@@ -25,3 +25,6 @@
 [submodule "libs/miniaudio"]
 	path = libs/miniaudio
 	url = https://github.com/mackron/miniaudio
+[submodule "assets/gltf-assets"]
+	path = assets/gltf-assets
+	url = https://github.com/KhronosGroup/glTF-Sample-Assets
