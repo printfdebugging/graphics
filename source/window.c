@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void winFrameBufResizeCallback(GLFWwindow *window, int width, int height) {
+static void __window_frame_buffer_resize_callback(GLFWwindow *window, int width, int height) {
     (void) window;
     glViewport(0, 0, width, height);
 }
@@ -40,7 +40,7 @@ struct window *window_create(unsigned int width, unsigned int height, const char
         return NULL;
     }
 
-    glfwSetFramebufferSizeCallback(window, winFrameBufResizeCallback);
+    glfwSetFramebufferSizeCallback(window, __window_frame_buffer_resize_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSwapInterval(1);
     glEnable(GL_DEPTH_TEST);
