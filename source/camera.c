@@ -57,42 +57,7 @@ void camera_process_keyboard(struct camera *camera, enum camera_direction direct
     }
 }
 
-static bool left_button_was_pressed = false;
-static bool first_mouse_enter = true;
-
-void camera_process_mouse_movement(struct camera *camera, float x, float y, bool left_button_pressed) {
-    if (!left_button_pressed) {
-        left_button_was_pressed = false;
-        return;
-    }
-
-    // camera's x,y should become the same as this point's x,y
-    // so that when we drag after click, the camera moves by the
-    // difference.
-    if (!left_button_was_pressed && left_button_pressed) {
-        camera->x = x;
-        camera->y = y;
-        first_mouse_enter = false;
-        left_button_was_pressed = true;
-        return;
-    }
-
-    if (first_mouse_enter) {
-        camera->x = x;
-        camera->y = y;
-        first_mouse_enter = false;
-    }
-
-    float xoffset = camera->x - x;
-    float yoffset = camera->y - y;
-    xoffset *= camera->mouse_sensitivity;
-    yoffset *= camera->mouse_sensitivity;
-
-    camera->x = x;
-    camera->y = y;
-    camera->yaw += xoffset;
-    camera->pitch -= yoffset;
-
+static void camera_calculate_direction(struct camera *camera) {
     if (camera->pitch > 89.0f)
         camera->pitch = 89.0f;
     if (camera->pitch < -89.0f)
@@ -106,6 +71,35 @@ void camera_process_mouse_movement(struct camera *camera, float x, float y, bool
 
     direction = glms_normalize(direction);
     camera->front = direction;
+}
+
+static bool left_button_was_pressed = false;
+
+void camera_process_mouse_movement(struct camera *camera, float x, float y, bool left_button_pressed) {
+    if (!left_button_pressed) {
+        left_button_was_pressed = false;
+        camera_calculate_direction(camera);
+        return;
+    }
+
+    if (!left_button_was_pressed && left_button_pressed) {
+        camera->x = x;
+        camera->y = y;
+        left_button_was_pressed = true;
+        return;
+    }
+
+    float xoffset = camera->x - x;
+    float yoffset = camera->y - y;
+    xoffset *= camera->mouse_sensitivity;
+    yoffset *= camera->mouse_sensitivity;
+
+    camera->x = x;
+    camera->y = y;
+    camera->yaw += xoffset;
+    camera->pitch -= yoffset;
+
+    camera_calculate_direction(camera);
 }
 
 void camera_process_mouse_scroll(struct camera *camera, float yoffset) {
