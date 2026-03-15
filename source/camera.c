@@ -8,7 +8,7 @@ struct camera *camera_create() {
         return NULL;
     }
 
-    camera->position = (vec3s) { 5.0f, 5.0f, 5.0f };
+    camera->position = (vec3s) { 10.0f, 10.0f, 10.0f };
     camera->front = (vec3s) { 0.0f, 0.0f, -5.0f };
     camera->up = (vec3s) { 0.0f, 1.0f, 0.0f };
     camera->yaw = -135.0f;
@@ -16,7 +16,7 @@ struct camera *camera_create() {
     camera->x = 400;
     camera->y = 300;
     camera->fov = 45.0f;
-    camera->movement_speed = 2.5f;
+    camera->movement_speed = 8.5f;
     camera->mouse_sensitivity = 0.1f;
 
     return camera;
@@ -57,7 +57,7 @@ void camera_process_keyboard(struct camera *camera, enum camera_direction direct
     }
 }
 
-static void camera_calculate_direction(struct camera *camera) {
+void camera_calculate_direction(struct camera *camera) {
     if (camera->pitch > 89.0f)
         camera->pitch = 89.0f;
     if (camera->pitch < -89.0f)
@@ -78,7 +78,6 @@ static bool left_button_was_pressed = false;
 void camera_process_mouse_movement(struct camera *camera, float x, float y, bool left_button_pressed) {
     if (!left_button_pressed) {
         left_button_was_pressed = false;
-        camera_calculate_direction(camera);
         return;
     }
 

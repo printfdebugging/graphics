@@ -31,19 +31,20 @@ vec3s axis_of_rotation = { 0.5f, 0.3f, 0.5f };
 
 float delta_time = 0.0f;
 float last_frame = 0.0f;
-const float WIDTH = 1400.0f;
-const float HEIGHT = 800.0f;
+const float WIDTH = 1550.0f;
+const float HEIGHT = 700.0f;
 
 void process_input(struct window *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 int main() {
-    window = window_create(WIDTH, HEIGHT, "OpenGL", (vec4s) { 0.156f, 0.172f, 0.203f, 1.0f });
+    window = window_create(WIDTH, HEIGHT, "OpenGL", (vec4s) { 0.24, 0.24, 0.24, 1.0 });
     if (!window) return EXIT_FAILURE;
 
     camera = camera_create();
     if (!camera) return EXIT_FAILURE;
+    camera_calculate_direction(camera);
 
     glfwSetCursorPosCallback(window->window, mouse_callback);
     glfwSetScrollCallback(window->window, scroll_callback);
@@ -214,34 +215,33 @@ int main() {
 
     {
         const int AXES = 2;
-        const int LINES_PER_AXIS = 51;
+        const int LINES_PER_AXIS = 501;
+        const int LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
         const int POINTS_PER_LINE = 2;
         const int FLOATS_PER_POINT = 3;
         const int count = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
 
         float vertices[AXES][LINES_PER_AXIS][POINTS_PER_LINE][FLOATS_PER_POINT];
 
-        for (int z = -25; z <= 25; ++z) {
-            vertices[0][z + 25][0][0] = -25.0f;
-            vertices[0][z + 25][0][1] = 0.0f;
-            vertices[0][z + 25][0][2] = (float) z;
+        for (int z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
+            vertices[0][z + LINES_ON_EACH_SIDE][0][0] = (float) -LINES_ON_EACH_SIDE;
+            vertices[0][z + LINES_ON_EACH_SIDE][0][1] = 0.0f;
+            vertices[0][z + LINES_ON_EACH_SIDE][0][2] = (float) z;
 
-            vertices[0][z + 25][1][0] = 25.0f;
-            vertices[0][z + 25][1][1] = 0.0f;
-            vertices[0][z + 25][1][2] = (float) z;
+            vertices[0][z + LINES_ON_EACH_SIDE][1][0] = (float) LINES_ON_EACH_SIDE;
+            vertices[0][z + LINES_ON_EACH_SIDE][1][1] = 0.0f;
+            vertices[0][z + LINES_ON_EACH_SIDE][1][2] = (float) z;
         }
 
-        for (int x = -25; x <= 25; ++x) {
-            vertices[1][x + 25][0][0] = (float) x;
-            vertices[1][x + 25][0][1] = 0.0f;
-            vertices[1][x + 25][0][2] = -25.0f;
+        for (int x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
+            vertices[1][x + LINES_ON_EACH_SIDE][0][0] = (float) x;
+            vertices[1][x + LINES_ON_EACH_SIDE][0][1] = 0.0f;
+            vertices[1][x + LINES_ON_EACH_SIDE][0][2] = (float) -LINES_ON_EACH_SIDE;
 
-            vertices[1][x + 25][1][0] = (float) x;
-            vertices[1][x + 25][1][1] = 0.0f;
-            vertices[1][x + 25][1][2] = 25.0f;
+            vertices[1][x + LINES_ON_EACH_SIDE][1][0] = (float) x;
+            vertices[1][x + LINES_ON_EACH_SIDE][1][1] = 0.0f;
+            vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (float) LINES_ON_EACH_SIDE;
         }
-
-        // TODO: create vertices using loops
 
         lines_mesh = mesh_create();
         mesh_load_vertices(lines_mesh, &vertices[0][0][0][0], count, 3 * sizeof(float));
