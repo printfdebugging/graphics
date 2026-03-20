@@ -13,8 +13,11 @@ if [ -f "/etc/os-release" ]; then
 				clang64/mingw-w64-clang-x86_64-extra-cmake-modules \
 				clang64/mingw-w64-clang-x86_64-nsis \
 				clang64/mingw-w64-clang-x86_64-emscripten \
-				clang64/mingw-w64-clang-x86_64-ccache
-
+				clang64/mingw-w64-clang-x86_64-ccache \
+				clang64/mingw-w64-clang-x86_64-make \
+				clang64/mingw-w64-clang-x86_64-ripgrep \
+                clang64/mingw-w64-clang-x86_64-neovim \
+                git
 		}
 		;;
 	'arch')
