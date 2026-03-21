@@ -3,8 +3,28 @@
 #include "window.h"
 #include "logger.h"
 
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include "GLFW/glfw3native.h"
+#include <dwmapi.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef _WIN32
+static bool __msw_is_dark_mode() {
+    HINSTANCE uxthemelib = LoadLibraryExW(L"uxtheme.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (!uxthemelib) {
+        fprintf(stderr, "failed to open uxtheme.dll\n");
+        return true; /* default to dark mode */
+    }
+
+    bool use_dark_mode = GetProcAddress(uxthemelib, MAKEINTRESOURCEA(132))();
+    FreeLibrary(uxthemelib);
+    return use_dark_mode;
+}
+#endif
 
 static void __window_frame_buffer_resize_callback(GLFWwindow *window, int width, int height) {
     (void) window;
@@ -39,6 +59,13 @@ struct window *window_create(unsigned int width, unsigned int height, const char
         glfwTerminate();
         return NULL;
     }
+
+    /* use a dark titlebar on windows in dark mode. */
+#ifdef _WIN32
+    HWND hwnd = glfwGetWin32Window(window);
+    DWORD value = __msw_is_dark_mode();
+    DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+#endif
 
     glfwSetFramebufferSizeCallback(window, __window_frame_buffer_resize_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

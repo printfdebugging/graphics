@@ -90,6 +90,7 @@ target_link_libraries(${APPLICATION} PUBLIC
     miniaudio
     pthread
     m
+    $<$<BOOL:${WIN32}>:dwmapi>
 )
 
 install(
