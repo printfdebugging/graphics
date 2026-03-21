@@ -41,6 +41,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 int main() {
     window = window_create(WIDTH, HEIGHT, "OpenGL", (vec4s) { 0.24, 0.24, 0.24, 1.0 });
     if (!window) return EXIT_FAILURE;
+    if (window_set_icon(window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
 
     camera = camera_create();
     if (!camera) return EXIT_FAILURE;

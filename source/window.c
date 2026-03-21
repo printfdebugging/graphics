@@ -1,4 +1,6 @@
+#include "GLFW/glfw3.h"
 #include "glad/glad.h"
+#include "stb_image.h"
 
 #include "window.h"
 #include "logger.h"
@@ -93,6 +95,7 @@ struct window *window_create(unsigned int width, unsigned int height, const char
     win->title = title;
     win->color = color;
     win->window = window;
+    win->icon = NULL;
     return win;
 }
 
@@ -130,4 +133,20 @@ bool window_close(struct window *window) {
     if (!window->window)
         return GL_TRUE;
     return glfwWindowShouldClose(window->window);
+}
+
+int window_set_icon(struct window *window, const char *path) {
+    GLFWimage image;
+    int image_channel_count;
+    image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
+    if (!image.pixels) {
+        fprintf(stderr, "failed to read window icon: %s", path);
+        return 1;
+    }
+
+    glfwSetWindowIcon(window->window, 1, &image);
+    window->icon = path;
+
+    stbi_image_free(image.pixels);
+    return 0;
 }

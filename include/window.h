@@ -10,6 +10,7 @@ struct window {
     unsigned int width;
     unsigned int height;
     const char *title;
+    const char *icon;
     GLFWwindow *window;
     vec4s color;
 
@@ -25,5 +26,6 @@ void window_clear_color(struct window *window);
 void window_swap_buffers(struct window *window);
 void window_destroy(struct window *window);
 bool window_close(struct window *window);
+int window_set_icon(struct window *window, const char *path);
 
 #endif
