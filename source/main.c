@@ -2,6 +2,7 @@
 #include "cglm/struct.h"
 #include "cglm/struct/affine.h"
 #include "glad/glad.h"
+#include "libavcodec/avcodec.h"
 
 #include "camera.h"
 #include "material.h"
@@ -39,6 +40,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 int main() {
+    fprintf(stderr, "version: %i\n", avcodec_version());
     window = window_create(WIDTH, HEIGHT, "OpenGL", (vec4s) { 0.24, 0.24, 0.24, 1.0 });
     if (!window) return EXIT_FAILURE;
     if (window_set_icon(window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;

@@ -43,6 +43,7 @@ add_subdirectory(libs/miniaudio)
 add_subdirectory(cmake/graphviz)        # dependency graphs
 add_subdirectory(cmake/clangd)          # .clangd
 add_subdirectory(cmake/assets)          # assets
+add_subdirectory(cmake/ffmpeg)
 
 # globals
 set(APPLICATION "executable")
@@ -91,6 +92,7 @@ target_link_libraries(${APPLICATION} PUBLIC
     pthread
     m
     $<$<BOOL:${WIN32}>:dwmapi>
+    ffmpeg::ffmpeg
 )
 
 install(
