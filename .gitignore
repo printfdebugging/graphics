@@ -7,5 +7,6 @@
 /CMakeUserPresets.json
 
 /tags
+/outputfile
 /compile_commands.json
 /gdb.txt
