@@ -18,15 +18,10 @@ struct mesh *mesh_create() {
 }
 
 void mesh_destroy(struct mesh *mesh) {
-    if (mesh->vbo_vertex)
-        glDeleteBuffers(1, &mesh->vbo_vertex);
-    if (mesh->vbo_color)
-        glDeleteBuffers(1, &mesh->vbo_color);
-    if (mesh->vbo_uv)
-        glDeleteBuffers(1, &mesh->vbo_uv);
-    if (mesh->ebo)
-        glDeleteBuffers(1, &mesh->ebo);
-
+    if (mesh->vbo_vertex) glDeleteBuffers(1, &mesh->vbo_vertex);
+    if (mesh->vbo_color) glDeleteBuffers(1, &mesh->vbo_color);
+    if (mesh->vbo_uv) glDeleteBuffers(1, &mesh->vbo_uv);
+    if (mesh->ebo) glDeleteBuffers(1, &mesh->ebo);
     glDeleteVertexArrays(1, &mesh->vao);
     free(mesh);
 }
