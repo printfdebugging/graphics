@@ -40,6 +40,7 @@ find_program(MAKE_EXECUTABLE
     DOC "GNU Make"
 )
 
+# let's not make it a requirement atleast for now
 # find_program(BEAR_EXECUTABLE
 #     NAMES bear REQUIRED
 #     NAMES_PER_DIR
@@ -47,7 +48,4 @@ find_program(MAKE_EXECUTABLE
 # )
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Autotools
-    VERSION_VAR AUTOCONF_VERSION
-    REQUIRED_VARS AUTOCONF_EXECUTABLE AUTOMAKE_EXECUTABLE MAKE_EXECUTABLE
-)
+find_package_handle_standard_args(Autotools REQUIRED_VARS AUTOCONF_EXECUTABLE AUTOMAKE_EXECUTABLE MAKE_EXECUTABLE)

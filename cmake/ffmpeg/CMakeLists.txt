@@ -38,7 +38,7 @@ ExternalProject_Add(ffmpeg
     BUILD_COMMAND ${MAKE_EXECUTABLE} -j
     INSTALL_COMMAND ${MAKE_EXECUTABLE} install
     TEST_COMMAND ""
-    BUILD_BYPRODUCTS ${FFMPEG_LIB_PATHS} ${CMAKE_BINARY_DIR}/compile_commands.json
+    BUILD_BYPRODUCTS ${FFMPEG_LIB_PATHS}
     USES_TERMINAL_CONFIGURE true
     USES_TERMINAL_BUILD true
     USES_TERMINAL_INSTALL true
@@ -52,8 +52,7 @@ add_library(ffmpeg::ffmpeg
 
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/install/include)
 target_include_directories(ffmpeg::ffmpeg INTERFACE
-    # ${CMAKE_SOURCE_DIR}/install/include
-    ${CMAKE_SOURCE_DIR}/libs/ffmpeg
+    ${CMAKE_SOURCE_DIR}/install/include
 )
 
 target_link_libraries(ffmpeg::ffmpeg INTERFACE
