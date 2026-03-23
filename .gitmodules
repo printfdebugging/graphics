@@ -25,3 +25,6 @@
 [submodule "libs/miniaudio"]
 	path = libs/miniaudio
 	url = https://github.com/mackron/miniaudio
+[submodule "libs/mpv"]
+	path = libs/mpv
+	url = https://github.com/mpv-player/mpv
