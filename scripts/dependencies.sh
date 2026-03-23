@@ -16,8 +16,9 @@ if [ -f "/etc/os-release" ]; then
 				clang64/mingw-w64-clang-x86_64-ccache \
 				clang64/mingw-w64-clang-x86_64-make \
 				clang64/mingw-w64-clang-x86_64-ripgrep \
-                clang64/mingw-w64-clang-x86_64-neovim \
-                git
+				clang64/mingw-w64-clang-x86_64-neovim \
+				clang64/mingw-w64-clang-x86_64-ffmpeg \
+				git
 		}
 		;;
 	'arch')
@@ -27,7 +28,8 @@ if [ -f "/etc/os-release" ]; then
 				'make' \
 				'clang' \
 				'gdb' \
-				'ccache'
+				'ccache' \
+				'ffmpeg'
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
