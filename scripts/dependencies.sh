@@ -5,31 +5,45 @@ if [ -f "/etc/os-release" ]; then
 	case "$ID" in
 	'msys2')
 		{
-			pacman -S clang64/mingw-w64-clang-x86_64-gdb \
-				clang64/mingw-w64-clang-x86_64-cmake \
-				clang64/mingw-w64-clang-x86_64-ninja \
-				clang64/mingw-w64-clang-x86_64-clang \
-				clang64/mingw-w64-clang-x86_64-clang-tools-extra \
-				clang64/mingw-w64-clang-x86_64-extra-cmake-modules \
-				clang64/mingw-w64-clang-x86_64-nsis \
-				clang64/mingw-w64-clang-x86_64-emscripten \
-				clang64/mingw-w64-clang-x86_64-ccache \
-				clang64/mingw-w64-clang-x86_64-make \
-				clang64/mingw-w64-clang-x86_64-ripgrep \
-				clang64/mingw-w64-clang-x86_64-neovim \
-				clang64/mingw-w64-clang-x86_64-ffmpeg \
-				git
+			prefix='clang64/mingw-w64-clang-x86_64'
+			packages=(
+				'gdb'
+				'cmake'
+				'ninja'
+				'clang'
+				'clang-tools-extra'
+				'extra-cmake-modules'
+				'nsis'
+				'emscripten'
+				'ccache'
+				'make'
+				'ripgrep'
+				'neovim'
+				'ffmpeg'
+				'mpv'
+				'git'
+			)
+
+			for package in "${packages[@]}"; do
+				pacman -Sy "${prefix}-${package}"
+			done
 		}
 		;;
 	'arch')
 		{
-			sudo pacman -S --noconfirm \
-				'cmake' \
-				'make' \
-				'clang' \
-				'gdb' \
-				'ccache' \
+			packages=(
+				'cmake'
+				'make'
+				'clang'
+				'gdb'
+				'ccache'
 				'ffmpeg'
+				'vulkan-devel'
+				'mpv'
+			)
+			for package in "${packages[@]}"; do
+				sudo pacman -S "${package}" --noconfirm
+			done
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
