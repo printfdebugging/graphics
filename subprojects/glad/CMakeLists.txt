@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 4.0)
 project(glad
-    VERSION         "0.1.36"
+    VERSION         "2.0"
     DESCRIPTION     "GL/GLES Loader-Generator based on the official specs"
     HOMEPAGE_URL    "https://glad.dav1d.de/"
     LANGUAGES       "C"
 )
 
 include(GNUInstallDirs)
+set(GLAD_LIB_NAME glad)
 
 add_library(glad
     src/glad.c
@@ -36,7 +37,7 @@ install(
 )
 
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/CMake/glad.pc.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/glad.pc.in
     ${CMAKE_CURRENT_BINARY_DIR}/glad.pc @ONLY
 )
 
