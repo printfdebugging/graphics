@@ -2,6 +2,7 @@
 #include "cglm/struct.h"
 #include "cglm/struct/affine.h"
 #include "glad/glad.h"
+#include <vulkan/vulkan.h>
 
 #include "camera.h"
 #include "material.h"
@@ -39,6 +40,30 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 int main() {
+    VkInstance instance;
+    VkApplicationInfo appInfo = {};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Hello Triangle";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    VkInstanceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+
+    uint32_t glfwExtensionCount = 0;
+    const char **glfwExtensions;
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+    createInfo.enabledExtensionCount = glfwExtensionCount;
+    createInfo.ppEnabledExtensionNames = glfwExtensions;
+
+    createInfo.enabledLayerCount = 0;
+
+    fprintf(stderr, "status: %i\n", vkCreateInstance(&createInfo, nullptr, &instance));
+
     window = window_create(WIDTH, HEIGHT, "OpenGL", (vec4s) { 0.24, 0.24, 0.24, 1.0 });
     if (!window) return EXIT_FAILURE;
     if (window_set_icon(window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;

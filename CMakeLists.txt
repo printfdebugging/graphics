@@ -91,6 +91,7 @@ target_link_libraries(${APPLICATION} PUBLIC
     pthread
     m
     $<$<BOOL:${WIN32}>:dwmapi>
+    $<IF$<BOOL:${WIN32}>:vulkan-1,vulkan>
 )
 
 install(
@@ -104,4 +105,13 @@ install(
 install(
     DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/assets"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}"
+)
+
+# todo: make this "system agnostic"
+install(TARGETS ${APPLICATION}
+    COMPONENT ${APPLICATION}
+    RUNTIME_DEPENDENCIES
+    PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+    POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
+    DIRECTORIES $<TARGET_FILE_DIR:${APPLICATION}>
 )
