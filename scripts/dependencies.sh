@@ -23,6 +23,7 @@ if [ -f "/etc/os-release" ]; then
 				'mpv'
 				'git'
 				'vulkan-headers'
+				'vulkan-loader'
 			)
 
 			for package in "${packages[@]}"; do

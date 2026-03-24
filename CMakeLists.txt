@@ -91,7 +91,8 @@ target_link_libraries(${APPLICATION} PUBLIC
     pthread
     m
     $<$<BOOL:${WIN32}>:dwmapi>
-    $<IF$<BOOL:${WIN32}>:vulkan-1,vulkan>
+    $<$<BOOL:${UNIX}>:vulkan>
+    $<$<BOOL:${WIN32}>:vulkan-1>
 )
 
 install(
