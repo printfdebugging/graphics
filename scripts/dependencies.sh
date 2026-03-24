@@ -22,6 +22,7 @@ if [ -f "/etc/os-release" ]; then
 				'ffmpeg'
 				'mpv'
 				'git'
+				'vulkan-headers'
 			)
 
 			for package in "${packages[@]}"; do
