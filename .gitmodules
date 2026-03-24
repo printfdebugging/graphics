@@ -1,0 +1,24 @@
+[submodule "subprojects/glfw"]
+	path = subprojects/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "subprojects/cglm"]
+	path = subprojects/cglm
+	url = https://github.com/recp/cglm.git
+[submodule "subprojects/stb"]
+	path = subprojects/stb
+	url = https://github.com/nothings/stb.git
+[submodule "subprojects/freetype"]
+	path = subprojects/freetype
+	url = https://github.com/freetype/freetype
+[submodule "subprojects/cgltf"]
+	path = subprojects/cgltf
+	url = https://github.com/jkuhlmann/cgltf
+[submodule "subprojects/mpv"]
+	path = subprojects/mpv
+	url = https://github.com/mpv-player/mpv
+[submodule "subprojects/miniaudio"]
+	path = subprojects/miniaudio
+	url = https://github.com/mackron/miniaudio
+[submodule "subprojects/ffmpeg"]
+	path = subprojects/ffmpeg
+	url = https://github.com/FFmpeg/FFmpeg/
