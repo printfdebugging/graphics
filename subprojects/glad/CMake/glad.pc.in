@@ -1,0 +1,12 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+
+Name: Glad
+Description: OpenGL loader
+Version: @GLAD_VERSION@
+URL: https://glad.dav1d.de/
+Requires:
+Libs: -L${libdir} -l@GLAD_LIB_NAME@@GLAD_LIB_NAME_SUFFIX@
+Cflags: -I${includedir}
