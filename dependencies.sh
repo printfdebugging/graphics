@@ -5,6 +5,7 @@ function install_bear_on_windows() {
 	bear_source="$HOME/Bear"
 	[ ! -d "${bear_source}" ] && git clone "${bear_upstream}" "${bear_source}"
 	(cd "${bear_source}" && cargo build --release)
+	install -m 755 ${bear_source}/target/release/{bear.exe,exec.dll,wrapper.exe} /clang64/bin
 }
 
 if [ -f "/etc/os-release" ]; then
