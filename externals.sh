@@ -92,9 +92,9 @@ function build_mpv() {
 	mpv_source="$(pwd)/subprojects/mpv"
 	mpv_builddir="$(pwd)/build/subprojects/mpv"
 
-	meson setup "${mpv_builddir}" "${mpv_source}" --prefix="${install_prefix}" &&
+	meson setup "${mpv_builddir}" "${mpv_source}" --prefix="${install_directory}" &&
 		meson compile -C "${mpv_builddir}" &&
-		meson install -C "${mpv_builddir}" --destdir="${install_directory}"
+		meson install -C "${mpv_builddir}"
 }
 
 # todo 0: avoid building ffmpeg if it's already built
@@ -109,6 +109,6 @@ build_glad &&
 	build_cglm &&
 	build_cgltf &&
 	build_miniaudio &&
+	build_freetype &&
 	build_ffmpeg &&
-	build_mpv &&
-	build_freetype
+	build_mpv
