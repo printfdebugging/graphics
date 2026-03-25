@@ -19,7 +19,6 @@ if [ -f "/etc/os-release" ]; then
 				'make'
 				'ripgrep'
 				'neovim'
-				'git'
 				'vulkan-headers'
 				'vulkan-loader'
 			)
