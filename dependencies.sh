@@ -13,49 +13,41 @@ if [ -f "/etc/os-release" ]; then
 	case "$ID" in
 	'msys2')
 		{
-			prefix='clang64/mingw-w64-clang-x86_64'
-			packages=(
-				'gdb'
-				'cmake'
-				'ninja'
-				'clang'
-				'clang-tools-extra'
-				'extra-cmake-modules'
-				'nsis'
-				'emscripten'
-				'ccache'
-				'make'
-				'ripgrep'
-				'nasm'
-				'diffutils'
-				'meson'
-				'neovim'
-				'rust'
-				'git'
-				'vulkan-headers'
-				'vulkan-loader'
-			)
-
-			for package in "${packages[@]}"; do
-				pacman -Sy "${prefix}-${package}"
-			done
+            pacman -Sy
+				'clang64/mingw-w64-clang-x86_64-gdb' \
+				'clang64/mingw-w64-clang-x86_64-cmake' \
+				'clang64/mingw-w64-clang-x86_64-ninja' \
+				'clang64/mingw-w64-clang-x86_64-clang' \
+				'clang64/mingw-w64-clang-x86_64-clang-tools-extra' \
+				'clang64/mingw-w64-clang-x86_64-extra-cmake-modules' \
+				'clang64/mingw-w64-clang-x86_64-nsis' \
+				'clang64/mingw-w64-clang-x86_64-emscripten' \
+				'clang64/mingw-w64-clang-x86_64-ccache' \
+				'clang64/mingw-w64-clang-x86_64-make' \
+				'clang64/mingw-w64-clang-x86_64-ripgrep' \
+				'clang64/mingw-w64-clang-x86_64-nasm' \
+				'clang64/mingw-w64-clang-x86_64-diffutils' \
+				'clang64/mingw-w64-clang-x86_64-meson' \
+				'clang64/mingw-w64-clang-x86_64-neovim' \
+				'clang64/mingw-w64-clang-x86_64-rust' \
+				'clang64/mingw-w64-clang-x86_64-git' \
+				'clang64/mingw-w64-clang-x86_64-pkg-config' \
+				'clang64/mingw-w64-clang-x86_64-vulkan-headers' \
+				'clang64/mingw-w64-clang-x86_64-vulkan-loader'
 
 			install_bear_on_windows
 		}
 		;;
 	'arch')
 		{
-			packages=(
-				'cmake'
-				'make'
-				'clang'
-				'gdb'
-				'ccache'
-				'vulkan-devel'
+            sudo pacman -S --noconfirm \
+				'cmake' \
+				'make' \
+				'clang' \
+				'gdb' \
+				'ccache' \
+				'vulkan-devel' \
 			)
-			for package in "${packages[@]}"; do
-				sudo pacman -S "${package}" --noconfirm
-			done
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
