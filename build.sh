@@ -1,8 +1,8 @@
 #!/bin/env bash
 
 pkgconfig_path="$(pwd)/install/lib/pkgconfig"
-application_source_dir="$(pwd)/application"
-application_build_dir="$(pwd)/build/application"
+application_source_dir="$(pwd)"
+application_build_dir="$(pwd)/build"
 
 cmake \
 	-DPKG_CONFIG_PATH="${pkgconfig_path}" \

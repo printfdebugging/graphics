@@ -2,6 +2,9 @@
 
 install_directory="$(pwd)/install"
 install_prefix="/"
+bear_config_file="$(pwd)/bear.yml"
+bear_compile_commands_file="$(pwd)/compile_commands.json"
+bear_cmd="bear --config ${bear_config_file} --output ${bear_compile_commands_file} --append -- "
 
 function build_glad() {
 	glad_source="$(pwd)/subprojects/glad"

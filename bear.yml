@@ -1,0 +1,12 @@
+schema: 4.0
+
+intercept:
+  mode: preload
+
+format:
+  paths:
+    directory: absolute
+    file: absolute
+  entries:
+    use_array_format: true
+    include_output_field: true
