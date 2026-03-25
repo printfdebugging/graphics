@@ -19,8 +19,6 @@ if [ -f "/etc/os-release" ]; then
 				'make'
 				'ripgrep'
 				'neovim'
-				'ffmpeg'
-				'mpv'
 				'git'
 				'vulkan-headers'
 				'vulkan-loader'
@@ -39,9 +37,7 @@ if [ -f "/etc/os-release" ]; then
 				'clang'
 				'gdb'
 				'ccache'
-				'ffmpeg'
 				'vulkan-devel'
-				'mpv'
 			)
 			for package in "${packages[@]}"; do
 				sudo pacman -S "${package}" --noconfirm
