@@ -19,6 +19,7 @@ if [ -f "/etc/os-release" ]; then
 				'make'
 				'ripgrep'
 				'nasm'
+				'diffutils'
 				'meson'
 				'neovim'
 				'vulkan-headers'
