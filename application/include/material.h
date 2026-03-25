@@ -1,7 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "cglm/struct/vec3.h"
+#include <cglm/struct/vec3.h>
 
 struct material {
     vec3s ambient;

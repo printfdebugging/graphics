@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 enum texture_index {
     TEXTURE0 = 0,

@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "cglm/struct.h"
+#include <cglm/struct.h>
 
 enum camera_direction {
     CAMERA_DIRECTION_FORWARD = 0,

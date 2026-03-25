@@ -1,8 +1,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "GLFW/glfw3.h"
-#include "cglm/struct.h"
+#include <GLFW/glfw3.h>
+#include <cglm/struct.h>
 
 #include <stdbool.h>
 

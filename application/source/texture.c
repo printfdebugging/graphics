@@ -2,7 +2,7 @@
 #include "logger.h"
 #include "shader.h"
 
-#include "stb_image.h"
+#include <stb/stb_image.h>
 
 int texture_load_from_file(struct texture *texture, const char *path) {
     int image_width;

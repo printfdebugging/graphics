@@ -3,7 +3,7 @@
 #include "mesh.h"
 #include "utils.h"
 
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 #include <stdio.h>
 #include <stdlib.h>

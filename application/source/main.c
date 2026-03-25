@@ -1,7 +1,7 @@
-#include "GLFW/glfw3.h"
-#include "cglm/struct.h"
-#include "cglm/struct/affine.h"
-#include "glad/glad.h"
+#include <GLFW/glfw3.h>
+#include <cglm/struct.h>
+#include <cglm/struct/affine.h>
+#include <glad/glad.h>
 #include <vulkan/vulkan.h>
 
 #include "camera.h"

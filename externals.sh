@@ -66,6 +66,15 @@ function build_miniaudio() {
 		cmake --install "${miniaudio_builddir}" --prefix "${install_directory}"
 }
 
+function build_freetype() {
+	freetype_source="$(pwd)/subprojects/freetype"
+	freetype_builddir="$(pwd)/build/subprojects/freetype"
+
+	cmake -DCMAKE_INSTALL_PREFIX="${install_directory}" -B "${freetype_builddir}" -S "${freetype_source}" &&
+		cmake --build "${freetype_builddir}" &&
+		cmake --install "${freetype_builddir}" --prefix "${install_directory}"
+}
+
 function build_ffmpeg() {
 	ffmpeg_source="$(pwd)/subprojects/ffmpeg"
 	ffmpeg_builddir="$(pwd)/build/subprojects/ffmpeg"
@@ -101,4 +110,5 @@ build_glad &&
 	build_cgltf &&
 	build_miniaudio &&
 	build_ffmpeg &&
-	build_mpv
+	build_mpv &&
+	build_freetype

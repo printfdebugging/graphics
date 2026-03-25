@@ -1,5 +1,5 @@
 #include "camera.h"
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 struct camera *camera_create() {
     struct camera *camera = malloc(sizeof(struct camera));
