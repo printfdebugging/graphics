@@ -18,6 +18,8 @@ if [ -f "/etc/os-release" ]; then
 				'ccache'
 				'make'
 				'ripgrep'
+				'nasm'
+				'meson'
 				'neovim'
 				'vulkan-headers'
 				'vulkan-loader'
