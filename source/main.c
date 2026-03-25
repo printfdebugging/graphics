@@ -3,6 +3,7 @@
 #include <cglm/struct/affine.h>
 #include <glad/glad.h>
 #include <vulkan/vulkan.h>
+#include <libavcodec/avcodec.h>
 
 #include "camera.h"
 #include "material.h"
@@ -39,7 +40,7 @@ void process_input(struct window *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
-int main() {
+static void check_vulkan() {
     VkInstance instance;
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -62,8 +63,11 @@ int main() {
 
     createInfo.enabledLayerCount = 0;
 
-    fprintf(stderr, "status: %i\n", vkCreateInstance(&createInfo, nullptr, &instance));
+    fprintf(stderr, "vulkan status: %i\n", vkCreateInstance(&createInfo, nullptr, &instance));
+}
 
+int main() {
+    check_vulkan();
     window = window_create(WIDTH, HEIGHT, "OpenGL", (vec4s) { 0.24, 0.24, 0.24, 1.0 });
     if (!window) return EXIT_FAILURE;
     if (window_set_icon(window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;

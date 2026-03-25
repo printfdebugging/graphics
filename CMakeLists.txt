@@ -8,9 +8,9 @@ project(LearnOpenGL
 )
 
 include(GNUInstallDirs)
-
-set(ENV{PKG_CONFIG_PATH} ${CMAKE_SOURCE_DIR}/../install/lib/pkgconfig)
+set(ENV{PKG_CONFIG_PATH} ${CMAKE_SOURCE_DIR}/install/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
 find_package(PkgConfig REQUIRED)
+
 pkg_check_modules(STB REQUIRED IMPORTED_TARGET stb)
 pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
 pkg_check_modules(CGLTF REQUIRED IMPORTED_TARGET cgltf)
@@ -18,6 +18,9 @@ pkg_check_modules(FREETYPE REQUIRED IMPORTED_TARGET freetype2)
 pkg_check_modules(MINIAUDIO REQUIRED IMPORTED_TARGET miniaudio)
 pkg_check_modules(CGLM REQUIRED IMPORTED_TARGET cglm)
 pkg_check_modules(GLAD REQUIRED IMPORTED_TARGET glad)
+# todo: fix mpv linking problems on linux
+# pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
+pkg_check_modules(FFMPEG_AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_COMPILER_LAUNCHER "ccache")
@@ -59,16 +62,8 @@ add_executable(${APPLICATION}
 target_compile_definitions(${APPLICATION} PRIVATE
     GLFW_INCLUDE_NONE
     $<IF:$<CONFIG:Debug>,-DDEBUG_BUILD,-DRELEASE_BUILD>
-    ASSETS_DIR="$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../assets/>$<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_DATAROOTDIR}/${PROJECT_ASSETS_DIR}>"
+    ASSETS_DIR="$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/assets/>$<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_DATAROOTDIR}/${PROJECT_ASSETS_DIR}>"
 )
-
-# target_compile_options(${APPLICATION} PRIVATE
-#     -fPIC
-#     -Wpedantic
-#     -Werror
-#     -Wall
-#     -Wextra
-# )
 
 target_include_directories(${APPLICATION}
     PUBLIC include
@@ -82,6 +77,8 @@ target_link_libraries(${APPLICATION} PUBLIC
     PkgConfig::MINIAUDIO
     PkgConfig::CGLM
     PkgConfig::GLAD
+    PkgConfig::FFMPEG_AVCODEC
+    # PkgConfig::MPV
     pthread
     m
     $<$<BOOL:${WIN32}>:dwmapi>
