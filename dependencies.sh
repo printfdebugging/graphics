@@ -22,6 +22,7 @@ if [ -f "/etc/os-release" ]; then
 				'diffutils'
 				'meson'
 				'neovim'
+				'rust'
 				'vulkan-headers'
 				'vulkan-loader'
 			)
