@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+export PKG_CONFIG_PATH=$(pwd)/install/lib/pkgconfig
+git submodule update --init --recursive
+
 install_directory="$(pwd)/install"
 install_prefix="/"
 bear_config_file="$(pwd)/bear.yml"
@@ -19,9 +22,12 @@ function build_libplacebo() {
 	libplacebo_source="$(pwd)/subprojects/libplacebo"
 	libplacebo_builddir="$(pwd)/build/subprojects/libplacebo"
 
-	meson setup "${libplacebo_builddir}" "${libplacebo_source}" --prefix="${install_prefix}" &&
+	meson setup \
+		-Dgl-proc-addr=disabled \
+		-Dvk-proc-addr=disabled \
+		"${libplacebo_builddir}" "${libplacebo_source}" --prefix="${install_directory}" &&
 		meson compile -C "${libplacebo_builddir}" &&
-		meson install -C "${libplacebo_builddir}" --destdir="${install_directory}"
+		meson install -C "${libplacebo_builddir}"
 }
 
 function build_glfw() {
@@ -98,6 +104,15 @@ function build_ffmpeg() {
 		make -C "${ffmpeg_builddir}" install)
 }
 
+function build_libass() {
+	libass_source="$(pwd)/subprojects/libass"
+	libass_builddir="$(pwd)/build/subprojects/libass"
+	echo "${PKG_CONFIG_PATH}"
+	meson setup "${libass_builddir}" "${libass_source}" --prefix="${install_directory}" &&
+		meson compile -C "${libass_builddir}" &&
+		meson install -C "${libass_builddir}"
+}
+
 function build_mpv() {
 	mpv_source="$(pwd)/subprojects/mpv"
 	mpv_builddir="$(pwd)/build/subprojects/mpv"
@@ -108,8 +123,8 @@ function build_mpv() {
 }
 
 # todo 0: avoid building ffmpeg if it's already built
-# todo 1: pkgconfig for glad, stb, cgltf
-# todo 2: point to the installdir pkgconfig
+# done 1: pkgconfig for glad, stb, cgltf
+# done 2: point to the installdir pkgconfig
 # todo 3: create switches for various build parameters like BUILD_SHARED_LIBS becomes --cmake-build-shared-libs or something similar
 # todo 4: build the application with these libraries
 
@@ -121,4 +136,6 @@ build_glad &&
 	build_miniaudio &&
 	build_freetype &&
 	build_ffmpeg &&
+	build_libplacebo &&
+	build_libass &&
 	build_mpv

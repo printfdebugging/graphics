@@ -22,3 +22,9 @@
 [submodule "subprojects/ffmpeg"]
 	path = subprojects/ffmpeg
 	url = https://github.com/FFmpeg/FFmpeg/
+[submodule "subprojects/libplacebo"]
+	path = subprojects/libplacebo
+	url = https://github.com/haasn/libplacebo
+[submodule "subprojects/libass"]
+	path = subprojects/libass
+	url = https://github.com/libass/libass
