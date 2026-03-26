@@ -92,7 +92,6 @@ function build_ffmpeg() {
 	(cd "${ffmpeg_builddir}" &&
 		"${ffmpeg_source}/configure" \
 			--prefix="${install_directory}" \
-			--target-os=mingw32 \
 			--arch=x86_64 \
 			--cc=clang \
 			--cxx=clang++ \
