@@ -23,7 +23,6 @@ if [ -f "/etc/os-release" ]; then
 				'clang64/mingw-w64-clang-x86_64-nsis' \
 				'clang64/mingw-w64-clang-x86_64-emscripten' \
 				'clang64/mingw-w64-clang-x86_64-ccache' \
-				'clang64/mingw-w64-clang-x86_64-make' \
 				'clang64/mingw-w64-clang-x86_64-ripgrep' \
 				'clang64/mingw-w64-clang-x86_64-nasm' \
 				'clang64/mingw-w64-clang-x86_64-cc' \
@@ -38,7 +37,8 @@ if [ -f "/etc/os-release" ]; then
 				'clang64/mingw-w64-clang-x86_64-amf-headers' \
 				'clang64/mingw-w64-clang-x86_64-autotools' \
 				'clang64/mingw-w64-clang-x86_64-dlfcn' \
-				'clang64/mingw-w64-clang-x86_64-ffnvcodec-headers'
+				'clang64/mingw-w64-clang-x86_64-ffnvcodec-headers' \
+				'make'
 
 			# install_bear_on_windows
 		}
