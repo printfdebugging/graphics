@@ -33,6 +33,7 @@
   - See `build.sh` for the full CMake command
 - With Script
   - Windows: Run the `./build.sh` script from `MSYS2 CLANG64` shell (or Git Bash if path has `C:\msys64\clang64\bin`)
+  - Archlinux: Run the `./build.sh` script in "THE BASH"
 - With VSCode
   - Install `ms-vscode.cpptools-extension-pack` extension pack
   - Press `<Shift+F5>` to build the project and attach a debugger
