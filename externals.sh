@@ -1,5 +1,7 @@
 #!/bin/env bash
 
+export INSTALL_DIRECTORY="$(pwd)/install"
+
 function build_glad() {
 	glad_source="$(pwd)/subprojects/glad"
 	glad_builddir="$(pwd)/build/subprojects/glad"

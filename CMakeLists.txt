@@ -19,7 +19,7 @@ pkg_check_modules(MINIAUDIO REQUIRED IMPORTED_TARGET miniaudio)
 pkg_check_modules(CGLM REQUIRED IMPORTED_TARGET cglm)
 pkg_check_modules(GLAD REQUIRED IMPORTED_TARGET glad)
 # todo: fix mpv linking problems on linux
-# pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
+pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(FFMPEG_AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
 
 set(CMAKE_C_STANDARD 23)
@@ -78,7 +78,7 @@ target_link_libraries(${APPLICATION} PUBLIC
     PkgConfig::CGLM
     PkgConfig::GLAD
     PkgConfig::FFMPEG_AVCODEC
-    # PkgConfig::MPV
+    PkgConfig::MPV
     pthread
     m
     $<$<BOOL:${WIN32}>:dwmapi>
