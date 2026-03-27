@@ -3,12 +3,28 @@
 export INSTALL_DIRECTORY="$(pwd)/install"
 export PKG_CONFIG_PATH="$(pwd)/install/lib/pkgconfig"
 
+# bear is a tool that generates compilation database
+# for clang tooling. we build it from source on both
+# archlinux and windows... you know, to add another package
+# manager to this build script i.e. cargo
+function build_bear() {
+	bear_source="$(pwd)/subprojects/bear"
+	bear_prefix="$(pwd)/install"
+	bear_config="$(pwd)/bear.yml"
+	bear_output="$(pwd)/compile_commands.json"
+	bear_script="$(pwd)/install/bin/bear"
+	export bear_cmd="${bear_script} --config ${bear_config} --output ${bear_output} --append --"
+
+	(cd "${bear_source}" && cargo build --release)
+	PREFIX="${bear_prefix}" "${bear_source}"/scripts/install.sh
+}
+
 function build_glad() {
 	glad_source="$(pwd)/subprojects/glad"
 	glad_builddir="$(pwd)/build/subprojects/glad"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${glad_builddir}" -S "${glad_source}" &&
-		cmake --build "${glad_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${glad_builddir}" -S "${glad_source}" &&
+		${bear_cmd} cmake --build "${glad_builddir}" &&
 		cmake --install "${glad_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -20,7 +36,7 @@ function build_libplacebo() {
 		-Dgl-proc-addr=disabled \
 		-Dvk-proc-addr=disabled \
 		"${libplacebo_builddir}" "${libplacebo_source}" --prefix="${INSTALL_DIRECTORY}" &&
-		meson compile -C "${libplacebo_builddir}" &&
+		${bear_cmd} meson compile -C "${libplacebo_builddir}" &&
 		meson install -C "${libplacebo_builddir}"
 }
 
@@ -28,8 +44,8 @@ function build_glfw() {
 	glfw_source="$(pwd)/subprojects/glfw"
 	glfw_builddir="$(pwd)/build/subprojects/glfw"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${glfw_builddir}" -S "${glfw_source}" &&
-		cmake --build "${glfw_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${glfw_builddir}" -S "${glfw_source}" &&
+		${bear_cmd} cmake --build "${glfw_builddir}" &&
 		cmake --install "${glfw_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -37,8 +53,8 @@ function build_stb() {
 	glfw_source="$(pwd)/cmake/stb"
 	glfw_builddir="$(pwd)/build/subprojects/stb"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${glfw_builddir}" -S "${glfw_source}" &&
-		cmake --build "${glfw_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${glfw_builddir}" -S "${glfw_source}" &&
+		${bear_cmd} cmake --build "${glfw_builddir}" &&
 		cmake --install "${glfw_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -46,8 +62,8 @@ function build_cglm() {
 	cglm_source="$(pwd)/subprojects/cglm"
 	cglm_builddir="$(pwd)/build/subprojects/cglm"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${cglm_builddir}" -S "${cglm_source}" &&
-		cmake --build "${cglm_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${cglm_builddir}" -S "${cglm_source}" &&
+		${bear_cmd} cmake --build "${cglm_builddir}" &&
 		cmake --install "${cglm_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -55,8 +71,8 @@ function build_cgltf() {
 	cgltf_source="$(pwd)/cmake/cgltf"
 	cgltf_builddir="$(pwd)/build/subprojects/cgltf"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${cgltf_builddir}" -S "${cgltf_source}" &&
-		cmake --build "${cgltf_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${cgltf_builddir}" -S "${cgltf_source}" &&
+		${bear_cmd} cmake --build "${cgltf_builddir}" &&
 		cmake --install "${cgltf_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -64,8 +80,8 @@ function build_miniaudio() {
 	miniaudio_source="$(pwd)/subprojects/miniaudio"
 	miniaudio_builddir="$(pwd)/build/subprojects/miniaudio"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${miniaudio_builddir}" -S "${miniaudio_source}" &&
-		cmake --build "${miniaudio_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${miniaudio_builddir}" -S "${miniaudio_source}" &&
+		${bear_cmd} cmake --build "${miniaudio_builddir}" &&
 		cmake --install "${miniaudio_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -73,8 +89,8 @@ function build_freetype() {
 	freetype_source="$(pwd)/subprojects/freetype"
 	freetype_builddir="$(pwd)/build/subprojects/freetype"
 
-	cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${freetype_builddir}" -S "${freetype_source}" &&
-		cmake --build "${freetype_builddir}" &&
+	${bear_cmd} cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" -B "${freetype_builddir}" -S "${freetype_source}" &&
+		${bear_cmd} cmake --build "${freetype_builddir}" &&
 		cmake --install "${freetype_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
@@ -93,7 +109,7 @@ function build_ffmpeg() {
 			--enable-version3 \
 			--enable-shared \
 			--logfile="${ffmpeg_builddir}/build.log" &&
-		make -C "${ffmpeg_builddir}" -j &&
+		${bear_cmd} make -C "${ffmpeg_builddir}" -j &&
 		make -C "${ffmpeg_builddir}" install)
 }
 
@@ -102,7 +118,7 @@ function build_libass() {
 	libass_builddir="$(pwd)/build/subprojects/libass"
 
 	meson setup "${libass_builddir}" "${libass_source}" --prefix="${INSTALL_DIRECTORY}" &&
-		meson compile -C "${libass_builddir}" &&
+		${bear_cmd} meson compile -C "${libass_builddir}" &&
 		meson install -C "${libass_builddir}"
 }
 
@@ -111,11 +127,12 @@ function build_mpv() {
 	mpv_builddir="$(pwd)/build/subprojects/mpv"
 
 	meson setup "${mpv_builddir}" "${mpv_source}" --prefix="${INSTALL_DIRECTORY}" &&
-		meson compile -C "${mpv_builddir}" &&
+		${bear_cmd} meson compile -C "${mpv_builddir}" &&
 		meson install -C "${mpv_builddir}"
 }
 
 git submodule update --init --recursive &&
+	build_bear &&
 	build_glad &&
 	build_glfw &&
 	build_stb &&

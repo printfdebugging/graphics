@@ -22,6 +22,7 @@ if [ -f "/etc/os-release" ]; then
 				'clang64/mingw-w64-clang-x86_64-meson' \
 				'clang64/mingw-w64-clang-x86_64-neovim' \
 				'clang64/mingw-w64-clang-x86_64-git' \
+				'clang64/mingw-w64-clang-x86_64-rust' \
 				'clang64/mingw-w64-clang-x86_64-pkgconf' \
 				'clang64/mingw-w64-clang-x86_64-vulkan-headers' \
 				'clang64/mingw-w64-clang-x86_64-vulkan-loader' \
@@ -39,6 +40,7 @@ if [ -f "/etc/os-release" ]; then
 				'make' \
 				'clang' \
 				'gdb' \
+				'rust' \
 				'ccache' \
 				'vulkan-devel'
 		}
