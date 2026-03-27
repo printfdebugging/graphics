@@ -28,6 +28,3 @@
 [submodule "subprojects/libass"]
 	path = subprojects/libass
 	url = https://github.com/libass/libass
-[submodule "subprojects/bear"]
-	path = subprojects/bear
-	url = https://github.com/debuff-io/bear
