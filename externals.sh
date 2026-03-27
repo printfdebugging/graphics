@@ -1,61 +1,5 @@
 #!/bin/env bash
 
-function build_bear() {
-	[ "$OSTYPE" == "linux-gnu" ] && return
-	bear_source="$(pwd)/subprojects/bear"
-	bear_install_dir="$(pwd)/install/bin"
-	(cd "${bear_source}" && cargo build --release)
-	mkdir -p "${bear_install_dir}"
-	install -m 755 "${bear_source}"/target/release/{bear.exe,exec.dll,wrapper.exe} "${bear_install_dir}"
-}
-
-function setup_environment() {
-	export PKG_CONFIG_PATH=$(pwd)/install/lib/pkgconfig
-
-	if [ -f "/etc/os-release" ]; then
-		. /etc/os-release
-		case "$ID" in
-		'msys2') {
-			export BEAR_EXE="$(pwd)/install/bin/bear.exe"
-			export BEAR_CONFIG_INTERCEPT_MODE=wrapper
-			export BEAR_CONFIG_INTERCEPT_PATH="path: $(cygpath.exe -w $(pwd)/install/bin/wrapper.exe)"
-			export BEAR_COMPILE_COMMANDS_FILE="$(pwd)/compile_commands.json"
-			export BEAR_CONFIG_FILE="$(pwd)/bear.yml"
-		} ;;
-		'arch') {
-			export BEAR_EXE="$(which bear)"
-			export BEAR_CONFIG_INTERCEPT_MODE=preload
-			export BEAR_CONFIG_INTERCEPT_PATH=""
-			export BEAR_COMPILE_COMMANDS_FILE="$(pwd)/compile_commands.json"
-			export BEAR_CONFIG_FILE="$(pwd)/bear.yml"
-		} ;;
-		*) {
-			echo "distribution not supported" && exit 1
-		} ;;
-		esac
-
-		export BEAR_CMD="${BEAR_EXE} --config ${BEAR_CONFIG_FILE} --output ${BEAR_COMPILE_COMMANDS_FILE} --append -- "
-		export INSTALL_DIRECTORY="$(pwd)/install"
-	else
-		echo "/etc/os-release not found" && exit 1
-	fi
-}
-
-function config_bear() {
-	echo "schema: 4.0
-intercept:
-  mode: ${BEAR_CONFIG_INTERCEPT_MODE}
-  ${BEAR_CONFIG_INTERCEPT_PATH}
-
-format:
-  paths:
-    directory: absolute
-    file: absolute
-  entries:
-    use_array_format: true
-    include_output_field: true" >"${BEAR_CONFIG_FILE}"
-}
-
 function build_glad() {
 	glad_source="$(pwd)/subprojects/glad"
 	glad_builddir="$(pwd)/build/subprojects/glad"
@@ -153,7 +97,7 @@ function build_ffmpeg() {
 function build_libass() {
 	libass_source="$(pwd)/subprojects/libass"
 	libass_builddir="$(pwd)/build/subprojects/libass"
-	echo "${PKG_CONFIG_PATH}"
+
 	meson setup "${libass_builddir}" "${libass_source}" --prefix="${INSTALL_DIRECTORY}" &&
 		${BEAR_CMD} meson compile -C "${libass_builddir}" &&
 		meson install -C "${libass_builddir}"
@@ -168,16 +112,8 @@ function build_mpv() {
 		meson install -C "${mpv_builddir}"
 }
 
-# todo 0: avoid building ffmpeg if it's already built
-# done 1: pkgconfig for glad, stb, cgltf
-# done 2: point to the installdir pkgconfig
-# todo 3: create switches for various build parameters like BUILD_SHARED_LIBS becomes --cmake-build-shared-libs or something similar
-# todo 4: build the application with these libraries
-
 git submodule update --init --recursive &&
 	setup_environment &&
-	build_bear &&
-	config_bear &&
 	build_glad &&
 	build_glfw &&
 	build_stb &&
