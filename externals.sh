@@ -3,18 +3,14 @@
 export INSTALL_DIRECTORY="$(pwd)/install"
 export PKG_CONFIG_PATH="$(pwd)/install/lib/pkgconfig"
 
-# bear is a tool that generates compilation database
-# for clang tooling. we build it from source on both
-# archlinux and windows... you know, to add another package
-# manager to this build script i.e. cargo
+bear_config="$(pwd)/bear.yml"
+bear_output="$(pwd)/compile_commands.json"
+bear_script="$(pwd)/install/bin/bear"
+bear_cmd="${bear_script} --config ${bear_config} --output ${bear_output} --append --"
+
 function build_bear() {
 	bear_source="$(pwd)/subprojects/bear"
 	bear_prefix="$(pwd)/install"
-	bear_config="$(pwd)/bear.yml"
-	bear_output="$(pwd)/compile_commands.json"
-	bear_script="$(pwd)/install/bin/bear"
-	export bear_cmd="${bear_script} --config ${bear_config} --output ${bear_output} --append --"
-
 	(cd "${bear_source}" && cargo build --release)
 	PREFIX="${bear_prefix}" "${bear_source}"/scripts/install.sh
 }
