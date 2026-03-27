@@ -8,9 +8,18 @@ project(LearnOpenGL
 )
 
 include(GNUInstallDirs)
-set(ENV{PKG_CONFIG_PATH} ${CMAKE_SOURCE_DIR}/install/lib/pkgconfig:$ENV{PKG_CONFIG_PATH})
-find_package(PkgConfig REQUIRED)
 
+#[[
+    CMAKE_PREFIX_PATH points to the install directory of the project.
+    it looks for `libfoo.pc` files in ${CMAKE_PREFIX_PATH}/lib/pkgconfig
+    directory.
+]]
+set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install")
+
+# TODO: comment out this cmake file nicely & also disable the thing which 
+# rebuilds/configures the project when i make changes to this file
+
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(STB REQUIRED IMPORTED_TARGET stb)
 pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
 pkg_check_modules(CGLTF REQUIRED IMPORTED_TARGET cgltf)
@@ -18,7 +27,6 @@ pkg_check_modules(FREETYPE REQUIRED IMPORTED_TARGET freetype2)
 pkg_check_modules(MINIAUDIO REQUIRED IMPORTED_TARGET miniaudio)
 pkg_check_modules(CGLM REQUIRED IMPORTED_TARGET cglm)
 pkg_check_modules(GLAD REQUIRED IMPORTED_TARGET glad)
-# todo: fix mpv linking problems on linux
 pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
 pkg_check_modules(FFMPEG_AVCODEC REQUIRED IMPORTED_TARGET libavcodec)
 
