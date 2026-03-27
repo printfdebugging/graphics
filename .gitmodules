@@ -28,7 +28,3 @@
 [submodule "subprojects/libass"]
 	path = subprojects/libass
 	url = https://github.com/libass/libass
-[submodule "subprojects/bear"]
-	path = subprojects/bear
-	url = https://github.com/rizsotto/Bear
-    branch = 4.1.0-rc
