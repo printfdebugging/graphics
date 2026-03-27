@@ -30,9 +30,6 @@ if [ -f "/etc/os-release" ]; then
 				'clang64/mingw-w64-clang-x86_64-dlfcn' \
 				'clang64/mingw-w64-clang-x86_64-ffnvcodec-headers' \
 				'make'
-
-			rustup default stable
-			rustup component add rust-analyzer
 		}
 		;;
 	'arch')
@@ -44,8 +41,6 @@ if [ -f "/etc/os-release" ]; then
 				'gdb' \
 				'ccache' \
 				'vulkan-devel'
-
-			rustup default stable
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
