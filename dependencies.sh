@@ -41,7 +41,8 @@ if [ -f "/etc/os-release" ]; then
 				'clang' \
 				'gdb' \
 				'ccache' \
-				'vulkan-devel'
+				'vulkan-devel' \
+				'bear'
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
