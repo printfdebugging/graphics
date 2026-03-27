@@ -21,7 +21,6 @@ if [ -f "/etc/os-release" ]; then
 				'clang64/mingw-w64-clang-x86_64-diffutils' \
 				'clang64/mingw-w64-clang-x86_64-meson' \
 				'clang64/mingw-w64-clang-x86_64-neovim' \
-				'clang64/mingw-w64-clang-x86_64-rustup' \
 				'clang64/mingw-w64-clang-x86_64-git' \
 				'clang64/mingw-w64-clang-x86_64-pkgconf' \
 				'clang64/mingw-w64-clang-x86_64-vulkan-headers' \
@@ -30,7 +29,6 @@ if [ -f "/etc/os-release" ]; then
 				'clang64/mingw-w64-clang-x86_64-autotools' \
 				'clang64/mingw-w64-clang-x86_64-dlfcn' \
 				'clang64/mingw-w64-clang-x86_64-ffnvcodec-headers' \
-				'clang64/mingw-w64-clang-x86_64-rust-analyzer' \
 				'make'
 
 			rustup default stable
@@ -45,10 +43,7 @@ if [ -f "/etc/os-release" ]; then
 				'clang' \
 				'gdb' \
 				'ccache' \
-				'vulkan-devel' \
-				'bear' \
-				'rust' \
-				'rust-analyzer'
+				'vulkan-devel'
 
 			rustup default stable
 		}
