@@ -113,7 +113,6 @@ function build_mpv() {
 }
 
 git submodule update --init --recursive &&
-	setup_environment &&
 	build_glad &&
 	build_glfw &&
 	build_stb &&
