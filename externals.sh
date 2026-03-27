@@ -1,6 +1,7 @@
 #!/bin/env bash
 
 export INSTALL_DIRECTORY="$(pwd)/install"
+export PKG_CONFIG_PATH="$(pwd)/install/lib/pkgconfig"
 
 function build_glad() {
 	glad_source="$(pwd)/subprojects/glad"
