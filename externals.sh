@@ -1,11 +1,12 @@
 #!/bin/env bash
 
 function build_bear() {
+	[ "$OSTYPE" == "linux-gnu" ] && return
 	bear_source="$(pwd)/subprojects/bear"
 	bear_install_dir="$(pwd)/install/bin"
 	(cd "${bear_source}" && cargo build --release)
 	mkdir -p "${bear_install_dir}"
-	install -m 755 ${bear_source}/target/release/{bear.exe,exec.dll,wrapper.exe} "${bear_install_dir}"
+	install -m 755 "${bear_source}"/target/release/{bear.exe,exec.dll,wrapper.exe} "${bear_install_dir}"
 }
 
 function setup_environment() {
