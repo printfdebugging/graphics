@@ -21,7 +21,9 @@
 - We build the libraries one by one and install them in `./install`
 - These libraries generate pkg-config files in `./install/lib/pkgconfig`
 - Run `./externals.sh` to build and install these libraries
-- We use bash to compile/install external libraries because other ways are painful
+  - Run in "THE BASH" on Archlinux
+  - Run in `MSYS2 CLANG64` shell on Windows
+- We use a bash script to compile/install external libraries because other ways are painful
 
 ## Bulid Steps
 
