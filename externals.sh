@@ -115,15 +115,11 @@ function build_freetype() {
 }
 
 function build_ffmpeg() {
-	# when we do out of source ffmpeg builds, the compile_commands.json
-	# file gets the file paths through symlinks which clangd doesn't seem
-	# to understand atleast on linux. so for now we do an in source build
-	# as there's no other way to avoid the src/ symlink.
 	ffmpeg_source="$(pwd)/subprojects/ffmpeg"
 	ffmpeg_builddir="$(pwd)/build/subprojects/ffmpeg"
 	mkdir -p "${ffmpeg_builddir}"
 
-	(cd "${ffmpeg_source}" &&
+	(cd "${ffmpeg_builddir}" &&
 		"${ffmpeg_source}/configure" \
 			--prefix="${INSTALL_DIRECTORY}" \
 			--arch=x86_64 \
@@ -133,9 +129,9 @@ function build_ffmpeg() {
 			--enable-version3 \
 			--enable-shared \
 			--logfile="${ffmpeg_builddir}/build.log" &&
-		make -C "${ffmpeg_source}" clean &&
-		${bear_cmd} make -C "${ffmpeg_source}" -j &&
-		make -C "${ffmpeg_source}" install)
+		make -C "${ffmpeg_builddir}" clean &&
+		${bear_cmd} make -C "${ffmpeg_builddir}" -j &&
+		make -C "${ffmpeg_builddir}" install)
 }
 
 function build_libass() {
