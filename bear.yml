@@ -2,8 +2,8 @@ schema: "4.1"
 
 format:
   paths:
-    directory: absolute
-    file: absolute
+    directory: canonical
+    file: canonical
   entries:
     use_array_format: true
     include_output_field: true
