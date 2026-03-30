@@ -57,7 +57,7 @@ void camera_process_keyboard(struct camera *camera, enum camera_direction direct
     }
 }
 
-void camera_calculate_direction(struct camera *camera) {
+void camera_adjust_direction(struct camera *camera) {
     if (camera->pitch > 89.0f)
         camera->pitch = 89.0f;
     if (camera->pitch < -89.0f)
@@ -98,7 +98,7 @@ void camera_process_mouse_movement(struct camera *camera, float x, float y, bool
     camera->yaw += xoffset;
     camera->pitch -= yoffset;
 
-    camera_calculate_direction(camera);
+    camera_adjust_direction(camera);
 }
 
 void camera_process_mouse_scroll(struct camera *camera, float yoffset) {
