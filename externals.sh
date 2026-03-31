@@ -54,6 +54,18 @@ function build_glfw() {
 		cmake --install "${glfw_builddir}" --prefix "${INSTALL_DIRECTORY}"
 }
 
+function build_sdl() {
+	sdl_source="$(pwd)/subprojects/sdl"
+	sdl_builddir="$(pwd)/build/subprojects/sdl"
+
+	${bear_cmd} cmake \
+		-DCMAKE_BUILD_TYPE="${BUILD_TYPE_CMAKE}" \
+		-DCMAKE_INSTALL_PREFIX="${INSTALL_DIRECTORY}" \
+		-B "${sdl_builddir}" -S "${sdl_source}" &&
+		${bear_cmd} cmake --build "${sdl_builddir}" &&
+		cmake --install "${sdl_builddir}" --prefix "${INSTALL_DIRECTORY}"
+}
+
 function build_stb() {
 	glfw_source="$(pwd)/cmake/stb"
 	glfw_builddir="$(pwd)/build/subprojects/stb"
@@ -160,6 +172,7 @@ git submodule update --init --recursive &&
 	build_bear &&
 	build_glad &&
 	build_glfw &&
+	build_sdl &&
 	build_stb &&
 	build_cglm &&
 	build_cgltf &&

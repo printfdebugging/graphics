@@ -22,6 +22,7 @@ set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install")
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(STB REQUIRED IMPORTED_TARGET stb)
 pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
+pkg_check_modules(SDL REQUIRED IMPORTED_TARGET sdl3)
 pkg_check_modules(CGLTF REQUIRED IMPORTED_TARGET cgltf)
 pkg_check_modules(FREETYPE REQUIRED IMPORTED_TARGET freetype2)
 pkg_check_modules(MINIAUDIO REQUIRED IMPORTED_TARGET miniaudio)
@@ -60,6 +61,7 @@ add_executable(${APPLICATION}
     source/logger.c
     source/main.c
     source/mesh.c
+    source/model.c
     source/renderer.c
     source/shader.c
     source/texture.c
@@ -81,6 +83,7 @@ target_include_directories(${APPLICATION}
 target_link_libraries(${APPLICATION} PUBLIC
     PkgConfig::STB
     PkgConfig::GLFW
+    PkgConfig::SDL
     PkgConfig::CGLTF
     PkgConfig::FREETYPE
     PkgConfig::MINIAUDIO
