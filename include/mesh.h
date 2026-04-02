@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include <glad/glad.h>
+#include <cglm/struct.h>
 
 #include "shader.h"
 #include "texture.h"
@@ -14,19 +15,33 @@ enum mesh_attribute {
     MESH_ATTRIBUTE_COUNT,
 };
 
+struct vertex {
+    vec3s position;
+    vec3s normal;
+    vec3s texture_coordinates;
+};
+
 struct mesh {
+    /* mesh data */
+    struct vertex *vertices;
+    unsigned int vertex_count;
+
+    int *indices;
+    unsigned int index_count;
+
+    struct texture *textures;
+    unsigned int texture_count;
+
+    /* render data */
     unsigned int vao;
+    unsigned int vbo_color; /* we can either have them separately or in a single vbo.. */
+    unsigned int vbo_uv;
+    unsigned int vbo_normals;
     unsigned int ebo;
 
     unsigned int vbo_vertex;
-    unsigned int vertex_count;
     unsigned int vertex_stride;
 
-    unsigned int vbo_color;
-    unsigned int vbo_uv;
-    unsigned int vbo_normals;
-
-    unsigned int ebo_count;
     GLenum ebo_type;
 };
 
@@ -37,5 +52,6 @@ void mesh_load_indices(struct mesh *mesh, int *data, unsigned int count, GLenum 
 void mesh_load_colors(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
 void mesh_load_uv(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
 void mesh_load_normals(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
+void draw_mesh(struct mesh *mesh, struct shader *shader);
 
 #endif

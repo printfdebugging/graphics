@@ -51,7 +51,7 @@ void mesh_load_indices(struct mesh *mesh, int *data, unsigned int count, GLenum 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * count, data, GL_STATIC_DRAW);
 
-    mesh->ebo_count = count;
+    mesh->index_count = count;
     mesh->ebo_type = type;
 }
 

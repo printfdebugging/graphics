@@ -3,6 +3,7 @@
 #include <cgltf/cgltf.h>
 #include <cglm/struct/affine.h>
 #include <glad/glad.h>
+#include <cgltf/cgltf.h>
 
 #include "camera.h"
 #include "mesh.h"
@@ -48,6 +49,14 @@ int main() {
 
     struct mesh *axes_mesh = create_axes_mesh();
     struct shader *axes_shader = create_axes_shader();
+
+    /* todo: move it to a separate function in mesh.. */
+    cgltf_options options = { 0 };
+    cgltf_data *data = NULL;
+    cgltf_result result = cgltf_parse_file(&options, ASSETS_DIR "models/cube/glTF/Cube.gltf", &data);
+    if (result == cgltf_result_success) {
+        cgltf_free(data);
+    }
 
     float last_frame = 0.0f;
     float delta_time = 0.0f;

@@ -41,6 +41,7 @@ enum texture_index {
 
 struct texture {
     unsigned int texture;
+    const char *type;
 };
 
 struct texture *texture_create();
