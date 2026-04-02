@@ -15,6 +15,7 @@ include(GNUInstallDirs)
     directory.
 ]]
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install")
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 # TODO: comment out this cmake file nicely & also disable the thing which 
 # rebuilds/configures the project when i make changes to this file
