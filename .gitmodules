@@ -31,7 +31,7 @@
 [submodule "subprojects/bear"]
 	path = subprojects/bear
 	url = https://github.com/rizsotto/bear
-	branch = 4.1.0-rc
+	branch = 4.1.1-rc
 [submodule "subprojects/sdl"]
 	path = subprojects/sdl
 	url = https://github.com/libsdl-org/SDL
