@@ -32,11 +32,11 @@ static int shader_compiled_successfully(unsigned int shader, const char *filepat
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success) return 0;
 
-    int infoLogLen;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLen);
+    int info_log_length;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_log_length);
 
-    char infoLog[infoLogLen];
-    glGetShaderInfoLog(shader, infoLogLen, NULL, infoLog);
+    char infoLog[info_log_length];
+    glGetShaderInfoLog(shader, info_log_length, NULL, infoLog);
     fprintf(stderr, "failed to compile shader: %s: %s\n", filepath, infoLog);
     return 1;
 }
@@ -46,11 +46,11 @@ static int shader_linked_successfully(unsigned int program) {
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (success) return 0;
 
-    int infoLogLen;
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLen);
+    int info_log_length;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_log_length);
 
-    char infoLog[infoLogLen];
-    glGetProgramInfoLog(program, infoLogLen, NULL, infoLog);
+    char infoLog[info_log_length];
+    glGetProgramInfoLog(program, info_log_length, NULL, infoLog);
     fprintf(stderr, "failed to link shader program: %s\n", infoLog);
     return 1;
 }
