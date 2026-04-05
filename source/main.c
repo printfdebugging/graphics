@@ -59,7 +59,7 @@ int main() {
     struct shader *cube_shader = shader_create();
     if (!cube_shader)
         return EXIT_FAILURE;
-    if (shader_load_from_file(cube_shader, ASSETS_DIR "shaders/cube/shader.vert", ASSETS_DIR "shaders/cube/shader.frag")) {
+    if (shader_load_from_file(cube_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
         shader_destroy(cube_shader);
         return EXIT_FAILURE;
     }
