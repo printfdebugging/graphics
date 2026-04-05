@@ -49,7 +49,7 @@ int main() {
     /* todo: why does loading this after axes_mesh replace
      * the mesh from the axes_mesh? i mean why is cube drawn
      * instead of the axes mesh? */
-    const char *model_path = ASSETS_DIR "models/cube/glTF/Cube.gltf";
+    const char *model_path = ASSETS_DIR "models/DamagedHelmet/glTF/DamagedHelmet.gltf";
     struct model *model = model_create();
     if (model_load(model, model_path)) {
         model_destroy(model);
