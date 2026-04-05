@@ -49,13 +49,4 @@ int texture_load(struct texture *texture, void *data, unsigned int width, unsign
 int texture_load_from_file(struct texture *texture, const char *path);
 void texture_destroy(struct texture *texture);
 
-/* TODO: later!
-int txLoadFromData(
-    struct Texture   *texture,
-    const char       *path,  // <-- data, width, height, format
-    const char       *shVarName,
-    enum TextureIndex txIndex
-);
-*/
-
 #endif
