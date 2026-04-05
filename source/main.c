@@ -1,16 +1,17 @@
 #include <GLFW/glfw3.h>
 #include <cglm/struct.h>
-#include <cgltf/cgltf.h>
 #include <cglm/struct/affine.h>
 #include <glad/glad.h>
-#include <cgltf/cgltf.h>
 
 #include "camera.h"
 #include "mesh.h"
+#include "model.h"
+#include "renderer.h"
 #include "shader.h"
 #include "window.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 struct camera *camera;
 
@@ -21,13 +22,8 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 struct mesh *create_axes_mesh();
 struct shader *create_axes_shader();
 
-void draw_axes(
-    struct mesh *axes_mesh,
-    struct shader *axes_shader,
-    mat4s model,
-    mat4s view,
-    mat4s projection
-);
+/* todo: deprecate this in favour of render_model */
+void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
 
 int main() {
     const float window_width = 1550.0f;
@@ -50,12 +46,22 @@ int main() {
     struct mesh *axes_mesh = create_axes_mesh();
     struct shader *axes_shader = create_axes_shader();
 
-    /* todo: move it to a separate function in mesh.. */
-    cgltf_options options = { 0 };
-    cgltf_data *data = NULL;
-    cgltf_result result = cgltf_parse_file(&options, ASSETS_DIR "models/cube/glTF/Cube.gltf", &data);
-    if (result == cgltf_result_success) {
-        cgltf_free(data);
+    /* todo: why does loading this after axes_mesh replace
+     * the mesh from the axes_mesh? i mean why is cube drawn
+     * instead of the axes mesh? */
+    const char *model_path = ASSETS_DIR "models/cube/glTF/Cube.gltf";
+    struct model *model = model_create();
+    if (model_load(model, model_path)) {
+        model_destroy(model);
+        return EXIT_FAILURE;
+    }
+
+    struct shader *cube_shader = shader_create();
+    if (!cube_shader)
+        return EXIT_FAILURE;
+    if (shader_load_from_file(cube_shader, ASSETS_DIR "shaders/cube/shader.vert", ASSETS_DIR "shaders/cube/shader.frag")) {
+        shader_destroy(cube_shader);
+        return EXIT_FAILURE;
     }
 
     float last_frame = 0.0f;
@@ -73,7 +79,12 @@ int main() {
         mat4s view = camera_get_view_matrix(camera);
         mat4s projection = glms_perspective(glm_rad(camera->fov), window_width / window_height, 0.1f, 100.0f);
 
+        /* without the render call below, why are axes not being drawn and instead cube's vertices are being drawn */
         draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
+
+        model->view = view;
+        model->projection = projection;
+        render_model(model, cube_shader);
         window_swap_buffers(window);
     }
 
@@ -145,7 +156,7 @@ struct shader *create_axes_shader() {
     struct shader *axes_shader = shader_create();
     if (!axes_shader)
         return NULL;
-    if (shader_load_from_file(axes_shader, ASSETS_DIR "shaders/lines.vert", ASSETS_DIR "shaders/lines.frag")) {
+    if (shader_load_from_file(axes_shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
         shader_destroy(axes_shader);
         return NULL;
     }
@@ -158,6 +169,5 @@ void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, 
     shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
 
     glBindVertexArray(axes_mesh->vao);
-    glUseProgram(axes_shader->program);
     glDrawArrays(GL_LINES, 0, axes_mesh->vertex_count);
 }
