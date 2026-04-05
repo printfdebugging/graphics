@@ -47,11 +47,10 @@ struct mesh {
 
 struct mesh *mesh_create();
 void mesh_destroy(struct mesh *mesh);
-void mesh_load_vertices(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
-void mesh_load_indices(struct mesh *mesh, int *data, unsigned int count, GLenum type);
-void mesh_load_colors(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
-void mesh_load_uv(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
-void mesh_load_normals(struct mesh *mesh, float *data, unsigned int count, unsigned int stride);
-void draw_mesh(struct mesh *mesh, struct shader *shader);
+void mesh_load_vertices(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
+void mesh_load_indices(struct mesh *mesh, void *data, unsigned int count, GLenum type);
+void mesh_load_colors(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
+void mesh_load_uv(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
+void mesh_load_normals(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
 
 #endif

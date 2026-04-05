@@ -33,7 +33,7 @@ void mesh_destroy(struct mesh *mesh) {
  *       that means that we are going to pass the pointer to the first data entry,
  *       not the start of the chunk.
  */
-void mesh_load_vertices(struct mesh *mesh, float *data, unsigned int count, unsigned int stride) {
+void mesh_load_vertices(struct mesh *mesh, void *data, unsigned int count, unsigned int stride) {
     glBindVertexArray(mesh->vao);
     glGenBuffers(1, &mesh->vbo_vertex);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo_vertex);
@@ -45,7 +45,7 @@ void mesh_load_vertices(struct mesh *mesh, float *data, unsigned int count, unsi
     mesh->vertex_stride = stride;
 }
 
-void mesh_load_indices(struct mesh *mesh, int *data, unsigned int count, GLenum type) {
+void mesh_load_indices(struct mesh *mesh, void *data, unsigned int count, GLenum type) {
     glBindVertexArray(mesh->vao);
     glGenBuffers(1, &mesh->ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ebo);
@@ -55,7 +55,7 @@ void mesh_load_indices(struct mesh *mesh, int *data, unsigned int count, GLenum 
     mesh->ebo_type = type;
 }
 
-void mesh_load_colors(struct mesh *mesh, float *data, unsigned int count, unsigned int stride) {
+void mesh_load_colors(struct mesh *mesh, void *data, unsigned int count, unsigned int stride) {
     glBindVertexArray(mesh->vao);
     glGenBuffers(1, &mesh->vbo_color);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo_color);
@@ -64,7 +64,7 @@ void mesh_load_colors(struct mesh *mesh, float *data, unsigned int count, unsign
     glEnableVertexAttribArray(MESH_ATTRIBUTE_COLOR);
 }
 
-void mesh_load_uv(struct mesh *mesh, float *data, unsigned int count, unsigned int stride) {
+void mesh_load_uv(struct mesh *mesh, void *data, unsigned int count, unsigned int stride) {
     glBindVertexArray(mesh->vao);
     glGenBuffers(1, &mesh->vbo_uv);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo_uv);
@@ -73,7 +73,7 @@ void mesh_load_uv(struct mesh *mesh, float *data, unsigned int count, unsigned i
     glEnableVertexAttribArray(MESH_ATTRIBUTE_UV);
 }
 
-void mesh_load_normals(struct mesh *mesh, float *data, unsigned int count, unsigned int stride) {
+void mesh_load_normals(struct mesh *mesh, void *data, unsigned int count, unsigned int stride) {
     glBindVertexArray(mesh->vao);
     glGenBuffers(1, &mesh->vbo_normals);
     glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo_normals);
