@@ -44,7 +44,7 @@ struct mesh {
     GLenum index_type;
     GLenum draw_mode;
 
-    struct texture *textures;
+    struct texture **textures;
     unsigned int texture_count;
 };
 

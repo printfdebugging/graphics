@@ -1,8 +1,8 @@
 #include "model.h"
 #include "mesh.h"
+#include "texture.h"
 
 #include <cgltf/cgltf.h>
-#include <iso646.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,6 +40,22 @@ static GLenum gltf_primitive_type_to_opengl_type(cgltf_primitive_type type) {
     }
 }
 /* clang-format on */
+
+/* note: todo:
+ * - use memcopy instead of snprintf
+ * - check for invalid last_separator and unsuccessful malloc
+ */
+static char *get_image_path_from_uri(const char *model_filepath, const char *image_uri) {
+    const char *last_separator = strrchr(model_filepath, '/');
+    int basepath_size = sizeof(char) * (last_separator - model_filepath + 1);
+    int imagepath_size = sizeof(char) * strlen(image_uri);
+    char *imagepath = malloc(basepath_size + imagepath_size + 1);
+
+    snprintf(imagepath, basepath_size, "%s", model_filepath);
+    imagepath[basepath_size - 1] = '/';
+    snprintf(imagepath + basepath_size, imagepath_size + 1, "%s", image_uri);
+    return imagepath;
+}
 
 static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, int *count, int *stride) {
     const cgltf_buffer_view *buffer_view = accessor->buffer_view;
@@ -120,6 +136,30 @@ int model_load(struct model *model, const char *filepath) {
              * based on the pbr model?*/
             if (primitive->material) {
                 cgltf_material *material = primitive->material;
+                if (material->pbr_metallic_roughness.base_color_texture.texture) {
+                    // material->pbr_metallic_roughness.base_color_texture
+
+                    /* note: cgltf images either have buffer_view or uri, they can't have both */
+                    /* todo: create a texture in the mesh, increment count. */
+                    cgltf_image *image = material->pbr_metallic_roughness.base_color_texture.texture->image;
+                    if (image->buffer_view) {
+                        /* todo: handle this case */
+                        fprintf(stderr, "image is in the buffer_view\n");
+                        exit(1);
+                    } else if (image->uri) {
+                        const char *image_path = get_image_path_from_uri(filepath, image->uri);
+                        mesh->texture_count += 1;
+                        mesh->textures = realloc(mesh->textures, sizeof(struct texture **) * mesh->texture_count);
+                        mesh->textures[mesh->texture_count - 1] = texture_create();
+                        /* note: textures should be stored globally, indentified by their filepath
+                         * so that we don't create multiple textures for the same texture. */
+                        if (texture_load_from_file(mesh->textures[mesh->texture_count - 1], image_path)) {
+                            fprintf(stderr, "failed to load texture from file: %s\n", image_path);
+                            exit(1);
+                        }
+                        free((void *) image_path);
+                    }
+                }
             }
 
             if (primitive->type) {
