@@ -21,6 +21,8 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 struct mesh *create_axes_mesh();
 struct shader *create_axes_shader();
+struct model *create_cube_model();
+struct shader *create_model_shader();
 
 /* todo: deprecate this in favour of render_model */
 void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
@@ -45,24 +47,11 @@ int main() {
 
     struct mesh *axes_mesh = create_axes_mesh();
     struct shader *axes_shader = create_axes_shader();
+    if (!axes_mesh || !axes_shader) return EXIT_FAILURE;
 
-    /* todo: why does loading this after axes_mesh replace
-     * the mesh from the axes_mesh? i mean why is cube drawn
-     * instead of the axes mesh? */
-    const char *model_path = ASSETS_DIR "models/DamagedHelmet/glTF/DamagedHelmet.gltf";
-    struct model *model = model_create();
-    if (model_load_from_file(model, model_path)) {
-        model_destroy(model);
-        return EXIT_FAILURE;
-    }
-
-    struct shader *cube_shader = shader_create();
-    if (!cube_shader)
-        return EXIT_FAILURE;
-    if (shader_load_from_file(cube_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
-        shader_destroy(cube_shader);
-        return EXIT_FAILURE;
-    }
+    struct model *cube = create_cube_model();
+    struct shader *cube_shader = create_model_shader();
+    if (!cube || !cube_shader) return EXIT_FAILURE;
 
     float last_frame = 0.0f;
     float delta_time = 0.0f;
@@ -82,9 +71,9 @@ int main() {
         /* without the render call below, why are axes not being drawn and instead cube's vertices are being drawn */
         draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
-        model->view = view;
-        model->projection = projection;
-        render_model(model, cube_shader);
+        cube->view = view;
+        cube->projection = projection;
+        render_model(cube, cube_shader);
         window_swap_buffers(window);
     }
 
@@ -170,4 +159,39 @@ void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, 
 
     glBindVertexArray(axes_mesh->vao);
     glDrawArrays(GL_LINES, 0, axes_mesh->vertex_count);
+}
+
+struct model *create_cube_model() {
+    /* clang-format off */
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f,  0.5f, 0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, 
+        0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  
+        -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, 
+        -0.5f,  0.5f, -0.5f, 0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, 
+    };
+    /* clang-format on */
+    struct model *model = model_create();
+    if (!model) return NULL;
+
+    /* todo: test this malloc as well, or more like break these steps in the model loader itself */
+    model->mesh = malloc(sizeof(struct model *));
+    model->mesh_count = 1;
+
+    *model->mesh = mesh_create();
+    model->mesh[0]->draw_mode = GL_TRIANGLES;
+    mesh_load_vertices(*model->mesh, vertices, 36, 3 * sizeof(float));
+    return model;
+}
+
+struct shader *create_model_shader() {
+    struct shader *shader = shader_create();
+    if (!shader)
+        return NULL;
+    if (shader_load_from_file(shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
+        shader_destroy(shader);
+        return NULL;
+    }
+    return shader;
 }
