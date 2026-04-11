@@ -4,18 +4,13 @@
 #include <GLFW/glfw3.h>
 #include <cglm/struct.h>
 
-#include <stdbool.h>
-
 struct window {
-    unsigned int width;
-    unsigned int height;
+    int width;
+    int height;
     const char *title;
     const char *icon;
     GLFWwindow *window;
     vec4s color;
-
-    // TODO: add callbacks and ways to register callbacks
-    // of the form void (*callback)(sturct Window *window, void* data);
 };
 
 struct window *window_create(unsigned int width, unsigned int height, const char *title, vec4s color);

@@ -2,6 +2,7 @@
 
 void render_model(struct model *model, struct shader *shader) {
     glUseProgram(shader->program);
+    /* add model */
     shader_set_uniform(shader, "view", Matrix4fv, 1, GL_FALSE, &model->view.col[0].raw[0]);
     shader_set_uniform(shader, "projection", Matrix4fv, 1, GL_FALSE, &model->projection.col[0].raw[0]);
 

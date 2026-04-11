@@ -61,6 +61,7 @@ set(PROJECT_ASSETS_DIR "${PROJECT_NAME}/assets/")
 add_executable(${APPLICATION}
     source/logger.c
     source/main.c
+    source/game.c
     source/mesh.c
     source/model.c
     source/renderer.c

@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <stb/stb_image.h>
 
+#include "game.h"
 #include "window.h"
 #include "logger.h"
 
@@ -29,7 +30,10 @@ static bool __msw_is_dark_mode() {
 #endif
 
 static void __window_frame_buffer_resize_callback(GLFWwindow *window, int width, int height) {
-    (void) window;
+    struct game_data *data = glfwGetWindowUserPointer(window);
+    data->window->width = width;
+    data->window->height = height;
+
     glViewport(0, 0, width, height);
 }
 

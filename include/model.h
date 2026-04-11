@@ -1,14 +1,16 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <stdint.h>
 #include <cglm/struct.h>
+#include <stdint.h>
+
 #include "mesh.h"
 
 struct model {
     struct mesh **mesh;
     uint32_t mesh_count;
 
+    mat4s model;
     mat4s view;
     mat4s projection;
 };

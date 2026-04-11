@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include <cglm/struct.h>
 
-#include "shader.h"
 #include "texture.h"
 
 enum mesh_attribute {

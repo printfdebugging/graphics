@@ -3,20 +3,15 @@
 #include <cglm/struct/affine.h>
 #include <glad/glad.h>
 
-#include "camera.h"
-#include "mesh.h"
-#include "model.h"
-#include "renderer.h"
-#include "shader.h"
-#include "window.h"
-
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_VERTEX_BUFFER  512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
-
-struct camera *camera;
+#include "camera.h"
+#include "mesh.h"
+#include "model.h"
+#include "shader.h"
+#include "window.h"
+#include "game.h"
 
 void process_input(struct window *window, float delta_time);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -31,22 +26,19 @@ struct shader *create_model_shader();
 void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
 
 int main() {
-    const float window_width = 1550.0f;
-    const float window_height = 700.0f;
-    const char *window_title = "OpenGL";
-    const vec4s window_color = { 0.24, 0.24, 0.24, 1.0 };
-    struct window *window;
+    struct game_data game = { NULL };
+    // return game_run();
+    game.window = window_create(1550.0f, 700.0f, "OpenGL", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
+    if (!game.window) return EXIT_FAILURE;
+    if (window_set_icon(game.window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
 
-    window = window_create(window_width, window_height, window_title, window_color);
-    if (!window) return EXIT_FAILURE;
-    if (window_set_icon(window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
+    game.camera = camera_create();
+    if (!game.camera) return EXIT_FAILURE;
+    camera_adjust_direction(game.camera);
 
-    camera = camera_create();
-    if (!camera) return EXIT_FAILURE;
-    camera_adjust_direction(camera);
-
-    glfwSetCursorPosCallback(window->window, mouse_callback);
-    glfwSetScrollCallback(window->window, scroll_callback);
+    glfwSetCursorPosCallback(game.window->window, mouse_callback);
+    glfwSetScrollCallback(game.window->window, scroll_callback);
+    glfwSetWindowUserPointer(game.window->window, &game);
 
     struct mesh *axes_mesh = create_axes_mesh();
     struct shader *axes_shader = create_axes_shader();
@@ -56,32 +48,79 @@ int main() {
     struct shader *cube_shader = create_model_shader();
     if (!cube || !cube_shader) return EXIT_FAILURE;
 
-    float last_frame = 0.0f;
-    float delta_time = 0.0f;
-    while (!window_close(window)) {
+    while (!window_close(game.window)) {
         float current_frame = glfwGetTime();
-        delta_time = current_frame - last_frame;
-        last_frame = current_frame;
+        game.delta_time = current_frame - game.last_frame;
+        game.last_frame = current_frame;
 
-        window_poll_events(window);
-        window_process_input(window);
-        window_clear_color(window);
-        process_input(window, delta_time);
+        window_poll_events(game.window);
+        window_process_input(game.window);
+        window_clear_color(game.window);
+        process_input(game.window, game.delta_time);
 
-        mat4s view = camera_get_view_matrix(camera);
-        mat4s projection = glms_perspective(glm_rad(camera->fov), window_width / window_height, 0.1f, 100.0f);
+        /* model matrix for light source */
+        vec3s lightpos = { 1.2f, 1.0f, 2.0f };
+        vec3s lightscale = { 0.2f, 0.2f, 0.2f };
+
+        mat4s model = { .raw = GLM_MAT4_IDENTITY_INIT };
+        mat4s view = camera_get_view_matrix(game.camera);
+        mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
+
+        model = glms_translate(model, lightpos);
+        model = glms_scale(model, lightscale);
 
         /* without the render call below, why are axes not being drawn and instead cube's vertices are being drawn */
         draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
-        cube->view = view;
-        cube->projection = projection;
-        render_model(cube, cube_shader);
-        window_swap_buffers(window);
+        {
+            /* render cube */
+            cube->model = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
+            cube->view = view;
+            cube->projection = projection;
+            glUseProgram(cube_shader->program);
+            shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
+            shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
+            shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
+            shader_set_uniform(cube_shader, "object_color", 3fv, 1, (vec3s) { 1.0f, 0.5f, 0.31f }.raw);
+            shader_set_uniform(cube_shader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+            for (int i = 0; i < cube->mesh_count; ++i) {
+                const struct mesh *mesh = cube->mesh[i];
+                glBindVertexArray(mesh->vao);
+                if (mesh->index_count) {
+                    glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
+                } else {
+                    glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+                }
+            }
+        }
+
+        {
+            /* render cube */
+            cube->view = view;
+            cube->projection = projection;
+            cube->model = model;
+            glUseProgram(cube_shader->program);
+            shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
+            shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
+            shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
+            shader_set_uniform(cube_shader, "object_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+            shader_set_uniform(cube_shader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+            for (int i = 0; i < cube->mesh_count; ++i) {
+                const struct mesh *mesh = cube->mesh[i];
+                glBindVertexArray(mesh->vao);
+                if (mesh->index_count) {
+                    glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
+                } else {
+                    glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+                }
+            }
+        }
+
+        window_swap_buffers(game.window);
     }
 
-    window_destroy(window);
-    camera_destroy(camera);
+    window_destroy(game.window);
+    camera_destroy(game.camera);
     shader_destroy(axes_shader);
     mesh_destroy(axes_mesh);
 
@@ -89,22 +128,25 @@ int main() {
 }
 
 void process_input(struct window *window, float delta_time) {
+    struct game_data *data = glfwGetWindowUserPointer(window->window);
     if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_process_keyboard(camera, CAMERA_DIRECTION_FORWARD, delta_time);
+        camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
     if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_process_keyboard(camera, CAMERA_DIRECTION_BACKWARD, delta_time);
+        camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
     if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
-        camera_process_keyboard(camera, CAMERA_DIRECTION_LEFT, delta_time);
+        camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
     if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
-        camera_process_keyboard(camera, CAMERA_DIRECTION_RIGHT, delta_time);
+        camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-    camera_process_mouse_movement(camera, (float) xpos, (float) ypos, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+    struct game_data *data = glfwGetWindowUserPointer(window);
+    camera_process_mouse_movement(data->camera, (float) xpos, (float) ypos, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-    camera_process_mouse_scroll(camera, (float) yoffset);
+    struct game_data *data = glfwGetWindowUserPointer(window);
+    camera_process_mouse_scroll(data->camera, (float) yoffset);
 }
 
 struct mesh *create_axes_mesh() {
