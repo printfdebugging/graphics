@@ -141,7 +141,6 @@ function build_ffmpeg() {
 			--enable-version3 \
 			--enable-shared \
 			--logfile="${ffmpeg_builddir}/build.log" &&
-		make -C "${ffmpeg_builddir}" clean &&
 		${bear_cmd} make -C "${ffmpeg_builddir}" -j &&
 		make -C "${ffmpeg_builddir}" install)
 }
