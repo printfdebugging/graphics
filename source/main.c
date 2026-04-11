@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* todo: also try out clay & cimgui and see how it does things. */
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
