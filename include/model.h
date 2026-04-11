@@ -14,7 +14,13 @@ struct model {
 };
 
 struct model *model_create();
-int model_load(struct model *model, const char *filepath);
+
+/* for now we are just loading gltf models. if in future
+ * we load other models as well, we might want to either
+ * pass a model type in this function, or create multiple functions
+ * to load different types of models.*/
+int model_load_from_file(struct model *model, const char *filepath);
+
 void model_destroy(struct model *model);
 
 #endif

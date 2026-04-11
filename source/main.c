@@ -51,7 +51,7 @@ int main() {
      * instead of the axes mesh? */
     const char *model_path = ASSETS_DIR "models/DamagedHelmet/glTF/DamagedHelmet.gltf";
     struct model *model = model_create();
-    if (model_load(model, model_path)) {
+    if (model_load_from_file(model, model_path)) {
         model_destroy(model);
         return EXIT_FAILURE;
     }

@@ -91,7 +91,7 @@ void model_destroy(struct model *model) {
 /* todo: try out multiple models from the assets and see what works. */
 /* note: assuming only one primitive in the primitives array for now */
 
-int model_load(struct model *model, const char *filepath) {
+int model_load_from_file(struct model *model, const char *filepath) {
     cgltf_data *data = NULL;
     cgltf_result result;
     const cgltf_options options = { 0 };
