@@ -28,7 +28,7 @@ void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, 
 int main() {
     struct game_data game = { NULL };
     // return game_run();
-    game.window = window_create(1550.0f, 700.0f, "OpenGL", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
+    game.window = window_create(1550.0f, 700.0f, "floating", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
     if (!game.window) return EXIT_FAILURE;
     if (window_set_icon(game.window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
 
