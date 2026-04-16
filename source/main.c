@@ -13,83 +13,83 @@
 #include "window.h"
 #include "game.h"
 
-void process_input(struct window *window, float delta_time);
-void mouse_callback(GLFWwindow *window, double xpos, double ypos);
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void processInput(struct Window *window, float deltaTime);
+void mouseCallback(GLFWwindow *window, double xpos, double ypos);
+void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
-struct mesh *create_axes_mesh();
-struct shader *create_axes_shader();
-struct model *create_cube_model();
-struct shader *create_model_shader();
+struct Mesh *createAxesMesh();
+struct Shader *createAxesShader();
+struct Model *createCubeModel();
+struct Shader *createModelShader();
 
-/* todo: deprecate this in favour of render_model */
-void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
+/* todo: deprecate this in favour of renderModel */
+void drawAxes(struct Mesh *axesMesh, struct Shader *axesShader, mat4s model, mat4s view, mat4s projection);
 
 int main() {
-    struct game_data game = { NULL };
-    // return game_run();
-    game.window = window_create(1550.0f, 700.0f, "floating", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
+    struct GameData game = { NULL };
+    // return gameRun();
+    game.window = windowCreate(1550.0f, 700.0f, "floating", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
     if (!game.window) return EXIT_FAILURE;
-    if (window_set_icon(game.window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
+    if (windowSetIcon(game.window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
 
-    game.camera = camera_create();
+    game.camera = cameraCreate();
     if (!game.camera) return EXIT_FAILURE;
-    camera_adjust_direction(game.camera);
+    cameraAdjustDirection(game.camera);
 
-    glfwSetCursorPosCallback(game.window->window, mouse_callback);
-    glfwSetScrollCallback(game.window->window, scroll_callback);
+    glfwSetCursorPosCallback(game.window->window, mouseCallback);
+    glfwSetScrollCallback(game.window->window, scrollCallback);
     glfwSetWindowUserPointer(game.window->window, &game);
 
-    struct mesh *axes_mesh = create_axes_mesh();
-    struct shader *axes_shader = create_axes_shader();
-    if (!axes_mesh || !axes_shader) return EXIT_FAILURE;
+    struct Mesh *axesMesh = createAxesMesh();
+    struct Shader *axesShader = createAxesShader();
+    if (!axesMesh || !axesShader) return EXIT_FAILURE;
 
-    struct model *cube = create_cube_model();
-    struct shader *cube_shader = create_model_shader();
-    if (!cube || !cube_shader) return EXIT_FAILURE;
+    struct Model *cube = createCubeModel();
+    struct Shader *cubeShader = createModelShader();
+    if (!cube || !cubeShader) return EXIT_FAILURE;
 
-    while (!window_close(game.window)) {
-        float current_frame = glfwGetTime();
-        game.delta_time = current_frame - game.last_frame;
-        game.last_frame = current_frame;
+    while (!windowClose(game.window)) {
+        float currentFrame = glfwGetTime();
+        game.deltaTime = currentFrame - game.lastFrame;
+        game.lastFrame = currentFrame;
 
-        window_poll_events(game.window);
-        window_process_input(game.window);
-        window_clear_color(game.window);
-        process_input(game.window, game.delta_time);
+        windowPollEvents(game.window);
+        windowProcessInput(game.window);
+        windowClearColor(game.window);
+        processInput(game.window, game.deltaTime);
 
         /* model matrix for light source */
         vec3s lightpos = { 1.2f, 1.0f, 2.0f };
         vec3s lightscale = { 0.2f, 0.2f, 0.2f };
 
         mat4s model = { .raw = GLM_MAT4_IDENTITY_INIT };
-        mat4s view = camera_get_view_matrix(game.camera);
+        mat4s view = cameraGetViewMatrix(game.camera);
         mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
 
         model = glms_translate(model, lightpos);
         model = glms_scale(model, lightscale);
 
         /* without the render call below, why are axes not being drawn and instead cube's vertices are being drawn */
-        draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
+        drawAxes(axesMesh, axesShader, (mat4s) {}, view, projection);
 
         {
             /* render cube */
             cube->model = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
             cube->view = view;
             cube->projection = projection;
-            glUseProgram(cube_shader->program);
-            shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-            shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-            shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-            shader_set_uniform(cube_shader, "object_color", 3fv, 1, (vec3s) { 1.0f, 0.5f, 0.31f }.raw);
-            shader_set_uniform(cube_shader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
-            for (int i = 0; i < cube->mesh_count; ++i) {
-                const struct mesh *mesh = cube->mesh[i];
+            glUseProgram(cubeShader->program);
+            shaderSetUniform(cubeShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
+            shaderSetUniform(cubeShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
+            shaderSetUniform(cubeShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
+            shaderSetUniform(cubeShader, "object_color", 3fv, 1, (vec3s) { 1.0f, 0.5f, 0.31f }.raw);
+            shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+            for (int i = 0; i < cube->meshCount; ++i) {
+                const struct Mesh *mesh = cube->mesh[i];
                 glBindVertexArray(mesh->vao);
-                if (mesh->index_count) {
-                    glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
+                if (mesh->indexCount) {
+                    glDrawElements(mesh->drawMode, mesh->indexCount, mesh->indexType, NULL);
                 } else {
-                    glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+                    glDrawArrays(mesh->drawMode, 0, mesh->vertexCount);
                 }
             }
         }
@@ -99,57 +99,57 @@ int main() {
             cube->view = view;
             cube->projection = projection;
             cube->model = model;
-            glUseProgram(cube_shader->program);
-            shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-            shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-            shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-            shader_set_uniform(cube_shader, "object_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
-            shader_set_uniform(cube_shader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
-            for (int i = 0; i < cube->mesh_count; ++i) {
-                const struct mesh *mesh = cube->mesh[i];
+            glUseProgram(cubeShader->program);
+            shaderSetUniform(cubeShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
+            shaderSetUniform(cubeShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
+            shaderSetUniform(cubeShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
+            shaderSetUniform(cubeShader, "object_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+            shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+            for (int i = 0; i < cube->meshCount; ++i) {
+                const struct Mesh *mesh = cube->mesh[i];
                 glBindVertexArray(mesh->vao);
-                if (mesh->index_count) {
-                    glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
+                if (mesh->indexCount) {
+                    glDrawElements(mesh->drawMode, mesh->indexCount, mesh->indexType, NULL);
                 } else {
-                    glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+                    glDrawArrays(mesh->drawMode, 0, mesh->vertexCount);
                 }
             }
         }
 
-        window_swap_buffers(game.window);
+        windowSwapBuffers(game.window);
     }
 
-    window_destroy(game.window);
-    camera_destroy(game.camera);
-    shader_destroy(axes_shader);
-    mesh_destroy(axes_mesh);
+    windowDestroy(game.window);
+    cameraDestroy(game.camera);
+    shaderDestroy(axesShader);
+    meshDestroy(axesMesh);
 
     return 0;
 }
 
-void process_input(struct window *window, float delta_time) {
-    struct game_data *data = glfwGetWindowUserPointer(window->window);
+void processInput(struct Window *window, float delta_time) {
+    struct GameData *data = glfwGetWindowUserPointer(window->window);
     if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
+        cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
     if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
+        cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
     if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
-        camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
+        cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
     if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
-        camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
+        cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
 }
 
-void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-    struct game_data *data = glfwGetWindowUserPointer(window);
-    camera_process_mouse_movement(data->camera, (float) xpos, (float) ypos, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
+    struct GameData *data = glfwGetWindowUserPointer(window);
+    cameraProcessMouseMovement(data->camera, (float) xpos, (float) ypos, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
 }
 
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
-    struct game_data *data = glfwGetWindowUserPointer(window);
-    camera_process_mouse_scroll(data->camera, (float) yoffset);
+void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+    struct GameData *data = glfwGetWindowUserPointer(window);
+    cameraProcessMouseScroll(data->camera, (float) yoffset);
 }
 
-struct mesh *create_axes_mesh() {
+struct Mesh *createAxesMesh() {
     const int AXES = 2;
     const int LINES_PER_AXIS = 501;
     const int LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
@@ -179,34 +179,34 @@ struct mesh *create_axes_mesh() {
         vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (float) LINES_ON_EACH_SIDE;
     }
 
-    struct mesh *axes_mesh = mesh_create();
+    struct Mesh *axes_mesh = meshCreate();
     if (!axes_mesh) return NULL;
 
-    mesh_load_vertices(axes_mesh, &vertices[0][0][0][0], count, 3 * sizeof(float));
+    meshLoadVertices(axes_mesh, &vertices[0][0][0][0], count, 3 * sizeof(float));
     return axes_mesh;
 }
 
-struct shader *create_axes_shader() {
-    struct shader *axes_shader = shader_create();
+struct Shader *createAxesShader() {
+    struct Shader *axes_shader = shaderCreate();
     if (!axes_shader)
         return NULL;
-    if (shader_load_from_file(axes_shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
-        shader_destroy(axes_shader);
+    if (shaderLoadFromFile(axes_shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
+        shaderDestroy(axes_shader);
         return NULL;
     }
     return axes_shader;
 }
 
-void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection) {
-    glUseProgram(axes_shader->program);
-    shader_set_uniform(axes_shader, "view", Matrix4fv, 1, GL_FALSE, &view.col[0].raw[0]);
-    shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
+void drawAxes(struct Mesh *axesMesh, struct Shader *axesShader, mat4s model, mat4s view, mat4s projection) {
+    glUseProgram(axesShader->program);
+    shaderSetUniform(axesShader, "view", Matrix4fv, 1, GL_FALSE, &view.col[0].raw[0]);
+    shaderSetUniform(axesShader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
 
-    glBindVertexArray(axes_mesh->vao);
-    glDrawArrays(GL_LINES, 0, axes_mesh->vertex_count);
+    glBindVertexArray(axesMesh->vao);
+    glDrawArrays(GL_LINES, 0, axesMesh->vertexCount);
 }
 
-struct model *create_cube_model() {
+struct Model *createCubeModel() {
     /* clang-format off */
     float vertices[] = {
         -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 
@@ -217,25 +217,25 @@ struct model *create_cube_model() {
         -0.5f,  0.5f, -0.5f, 0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, 
     };
     /* clang-format on */
-    struct model *model = model_create();
+    struct Model *model = modelCreate();
     if (!model) return NULL;
 
     /* todo: test this malloc as well, or more like break these steps in the model loader itself */
-    model->mesh = malloc(sizeof(struct model *));
-    model->mesh_count = 1;
+    model->mesh = malloc(sizeof(struct Model *));
+    model->meshCount = 1;
 
-    *model->mesh = mesh_create();
-    model->mesh[0]->draw_mode = GL_TRIANGLES;
-    mesh_load_vertices(*model->mesh, vertices, 36, 3 * sizeof(float));
+    *model->mesh = meshCreate();
+    model->mesh[0]->drawMode = GL_TRIANGLES;
+    meshLoadVertices(*model->mesh, vertices, 36, 3 * sizeof(float));
     return model;
 }
 
-struct shader *create_model_shader() {
-    struct shader *shader = shader_create();
+struct Shader *createModelShader() {
+    struct Shader *shader = shaderCreate();
     if (!shader)
         return NULL;
-    if (shader_load_from_file(shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
-        shader_destroy(shader);
+    if (shaderLoadFromFile(shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
+        shaderDestroy(shader);
         return NULL;
     }
     return shader;

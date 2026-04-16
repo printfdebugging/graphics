@@ -7,7 +7,7 @@
 #include <string.h>
 
 /* clang-format off */
-static GLenum gltf_type_to_opengl_type(cgltf_component_type type) {
+static GLenum gltfComponentTypeToGLType(cgltf_component_type type) {
     switch (type) {
         case cgltf_component_type_r_8:      return GL_BYTE;
         case cgltf_component_type_r_8u:     return GL_UNSIGNED_BYTE;
@@ -23,7 +23,7 @@ static GLenum gltf_type_to_opengl_type(cgltf_component_type type) {
     }
 }
 
-static GLenum gltf_primitive_type_to_opengl_type(cgltf_primitive_type type) {
+static GLenum gltfPrimitiveTypeToGLType(cgltf_primitive_type type) {
     switch (type) {
         case cgltf_primitive_type_points:         return GL_POINTS;
         case cgltf_primitive_type_lines:          return GL_LINES;
@@ -45,42 +45,42 @@ static GLenum gltf_primitive_type_to_opengl_type(cgltf_primitive_type type) {
  * - use memcopy instead of snprintf
  * - check for invalid last_separator and unsuccessful malloc
  */
-static char *get_image_path_from_uri(const char *model_filepath, const char *image_uri) {
-    const char *last_separator = strrchr(model_filepath, '/');
-    int basepath_size = sizeof(char) * (last_separator - model_filepath + 1);
-    int imagepath_size = sizeof(char) * strlen(image_uri);
-    char *imagepath = malloc(basepath_size + imagepath_size + 1);
+static char *getImagePathFromURI(const char *modelFilePath, const char *imageURI) {
+    const char *lastSeparator = strrchr(modelFilePath, '/');
+    int basepathSize = sizeof(char) * (lastSeparator - modelFilePath + 1);
+    int imgPathSize = sizeof(char) * strlen(imageURI);
+    char *imagepath = malloc(basepathSize + imgPathSize + 1);
 
-    snprintf(imagepath, basepath_size, "%s", model_filepath);
-    imagepath[basepath_size - 1] = '/';
-    snprintf(imagepath + basepath_size, imagepath_size + 1, "%s", image_uri);
+    snprintf(imagepath, basepathSize, "%s", modelFilePath);
+    imagepath[basepathSize - 1] = '/';
+    snprintf(imagepath + basepathSize, imgPathSize + 1, "%s", imageURI);
     return imagepath;
 }
 
-static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, int *count, int *stride) {
-    const cgltf_buffer_view *buffer_view = accessor->buffer_view;
-    const int offset = accessor->offset + buffer_view->offset;
-    const int data_size = accessor->count * cgltf_calc_size(accessor->type, accessor->component_type);
+static void accessorPointToData(const cgltf_accessor *accessor, void **data, int *count, int *stride) {
+    const cgltf_buffer_view *bufferView = accessor->buffer_view;
+    const int offset = accessor->offset + bufferView->offset;
+    const int dataSize = accessor->count * cgltf_calc_size(accessor->type, accessor->component_type);
 
     /* todo: i heard that offset was in bytes, but data is a void * which is 64 bits = 8 bytes */
-    *data = (buffer_view->buffer->data + offset);
+    *data = (bufferView->buffer->data + offset);
     *count = accessor->count;
-    *stride = buffer_view->stride;
+    *stride = bufferView->stride;
 }
 
-struct model *model_create() {
-    struct model *model = malloc(sizeof(struct model));
+struct Model *modelCreate() {
+    struct Model *model = malloc(sizeof(struct Model));
     if (!model) {
         fprintf(stderr, "failed to allocate model\n");
         return NULL;
     }
-    *model = (struct model) { 0 };
+    *model = (struct Model) { 0 };
     return model;
 }
 
-void model_destroy(struct model *model) {
-    for (int i = 0; i < model->mesh_count; ++i) {
-        mesh_destroy(*(model->mesh + i));
+void modelDestroy(struct Model *model) {
+    for (int i = 0; i < model->meshCount; ++i) {
+        meshDestroy(*(model->mesh + i));
     }
 
     free(model->mesh);
@@ -91,7 +91,7 @@ void model_destroy(struct model *model) {
 /* todo: try out multiple models from the assets and see what works. */
 /* note: assuming only one primitive in the primitives array for now */
 
-int model_load_from_file(struct model *model, const char *filepath) {
+int modelLoadFromFile(struct Model *model, const char *filepath) {
     cgltf_data *data = NULL;
     cgltf_result result;
     const cgltf_options options = { 0 };
@@ -108,18 +108,18 @@ int model_load_from_file(struct model *model, const char *filepath) {
         return 1;
     }
 
-    model->mesh = malloc(sizeof(struct mesh *) * data->meshes_count);
-    model->mesh_count = data->meshes_count;
+    model->mesh = malloc(sizeof(struct Mesh *) * data->meshes_count);
+    model->meshCount = data->meshes_count;
 
     /* iterate over all the meshes - meshes have primitives */
     for (int i = 0; i < data->meshes_count; ++i) {
         /*         struct mesh  */
         // contoinue here
         const cgltf_mesh *gltf_mesh = &data->meshes[i];
-        struct mesh **meshptr = model->mesh + i;
+        struct Mesh **meshptr = model->mesh + i;
         /* todo: check meshptr, if mesh_create was successful or not. */
-        *meshptr = mesh_create();
-        struct mesh *mesh = *meshptr;
+        *meshptr = meshCreate();
+        struct Mesh *mesh = *meshptr;
         for (int j = 0; j < gltf_mesh->primitives_count; ++j) {
             const cgltf_primitive *primitive = &gltf_mesh->primitives[j];
 
@@ -127,9 +127,9 @@ int model_load_from_file(struct model *model, const char *filepath) {
                 void *data = NULL;
                 int count = 0;
                 int stride = 0;
-                GLenum type = gltf_type_to_opengl_type(primitive->indices->component_type);
-                accessor_point_to_data(primitive->indices, &data, &count, &stride);
-                mesh_load_indices(mesh, data, count, type, stride);
+                GLenum type = gltfComponentTypeToGLType(primitive->indices->component_type);
+                accessorPointToData(primitive->indices, &data, &count, &stride);
+                meshLoadIndices(mesh, data, count, type, stride);
             }
 
             /* materials array defines various materials and their various properties
@@ -147,13 +147,13 @@ int model_load_from_file(struct model *model, const char *filepath) {
                         fprintf(stderr, "image is in the buffer_view\n");
                         exit(1);
                     } else if (image->uri) {
-                        const char *image_path = get_image_path_from_uri(filepath, image->uri);
-                        mesh->texture_count += 1;
-                        mesh->textures = realloc(mesh->textures, sizeof(struct texture **) * mesh->texture_count);
-                        mesh->textures[mesh->texture_count - 1] = texture_create();
+                        const char *image_path = getImagePathFromURI(filepath, image->uri);
+                        mesh->textureCount += 1;
+                        mesh->textures = realloc(mesh->textures, sizeof(struct Texture **) * mesh->textureCount);
+                        mesh->textures[mesh->textureCount - 1] = textureCreate();
                         /* note: textures should be stored globally, indentified by their filepath
                          * so that we don't create multiple textures for the same texture. */
-                        if (texture_load_from_file(mesh->textures[mesh->texture_count - 1], image_path)) {
+                        if (textureLoadFromFile(mesh->textures[mesh->textureCount - 1], image_path)) {
                             fprintf(stderr, "failed to load texture from file: %s\n", image_path);
                             exit(1);
                         }
@@ -163,19 +163,19 @@ int model_load_from_file(struct model *model, const char *filepath) {
             }
 
             if (primitive->type) {
-                mesh->draw_mode = gltf_primitive_type_to_opengl_type(primitive->type);
+                mesh->drawMode = gltfPrimitiveTypeToGLType(primitive->type);
             }
 
-            const int attribute_count = primitive->attributes_count;
-            for (int k = 0; k < attribute_count; ++k) {
+            const int attrCount = primitive->attributes_count;
+            for (int k = 0; k < attrCount; ++k) {
                 const cgltf_attribute *attribute = &primitive->attributes[k];
                 void *data = NULL;
                 int count = 0;
                 int stride = 0;
                 switch (attribute->type) {
                     case cgltf_attribute_type_position: {
-                        accessor_point_to_data(attribute->data, &data, &count, &stride);
-                        mesh_load_vertices(mesh, data, count, stride);
+                        accessorPointToData(attribute->data, &data, &count, &stride);
+                        meshLoadVertices(mesh, data, count, stride);
                     } break;
                     case cgltf_attribute_type_normal: {
                     } break;
@@ -183,8 +183,8 @@ int model_load_from_file(struct model *model, const char *filepath) {
                         /* todo: check if this attribute->index property actually
                          * is an index in the textures array i.e. pointing to the texture
                          * these texture coordinates are for. */
-                        accessor_point_to_data(attribute->data, &data, &count, &stride);
-                        mesh_load_uv(mesh, data, count, stride);
+                        accessorPointToData(attribute->data, &data, &count, &stride);
+                        meshLoadUV(mesh, data, count, stride);
                         /* where to load the texture? surely a texture is a part of the "mesh", so it
                          * probably should be loaded here since we are loading texture coordinates. */
                     } break;

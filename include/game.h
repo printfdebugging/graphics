@@ -4,14 +4,14 @@
 #include "window.h"
 #include "camera.h"
 
-struct game_data {
-    struct window *window;
-    struct camera *camera;
+struct GameData {
+    struct Window *window;
+    struct Camera *camera;
 
-    float last_frame;
-    float delta_time;
+    float lastFrame;
+    float deltaTime;
 };
 
-int game_run();
+int gameRun();
 
 #endif

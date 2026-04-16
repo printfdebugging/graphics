@@ -16,7 +16,7 @@
 #include <string.h>
 
 #ifdef _WIN32
-static bool __msw_is_dark_mode() {
+static bool __mswIsDarkMode() {
     HINSTANCE uxthemelib = LoadLibraryExW(L"uxtheme.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (!uxthemelib) {
         fprintf(stderr, "failed to open uxtheme.dll\n");
@@ -29,15 +29,15 @@ static bool __msw_is_dark_mode() {
 }
 #endif
 
-static void __window_frame_buffer_resize_callback(GLFWwindow *window, int width, int height) {
-    struct game_data *data = glfwGetWindowUserPointer(window);
+static void __windowFrameBufferResizeCallback(GLFWwindow *window, int width, int height) {
+    struct GameData *data = glfwGetWindowUserPointer(window);
     data->window->width = width;
     data->window->height = height;
 
     glViewport(0, 0, width, height);
 }
 
-struct window *window_create(unsigned int width, unsigned int height, const char *title, vec4s color) {
+struct Window *windowCreate(unsigned int width, unsigned int height, const char *title, vec4s color) {
     if (!glfwInit()) {
         fprintf(stderr, "failed to initialize glfw");
         return NULL;
@@ -69,11 +69,11 @@ struct window *window_create(unsigned int width, unsigned int height, const char
     /* use a dark titlebar on windows in dark mode. */
 #ifdef _WIN32
     HWND hwnd = glfwGetWin32Window(window);
-    DWORD value = __msw_is_dark_mode();
+    DWORD value = __mswIsDarkMode();
     DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 #endif
 
-    glfwSetFramebufferSizeCallback(window, __window_frame_buffer_resize_callback);
+    glfwSetFramebufferSizeCallback(window, __windowFrameBufferResizeCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSwapInterval(1);
     glEnable(GL_DEPTH_TEST);
@@ -87,7 +87,7 @@ struct window *window_create(unsigned int width, unsigned int height, const char
     // glEnable(GL_BLEND);
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    struct window *win = malloc(sizeof(struct window));
+    struct Window *win = malloc(sizeof(struct Window));
     if (!win) {
         fprintf(stderr, "failed to initialize glad\n");
         glfwTerminate();
@@ -103,43 +103,43 @@ struct window *window_create(unsigned int width, unsigned int height, const char
     return win;
 }
 
-void window_set_clear_color(struct window *window, vec4s color) {
+void windowSetClearColor(struct Window *window, vec4s color) {
     window->color = color;
 }
 
-void window_process_input(struct window *window) {
+void windowProcessInput(struct Window *window) {
     if (glfwGetKey(window->window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS)
         glfwSetWindowShouldClose(window->window, GLFW_TRUE);
 }
 
-void window_poll_events(struct window *window) {
+void windowPollEvents(struct Window *window) {
     (void) window;
     glfwPollEvents();
 }
 
-void window_clear_color(struct window *window) {
+void windowClearColor(struct Window *window) {
     (void) window;
     glClearColor(window->color.r, window->color.g, window->color.b, window->color.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void window_swap_buffers(struct window *window) {
+void windowSwapBuffers(struct Window *window) {
     glfwSwapBuffers(window->window);
 }
 
-void window_destroy(struct window *window) {
+void windowDestroy(struct Window *window) {
     glfwDestroyWindow(window->window);
     glfwTerminate();
     free(window);
 }
 
-bool window_close(struct window *window) {
+bool windowClose(struct Window *window) {
     if (!window->window)
         return GL_TRUE;
     return glfwWindowShouldClose(window->window);
 }
 
-int window_set_icon(struct window *window, const char *path) {
+int windowSetIcon(struct Window *window, const char *path) {
     GLFWimage image;
     int image_channel_count;
     image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);

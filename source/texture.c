@@ -4,48 +4,48 @@
 
 #include <stb/stb_image.h>
 
-int texture_load_from_file(struct texture *texture, const char *path) {
-    int image_width;
-    int image_height;
-    int image_channel_count;
-    unsigned char *image_data;
+int textureLoadFromFile(struct Texture *texture, const char *path) {
+    int imgWidth;
+    int imgHeight;
+    int imgChanCount;
+    unsigned char *imgData;
 
     stbi_set_flip_vertically_on_load(true);
-    image_data = stbi_load(path, &image_width, &image_height, &image_channel_count, 0);
+    imgData = stbi_load(path, &imgWidth, &imgHeight, &imgChanCount, 0);
 
     // TODO: make this a bit more robust using switch
     GLenum imgFormat;
-    if (image_channel_count == 3)
+    if (imgChanCount == 3)
         imgFormat = GL_RGB;
     else
         imgFormat = GL_RGBA;
 
-    if (!image_data) {
+    if (!imgData) {
         fprintf(stderr, "Failed to load texture %s\n", path);
         free(texture);
-        stbi_image_free(image_data);
+        stbi_image_free(imgData);
         return 1;
     }
 
-    if (texture_load(texture, image_data, image_width, image_height, imgFormat, GL_UNSIGNED_BYTE, imgFormat, GL_TRUE))
+    if (textureLoad(texture, imgData, imgWidth, imgHeight, imgFormat, GL_UNSIGNED_BYTE, imgFormat, GL_TRUE))
         return 1;
 
-    stbi_image_free(image_data);
+    stbi_image_free(imgData);
     return 0;
 }
 
-struct texture *texture_create() {
-    struct texture *texture = malloc(sizeof(struct texture));
+struct Texture *textureCreate() {
+    struct Texture *texture = malloc(sizeof(struct Texture));
     if (!texture) {
         fprintf(stderr, "Failed to allocate memory for texture\n");
         return NULL;
     }
 
-    *texture = (struct texture) { 0 };
+    *texture = (struct Texture) { 0 };
     return texture;
 }
 
-int texture_load(struct texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps) {
+int textureLoad(struct Texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps) {
     glGenTextures(1, &texture->texture);
     glBindTexture(GL_TEXTURE_2D, texture->texture);
     glTexImage2D(GL_TEXTURE_2D, GL_ZERO, internal_format, width, height, GL_ZERO, format, data_type, data);
@@ -61,7 +61,7 @@ int texture_load(struct texture *texture, void *data, unsigned int width, unsign
     return 0;
 }
 
-void texture_destroy(struct texture *texture) {
+void textureDestroy(struct Texture *texture) {
     glDeleteTextures(1, &texture->texture);
     free(texture);
 }

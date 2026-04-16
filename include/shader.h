@@ -3,15 +3,15 @@
 
 #include <glad/glad.h>
 
-struct shader {
+struct Shader {
     unsigned int program;
 };
 
-struct shader *shader_create();
-void shader_destroy(struct shader *shader);
-int shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
+struct Shader *shaderCreate();
+void shaderDestroy(struct Shader *shader);
+int shaderLoadFromFile(struct Shader *shader, const char *vpath, const char *fpath);
 
-#define shader_set_uniform(shader, name, type, ...)                                    \
+#define shaderSetUniform(shader, name, type, ...)                                      \
     {                                                                                  \
         int var_##location = glGetUniformLocation(shader->program, name);              \
         if (var_##location == -1) {                                                    \

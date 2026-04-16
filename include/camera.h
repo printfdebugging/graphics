@@ -3,33 +3,94 @@
 
 #include <cglm/struct.h>
 
-enum camera_direction {
+enum CameraDirection {
     CAMERA_DIRECTION_FORWARD = 0,
     CAMERA_DIRECTION_BACKWARD = 1,
     CAMERA_DIRECTION_LEFT = 2,
     CAMERA_DIRECTION_RIGHT = 3
 };
 
-struct camera {
+struct Camera {
+    /*
+     *
+     */
     vec3s position;
+
+    /*
+     *
+     */
     vec3s front;
+
+    /*
+     *
+     */
     vec3s up;
 
+    /*
+     *
+     */
     float yaw;
+
+    /*
+     *
+     */
     float pitch;
+
+    /*
+     *
+     */
     float x;
     float y;
+
+    /*
+     *
+     */
     float fov;
-    float movement_speed;
-    float mouse_sensitivity;
+
+    /*
+     *
+     */
+    float movementSpeed;
+
+    /*
+     *
+     */
+    float mouseSensitivity;
 };
 
-struct camera *camera_create();
-void camera_process_keyboard(struct camera *camera, enum camera_direction direction, float delta_time);
-void camera_process_mouse_movement(struct camera *camera, float x, float y, bool left_button_pressed);
-void camera_process_mouse_scroll(struct camera *camera, float yoffset);
-void camera_adjust_direction(struct camera *camera);
-mat4s camera_get_view_matrix(struct camera *camera);
-void camera_destroy(struct camera *camera);
+/*
+ *
+ */
+struct Camera *cameraCreate();
+
+/*
+ *
+ */
+void cameraProcessKeyboard(struct Camera *camera, enum CameraDirection direction, float delta_time);
+
+/*
+ *
+ */
+void cameraProcessMouseMovement(struct Camera *camera, float x, float y, bool left_button_pressed);
+
+/*
+ *
+ */
+void cameraProcessMouseScroll(struct Camera *camera, float yoffset);
+
+/*
+ *
+ */
+void cameraAdjustDirection(struct Camera *camera);
+
+/*
+ *
+ */
+mat4s cameraGetViewMatrix(struct Camera *camera);
+
+/*
+ *
+ */
+void cameraDestroy(struct Camera *camera);
 
 #endif

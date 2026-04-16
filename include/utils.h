@@ -3,7 +3,7 @@
 
 #define DEFAULT_STRING_CAPACITY 512.0f
 
-struct string {
+struct String {
     char *data;
 
     /*
@@ -21,8 +21,8 @@ struct string {
     int capacity;
 };
 
-struct string *string_create(const char *data);
-struct string *string_create_from_file(const char *path);
+struct String *stringCreate(const char *data);
+struct String *stringCreateFromFile(const char *path);
 
 /*
  * we always append a `part` to the `string` string.
@@ -30,8 +30,8 @@ struct string *string_create_from_file(const char *path);
  * this function doesn't free part (infact it assumes part
  * to be stack allocated).
  */
-int string_append(struct string *string, const char *part);
-int string_append_file(struct string *string, const char *path);
-void string_destroy(struct string *string);
+int stringAppend(struct String *string, const char *part);
+int stringAppendFile(struct String *string, const char *path);
+void stringDestroy(struct String *string);
 
 #endif

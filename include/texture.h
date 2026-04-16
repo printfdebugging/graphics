@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-enum texture_index {
+enum TextureIndex {
     TEXTURE0 = 0,
     TEXTURE1 = 1,
     TEXTURE2 = 2,
@@ -39,14 +39,14 @@ enum texture_index {
     TEXTURE_COUNT = 32,
 };
 
-struct texture {
+struct Texture {
     unsigned int texture;
     const char *type;
 };
 
-struct texture *texture_create();
-int texture_load(struct texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps);
-int texture_load_from_file(struct texture *texture, const char *path);
-void texture_destroy(struct texture *texture);
+struct Texture *textureCreate();
+int textureLoad(struct Texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps);
+int textureLoadFromFile(struct Texture *texture, const char *path);
+void textureDestroy(struct Texture *texture);
 
 #endif
