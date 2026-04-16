@@ -1,2 +1,2 @@
 run: 
-	./build.sh && ./build/executable
+	./scripts/build.sh && ./build/executable
