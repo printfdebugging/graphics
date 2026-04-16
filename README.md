@@ -7,10 +7,10 @@
 ## Dependencies
 
 - Windows
-  - Run `dependencies.sh` from `MSYS2 CLANG64` shell
+  - Run `./scripts/dependencies.sh` from `MSYS2 CLANG64` shell
   - This installs compilers, build tools etc
 - Archlinux
-  - Run `dependencies.sh` from "THE BASH"
+  - Run `./scripts/dependencies.sh` from "THE BASH"
   - You use Arch BTW, so no spoon feeding for you!
 
 ## Libraries
@@ -20,7 +20,7 @@
 - All build systems discover installed libraries through `pkgconf`
 - We build the libraries one by one and install them in `./install`
 - These libraries generate pkg-config files in `./install/lib/pkgconfig`
-- Run `./externals.sh` to build and install these libraries
+- Run `./scripts/externals.sh` to build and install these libraries
   - Run in "THE BASH" on Archlinux
   - Run in `MSYS2 CLANG64` shell on Windows
 - We use a bash script to compile/install external libraries because other ways are painful
@@ -30,10 +30,10 @@
 - With CMake
   - This is a CMake project
   - Source files live in `./source`, header files live in `./include`
-  - See `build.sh` for the full CMake command
+  - See `./scripts/build.sh` for the full CMake command
 - With Script
-  - Windows: Run the `./build.sh` script from `MSYS2 CLANG64` shell (or Git Bash if path has `C:\msys64\clang64\bin`)
-  - Archlinux: Run the `./build.sh` script in "THE BASH"
+  - Windows: Run the `./scripts/build.sh` script from `MSYS2 CLANG64` shell (or Git Bash if path has `C:\msys64\clang64\bin`)
+  - Archlinux: Run the `./scripts/build.sh` script in "THE BASH"
 - With VSCode
   - Install `ms-vscode.cpptools-extension-pack` extension pack
   - Press `<Shift+F5>` to build the project and attach a debugger
