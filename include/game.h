@@ -5,11 +5,11 @@
 #include "camera.h"
 
 struct GameData {
-    struct Window *window;
-    struct Camera *camera;
+        struct Window *window;
+        struct Camera *camera;
 
-    float lastFrame;
-    float deltaTime;
+        float lastFrame;
+        float deltaTime;
 };
 
 int gameRun();
