@@ -26,6 +26,7 @@ add_subdirectory(subprojects/cglm)
 add_subdirectory(subprojects/glfw)
 add_subdirectory(subprojects/glad)
 add_subdirectory(subprojects/freetype)
+add_subdirectory(subprojects/harfbuzz)
 add_subdirectory(subprojects/miniaudio)
 
 set(CMAKE_C_STANDARD 23)
