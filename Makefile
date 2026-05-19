@@ -1,2 +1,2 @@
 run: 
-	./scripts/build.sh && ./build/executable
+	cmake -B build && cmake --build build && ./build/executable
