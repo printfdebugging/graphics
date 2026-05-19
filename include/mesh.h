@@ -1,8 +1,8 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include <glad/glad.h>
-#include <cglm/struct.h>
+#include "glad/glad.h"
+#include "cglm/struct.h"
 
 #include "texture.h"
 

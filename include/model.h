@@ -1,7 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <cglm/struct.h>
+#include "cglm/struct.h"
 #include <stdint.h>
 
 #include "mesh.h"

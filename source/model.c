@@ -2,7 +2,7 @@
 #include "mesh.h"
 #include "texture.h"
 
-#include <cgltf/cgltf.h>
+#include "cgltf.h"
 #include <stdlib.h>
 #include <string.h>
 

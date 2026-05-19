@@ -2,7 +2,7 @@
 #define LOGGER_H
 
 #include <stdio.h>
-#include <cglm/cglm.h>
+#include "cglm/cglm.h"
 
 #define DECLARE_PRINT_MATRIX(n) \
         void print_mat##n(mat##n mat)
