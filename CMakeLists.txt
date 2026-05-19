@@ -79,6 +79,7 @@ target_link_libraries(${APPLICATION} PUBLIC
         glad
         glfw
         freetype
+        harfbuzz
         miniaudio
         cglm
         pthread
