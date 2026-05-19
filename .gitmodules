@@ -13,25 +13,6 @@
 [submodule "subprojects/cgltf"]
 	path = subprojects/cgltf
 	url = https://github.com/jkuhlmann/cgltf
-[submodule "subprojects/mpv"]
-	path = subprojects/mpv
-	url = https://github.com/mpv-player/mpv
 [submodule "subprojects/miniaudio"]
 	path = subprojects/miniaudio
 	url = https://github.com/mackron/miniaudio
-[submodule "subprojects/ffmpeg"]
-	path = subprojects/ffmpeg
-	url = https://github.com/FFmpeg/FFmpeg/
-[submodule "subprojects/libplacebo"]
-	path = subprojects/libplacebo
-	url = https://github.com/haasn/libplacebo
-[submodule "subprojects/libass"]
-	path = subprojects/libass
-	url = https://github.com/libass/libass
-[submodule "subprojects/bear"]
-	path = subprojects/bear
-	url = https://github.com/rizsotto/bear
-	branch = 4.1.1-rc
-[submodule "subprojects/sdl"]
-	path = subprojects/sdl
-	url = https://github.com/libsdl-org/SDL
