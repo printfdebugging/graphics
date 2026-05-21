@@ -23,5 +23,6 @@ void windowSwapBuffers(struct Window *window);
 void windowDestroy(struct Window *window);
 bool windowClose(struct Window *window);
 int  windowSetIcon(struct Window *window, const char *path);
+void windowScaleToMonitorDPI(GLFWwindow *window);
 
 #endif

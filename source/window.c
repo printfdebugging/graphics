@@ -47,6 +47,7 @@ struct Window *windowCreate(unsigned int width, unsigned int height, const char 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+        glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
@@ -153,4 +154,13 @@ int windowSetIcon(struct Window *window, const char *path) {
 
         stbi_image_free(image.pixels);
         return 0;
+}
+
+void windowScaleToMonitorDPI(GLFWwindow *window) {
+        float xscale = 1, yscale = 1;
+        glfwGetWindowContentScale(window, &xscale, &yscale);
+        struct GameData *data = glfwGetWindowUserPointer(window);
+        if (data) {
+                __windowFrameBufferResizeCallback(window, data->window->width * xscale, data->window->height * yscale);
+        }
 }

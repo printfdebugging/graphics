@@ -39,6 +39,7 @@ int main() {
         glfwSetCursorPosCallback(game.window->window, mouseCallback);
         glfwSetScrollCallback(game.window->window, scrollCallback);
         glfwSetWindowUserPointer(game.window->window, &game);
+        windowScaleToMonitorDPI(game.window->window);
 
         struct Mesh   *axesMesh   = createAxesMesh();
         struct Shader *axesShader = createAxesShader();
