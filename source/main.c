@@ -21,6 +21,7 @@ struct Mesh   *createAxesMesh();
 struct Shader *createAxesShader();
 struct Model  *createCubeModel();
 struct Shader *createModelShader();
+struct Shader *createLightShader();
 
 /* todo: deprecate this in favour of renderModel */
 void drawAxes(struct Mesh *axesMesh, struct Shader *axesShader, mat4s model, mat4s view, mat4s projection);
@@ -45,9 +46,10 @@ int main() {
         struct Shader *axesShader = createAxesShader();
         if (!axesMesh || !axesShader) return EXIT_FAILURE;
 
-        struct Model  *cube       = createCubeModel();
-        struct Shader *cubeShader = createModelShader();
-        if (!cube || !cubeShader) return EXIT_FAILURE;
+        struct Model  *cube        = createCubeModel();
+        struct Shader *cubeShader  = createModelShader();
+        struct Shader *lightShader = createLightShader();
+        if (!cube || !cubeShader || !lightShader) return EXIT_FAILURE;
 
         while (!windowClose(game.window)) {
                 float currentFrame = glfwGetTime();
@@ -63,19 +65,16 @@ int main() {
                 vec3s lightpos   = { 1.2f, 1.0f, 2.0f };
                 vec3s lightscale = { 0.2f, 0.2f, 0.2f };
 
-                mat4s model      = { .raw = GLM_MAT4_IDENTITY_INIT };
                 mat4s view       = cameraGetViewMatrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
 
-                model = glms_translate(model, lightpos);
-                model = glms_scale(model, lightscale);
-
                 /* without the render call below, why are axes not being drawn and instead cube's vertices are being drawn */
-                drawAxes(axesMesh, axesShader, (mat4s) {}, view, projection);
+                // drawAxes(axesMesh, axesShader, (mat4s) {}, view, projection);
 
                 {
-                        /* render cube */
+                        /* render model*/
                         cube->model      = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
+                        cube->model      = glms_scale(cube->model, (vec3s) { 4.3, 3.0, 2.5 });
                         cube->view       = view;
                         cube->projection = projection;
                         glUseProgram(cubeShader->program);
@@ -84,6 +83,7 @@ int main() {
                         shaderSetUniform(cubeShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
                         shaderSetUniform(cubeShader, "object_color", 3fv, 1, (vec3s) { 1.0f, 0.5f, 0.31f }.raw);
                         shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+                        shaderSetUniform(cubeShader, "light_position", 3fv, 1, lightpos.raw);
                         for (int i = 0; i < cube->meshCount; ++i) {
                                 const struct Mesh *mesh = cube->mesh[i];
                                 glBindVertexArray(mesh->vao);
@@ -96,16 +96,18 @@ int main() {
                 }
 
                 {
+                        mat4s model_matrix_light = { .raw = GLM_MAT4_IDENTITY_INIT };
+                        model_matrix_light       = glms_translate(model_matrix_light, lightpos);
+                        model_matrix_light       = glms_scale(model_matrix_light, lightscale);
+
                         /* render cube */
                         cube->view       = view;
                         cube->projection = projection;
-                        cube->model      = model;
-                        glUseProgram(cubeShader->program);
-                        shaderSetUniform(cubeShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "object_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
-                        shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
+                        cube->model      = model_matrix_light;
+                        glUseProgram(lightShader->program);
+                        shaderSetUniform(lightShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
+                        shaderSetUniform(lightShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
+                        shaderSetUniform(lightShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
                         for (int i = 0; i < cube->meshCount; ++i) {
                                 const struct Mesh *mesh = cube->mesh[i];
                                 glBindVertexArray(mesh->vao);
@@ -217,6 +219,14 @@ struct Model *createCubeModel() {
 		-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, 
 		-0.5f,  0.5f, -0.5f, 0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, 
 	};
+	float normals[] = {
+		0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 
+		0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+		-1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+		1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f,
+		0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f,
+		0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f
+	};
         /* clang-format on */
         struct Model *model = modelCreate();
         if (!model) return NULL;
@@ -228,6 +238,7 @@ struct Model *createCubeModel() {
         *model->mesh             = meshCreate();
         model->mesh[0]->drawMode = GL_TRIANGLES;
         meshLoadVertices(*model->mesh, vertices, 36, 3 * sizeof(float));
+        meshLoadNormals(*model->mesh, normals, 36, 3 * sizeof(float));
         return model;
 }
 
@@ -236,6 +247,17 @@ struct Shader *createModelShader() {
         if (!shader)
                 return NULL;
         if (shaderLoadFromFile(shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
+                shaderDestroy(shader);
+                return NULL;
+        }
+        return shader;
+}
+
+struct Shader *createLightShader() {
+        struct Shader *shader = shaderCreate();
+        if (!shader)
+                return NULL;
+        if (shaderLoadFromFile(shader, ASSETS_DIR "shaders/light/shader.vert", ASSETS_DIR "shaders/light/shader.frag")) {
                 shaderDestroy(shader);
                 return NULL;
         }

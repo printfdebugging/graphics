@@ -9,15 +9,15 @@ struct Camera *cameraCreate() {
                 return NULL;
         }
 
-        camera->position         = (vec3s) { 10.0f, 10.0f, 10.0f };
-        camera->front            = (vec3s) { 0.0f, 0.0f, -5.0f };
+        camera->position         = (vec3s) { 2.0f, 1.0f, 5.0f };
+        camera->front            = (vec3s) { 0.0f, 0.0f, -1.0f };
         camera->up               = (vec3s) { 0.0f, 1.0f, 0.0f };
-        camera->yaw              = -135.0f;
-        camera->pitch            = -38.0f;
+        camera->yaw              = -110.0f;
+        camera->pitch            = 0.0f;
         camera->x                = 400;
         camera->y                = 300;
         camera->fov              = 45.0f;
-        camera->movementSpeed    = 8.5f;
+        camera->movementSpeed    = 2.5f;
         camera->mouseSensitivity = 0.1f;
 
         return camera;

@@ -16,6 +16,8 @@ struct Camera {
         vec3s up;
         float yaw;
         float pitch;
+        /* what is camera.x and camera.y ?
+         * i should document these*/
         float x;
         float y;
         float fov;
