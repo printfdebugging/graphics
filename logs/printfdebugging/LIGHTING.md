@@ -6,6 +6,7 @@
   * [Diffuse lighting](#diffuse-lighting)
   * [Specular lighting](#specular-lighting)
     * [Missunderstanding specular reflection math](#missunderstanding-specular-reflection-math)
+  * [Debugging lighting code](#debugging-lighting-code)
 
 <!-- mtoc-end -->
 
@@ -180,3 +181,9 @@ spot gets smaller and smaller.
 > like `this library function must be working this way`, who knows, verify
 > that.
 
+### Debugging lighting code
+
+Often we make a few changes following the tutorial and the thing breaks
+such that it's even hard to imagine what's going on with it. In such cases,
+it's better to stash the changes and do it one step at a time, change
+something, then verify that it works. And repeat that.
