@@ -27,7 +27,7 @@ void main() {
         vec3  unit_view_direction = normalize(camera_position - position);
         /* here the light direction is negative because previously we calculated it from fragment to light
          * for the dot product, but reflect expects it to be from source to fragment like any incident ray */
-        vec3 unit_reflected_direction = normalize(reflect(-unit_light_direction, normal));
+        vec3 unit_reflected_direction = normalize(reflect(-unit_light_direction, unit_normal));
         /* the tutorial says that this power of 32 thing is the shininess value of highlight, higher this
          * value, higher light gets reflected. so we are essentially raising 32 to the power of a number between
          * 0 and 1. so at max the value will be 32 and at least 1. spec = [1, 32] */
