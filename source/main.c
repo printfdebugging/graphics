@@ -62,7 +62,7 @@ int main() {
                 processInput(game.window, game.deltaTime);
 
                 /* model matrix for light source */
-                vec3s lightpos   = { 1.2f, 1.0f, 2.0f };
+                vec3s lightpos   = { 2.0f, 0.0f, 0.0f };
                 vec3s lightscale = { 0.2f, 0.2f, 0.2f };
 
                 mat4s view       = cameraGetViewMatrix(game.camera);
@@ -74,7 +74,7 @@ int main() {
                 {
                         /* render model*/
                         cube->model      = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
-                        cube->model      = glms_scale(cube->model, (vec3s) { 4.3, 3.0, 2.5 });
+                        cube->model      = glms_scale(cube->model, (vec3s) { 2.3, 1.0, 2.5 });
                         cube->view       = view;
                         cube->projection = projection;
                         glUseProgram(cubeShader->program);
@@ -84,6 +84,7 @@ int main() {
                         shaderSetUniform(cubeShader, "object_color", 3fv, 1, (vec3s) { 1.0f, 0.5f, 0.31f }.raw);
                         shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
                         shaderSetUniform(cubeShader, "light_position", 3fv, 1, lightpos.raw);
+                        shaderSetUniform(cubeShader, "camera_position", 3fv, 1, game.camera->position.raw);
                         for (int i = 0; i < cube->meshCount; ++i) {
                                 const struct Mesh *mesh = cube->mesh[i];
                                 glBindVertexArray(mesh->vao);
