@@ -74,7 +74,7 @@ int main() {
                 {
                         /* render model*/
                         cube->model      = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
-                        cube->model      = glms_scale(cube->model, (vec3s) { 2.0, 2.0, 2.0 });
+                        cube->model      = glms_scale(cube->model, (vec3s) { 1.0, 1.0, 1.0 });
                         cube->view       = view;
                         cube->projection = projection;
                         glUseProgram(cubeShader->program);
