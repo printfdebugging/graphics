@@ -62,7 +62,7 @@ int main() {
                 processInput(game.window, game.deltaTime);
 
                 /* model matrix for light source */
-                vec3s lightpos   = { 2.0f, 0.0f, 0.0f };
+                vec3s lightpos   = { 1.5f, 0.0f, 0.0f };
                 vec3s lightscale = { 0.2f, 0.2f, 0.2f };
 
                 mat4s view       = cameraGetViewMatrix(game.camera);
@@ -74,7 +74,7 @@ int main() {
                 {
                         /* render model*/
                         cube->model      = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
-                        cube->model      = glms_scale(cube->model, (vec3s) { 2.3, 1.0, 2.5 });
+                        cube->model      = glms_scale(cube->model, (vec3s) { 2.0, 2.0, 2.0 });
                         cube->view       = view;
                         cube->projection = projection;
                         glUseProgram(cubeShader->program);
