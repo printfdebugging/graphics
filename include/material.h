@@ -11,7 +11,7 @@ struct material {
 };
 
 /* http://devernay.free.fr/cours/opengl/materials.html */
-enum material_types {
+enum material_type {
         EMERALD,
         JADE,
         OBSIDIAN,

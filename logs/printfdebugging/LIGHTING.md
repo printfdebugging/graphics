@@ -6,6 +6,14 @@
   * [Diffuse lighting](#diffuse-lighting)
   * [Specular lighting](#specular-lighting)
     * [Missunderstanding specular reflection math](#missunderstanding-specular-reflection-math)
+    * [Getting weird specular highlights for materials](#getting-weird-specular-highlights-for-materials)
+      * [gold](#gold)
+      * [red-plastic](#red-plastic)
+      * [custom material](#custom-material)
+      * [black rubber](#black-rubber)
+    * [Found the bug in the code](#found-the-bug-in-the-code)
+      * [Gold](#gold-1)
+      * [Black Rubber](#black-rubber-1)
   * [Debugging lighting code](#debugging-lighting-code)
 
 <!-- mtoc-end -->
@@ -180,6 +188,52 @@ spot gets smaller and smaller.
 > and they would seem correct but you would miss out the obvious assumptions
 > like `this library function must be working this way`, who knows, verify
 > that.
+
+#### Getting weird specular highlights for materials
+
+##### gold
+![weird-specular-highlight-for-gold](assets/weird-specular-highlight-for-gold.png)
+##### red-plastic
+![weird-specular-highlight-for-red-plastic](assets/weird-specular-highlight-for-red-plastic.png)
+##### custom material
+![looks-normal-for-custom-material](assets/looks-normal-for-custom-material.png)
+##### black rubber
+![black-rubber-weird-specular-highlight](assets/black-rubber-weird-specular-highlight.png)
+
+I have defined some materials in `materials.h` and when i use them, i get
+these weird specular highlights. Maybe they are weird when compared to the
+real world objects, but not so much for phong model, maybe this is what
+blin phong fixes as shown in this image 
+
+![advanced_lighting_comparrison](https://learnopengl.com/img/advanced-lighting/advanced_lighting_comparrison.png)
+
+```c
+
+    [COPPER]         = { (vec3s) { 0.19125, 0.0735, 0.0225 },      (vec3s) { 0.7038, 0.27048, 0.0828 },      (vec3s) { 0.256777, 0.137622, 0.086014 },       0.1        },
+    [GOLD]           = { (vec3s) { 0.24725, 0.1995, 0.0745 },      (vec3s) { 0.75164, 0.60648, 0.22648 },    (vec3s) { 0.628281, 0.555802, 0.366065 },       0.4        },
+    [SILVER]         = { (vec3s) { 0.19225, 0.19225, 0.19225 },    (vec3s) { 0.50754, 0.50754, 0.50754 },    (vec3s) { 0.508273, 0.508273, 0.508273 },       0.4        },
+    [BLACK_PLASTIC]  = { (vec3s) { 0.0, 0.0, 0.0 },                (vec3s) { 0.01, 0.01, 0.01 },             (vec3s) { 0.50, 0.50, 0.50 },                   0.25       },
+    [CYAN_PLASTIC]   = { (vec3s) { 0.0, 0.1, 0.06 },               (vec3s) { 0.0, 0.50980392, 0.50980392 },  (vec3s) { 0.50196078, 0.50196078, 0.50196078 }, 0.25       },
+    [GREEN_PLASTIC]  = { (vec3s) { 0.0, 0.0, 0.0 },                (vec3s) { 0.1, 0.35, 0.1 },               (vec3s) { 0.45, 0.55, 0.45 },                   0.25       },
+    [RED_PLASTIC]    = { (vec3s) { 0.0, 0.0, 0.0 },                (vec3s) { 0.5, 0.0, 0.0 },                (vec3s) { 0.7, 0.6, 0.6 },                      0.25       },
+    [WHITE_PLASTIC]  = { (vec3s) { 0.0, 0.0, 0.0 },                (vec3s) { 0.55, 0.55, 0.55 },             (vec3s) { 0.70, 0.70, 0.70 },                   0.25       },
+    [BLACK_RUBBER]   = { (vec3s) { 0.02, 0.02, 0.02 },             (vec3s) { 0.01, 0.01, 0.01 },             (vec3s) { 0.4, 0.4, 0.4 },                      0.078125   },
+```
+
+#### Found the bug in the code
+It seems that there was a bug in my shader code where I was using the
+material properties to calculate the three lighting components and then
+multiplied their sum with an object color (the orange from the last
+section of the tutorial). That made everything look orange, even the black
+rubber :).
+
+##### Gold
+![corrected-gold-specular](assets/corrected-gold-specular.png)
+##### Black Rubber
+![corrected-black-rubber](assets/corrected-black-rubber.png)
+
+But the black rubber still look weird, i mean should it have such well
+defined specular highlight boundary?
 
 ### Debugging lighting code
 

@@ -22,5 +22,4 @@ void main() {
         color       = vec3(0.5, 0.5, 0.5);
         uv          = in_uv;
         normal      = mat3(transpose(inverse(model))) * in_normal;
-        // normal = vec3(model * vec4(in_normal, 1.0)); // ????????
 }

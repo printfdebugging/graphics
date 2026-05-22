@@ -11,6 +11,7 @@
 #include "model.h"
 #include "shader.h"
 #include "window.h"
+#include "material.h"
 #include "game.h"
 
 void processInput(struct Window *window, float deltaTime);
@@ -62,7 +63,7 @@ int main() {
                 processInput(game.window, game.deltaTime);
 
                 /* model matrix for light source */
-                vec3s lightpos   = { 8.0f, 0.0f, 0.0f };
+                vec3s lightpos   = { 1.0f, 0.0f, 0.0f };
                 vec3s lightscale = { 0.2f, 0.2f, 0.2f };
 
                 mat4s view       = cameraGetViewMatrix(game.camera);
@@ -81,10 +82,14 @@ int main() {
                         shaderSetUniform(cubeShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
                         shaderSetUniform(cubeShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
                         shaderSetUniform(cubeShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "object_color", 3fv, 1, (vec3s) { 1.0f, 0.5f, 0.31f }.raw);
                         shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
                         shaderSetUniform(cubeShader, "light_position", 3fv, 1, lightpos.raw);
                         shaderSetUniform(cubeShader, "camera_position", 3fv, 1, game.camera->position.raw);
+                        enum material_type mat = BLACK_RUBBER;
+                        shaderSetUniform(cubeShader, "material_ambient", 3fv, 1, MATERIALS[mat].ambient.raw);
+                        shaderSetUniform(cubeShader, "material_diffuse", 3fv, 1, MATERIALS[mat].diffuse.raw);
+                        shaderSetUniform(cubeShader, "material_specular", 3fv, 1, MATERIALS[mat].specular.raw);
+                        shaderSetUniform(cubeShader, "material_shininess", 1f, MATERIALS[mat].shininess);
                         for (int i = 0; i < cube->meshCount; ++i) {
                                 const struct Mesh *mesh = cube->mesh[i];
                                 glBindVertexArray(mesh->vao);
