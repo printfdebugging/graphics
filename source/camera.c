@@ -9,7 +9,7 @@ struct Camera *cameraCreate() {
                 return NULL;
         }
 
-        camera->position         = (vec3s) { 2.0f, 1.0f, 5.0f };
+        camera->position         = (vec3s) { 20.0f, 1.0f, 5.0f };
         camera->front            = (vec3s) { 0.0f, 0.0f, -1.0f };
         camera->up               = (vec3s) { 0.0f, 1.0f, 0.0f };
         camera->yaw              = -110.0f;
