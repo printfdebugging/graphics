@@ -18,6 +18,7 @@
     * [Debugging lighting code](#debugging-lighting-code)
   * [Lighting maps](#lighting-maps)
     * [Diffuse maps](#diffuse-maps)
+    * [The diffuse map is not rendering on top and bottom faces](#the-diffuse-map-is-not-rendering-on-top-and-bottom-faces)
 
 <!-- mtoc-end -->
 
@@ -293,3 +294,11 @@ nitrix:  Point is they multiply each others. Maybe it's easier if you think of l
 > [!WARNING]
 > `glms_translate` actually modifies the argument matrix and returns the same,
 > so be cautious and always confirm what the function does.
+
+### The diffuse map is not rendering on top and bottom faces
+
+![diffuse-map-not-rendering-on-top-and-bottom-faces](assets/diffuse-map-not-rendering-on-top-and-bottom-faces.png)
+
+This is the [commit](https://github.com/printfdebugging/learnopengl/commit/70559c6c056af5d8c0316db5e1c100b4e28efd77) for this change. I updated the vertex/normal/uv arrays
+with the latest opengl cube data as of this chapter. I wonder how should I
+debug it.
