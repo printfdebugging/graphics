@@ -1,6 +1,7 @@
 <!-- mtoc-start -->
 
 * [Textures](#textures)
+  * [Texture Coordinates](#texture-coordinates)
   * [Texture object creation](#texture-object-creation)
   * [Using texture objects](#using-texture-objects)
   * [Texture unit internal representation](#texture-unit-internal-representation)
@@ -8,6 +9,14 @@
 <!-- mtoc-end -->
 
 # Textures
+
+## Texture Coordinates
+
+These are part of the mesh's attributes i.e. we receive them in the vertex
+shader as `in` variables and then pass them to the fragment shader. These help
+us map vertices to positions on the texture with (0,0) being the bottom left
+corner and (1,1) being the top right. Only the vertices are mapped and rest
+all is interpolated by the shader.
 
 ## Texture object creation
 
