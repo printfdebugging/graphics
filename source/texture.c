@@ -45,6 +45,18 @@ struct Texture *textureCreate() {
         return texture;
 }
 
+struct Texture *textureCreateFromFile(const char *path) {
+        struct Texture *texture = textureCreate();
+        if (!texture)
+                return NULL;
+        if (textureLoadFromFile(texture, path)) {
+                textureDestroy(texture);
+                return NULL;
+        }
+
+        return texture;
+}
+
 int textureLoad(struct Texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps) {
         glGenTextures(1, &texture->texture);
         glBindTexture(GL_TEXTURE_2D, texture->texture);

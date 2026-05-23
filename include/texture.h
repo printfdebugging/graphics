@@ -41,12 +41,18 @@ enum TextureIndex {
 
 struct Texture {
         unsigned int texture;
+        short int    texture_index;
         const char  *type;
 };
 
 struct Texture *textureCreate();
-int             textureLoad(struct Texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps);
-int             textureLoadFromFile(struct Texture *texture, const char *path);
-void            textureDestroy(struct Texture *texture);
+struct Texture *textureCreateFromFile(const char *path);
+
+int  textureLoad(struct Texture *texture, void *data, unsigned int width, unsigned int height, GLenum format, GLenum data_type, GLenum internal_format, GLboolean generate_mipmaps);
+int  textureLoadFromFile(struct Texture *texture, const char *path);
+void textureDestroy(struct Texture *texture);
+
+/* note that we don't have wrappers for binding textures to various texture units
+ * and for activating the textures. */
 
 #endif
