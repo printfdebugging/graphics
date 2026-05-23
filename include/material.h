@@ -40,6 +40,7 @@ enum material_type {
 };
 
 /* clang-format off */
+/* NOTE: the website says that we should multiply the shininess by 128, don't forget that! */
 struct material MATERIALS[MATERIAL_TYPES_LENGTH] = {
     [EMERALD]        = { (vec3s) { 0.0215, 0.1745, 0.0215 },       (vec3s) { 0.07568, 0.61424, 0.07568 },    (vec3s) { 0.633, 0.727811, 0.633 },             0.6        },
     [JADE]           = { (vec3s) { 0.135, 0.2225, 0.1575 },        (vec3s) { 0.54, 0.89, 0.63 },             (vec3s) { 0.316228, 0.316228, 0.316228 },       0.1        },

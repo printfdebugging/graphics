@@ -14,6 +14,7 @@
     * [Found the bug in the code](#found-the-bug-in-the-code)
       * [Gold](#gold-1)
       * [Black Rubber](#black-rubber-1)
+    * [There was another bug](#there-was-another-bug)
   * [Debugging lighting code](#debugging-lighting-code)
 
 <!-- mtoc-end -->
@@ -234,6 +235,17 @@ rubber :).
 
 But the black rubber still look weird, i mean should it have such well
 defined specular highlight boundary?
+
+#### There was another bug
+
+The [website](http://devernay.free.fr/cours/opengl/materials.html) where I
+copied the material properties from clearly says "multiply the shininess by
+128". I missed that part and the tutorial didn't say that either, but it's
+fine, nitrix pointed that out and now things look close to how they do in
+real world.
+
+![black-rubber-corrected](assets/black-rubber-corrected.png)
+![gold-corrected](assets/gold-corrected.png)
 
 ### Debugging lighting code
 

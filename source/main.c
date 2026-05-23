@@ -63,7 +63,7 @@ int main() {
                 processInput(game.window, game.deltaTime);
 
                 /* model matrix for light source */
-                vec3s lightpos   = { 1.0f, 0.0f, 0.0f };
+                vec3s lightpos   = { 2.0f, 0.0f, 0.0f };
                 vec3s lightscale = { 0.2f, 0.2f, 0.2f };
 
                 mat4s view       = cameraGetViewMatrix(game.camera);
@@ -85,11 +85,11 @@ int main() {
                         shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
                         shaderSetUniform(cubeShader, "light_position", 3fv, 1, lightpos.raw);
                         shaderSetUniform(cubeShader, "camera_position", 3fv, 1, game.camera->position.raw);
-                        enum material_type mat = BLACK_RUBBER;
+                        enum material_type mat = GOLD;
                         shaderSetUniform(cubeShader, "material_ambient", 3fv, 1, MATERIALS[mat].ambient.raw);
                         shaderSetUniform(cubeShader, "material_diffuse", 3fv, 1, MATERIALS[mat].diffuse.raw);
                         shaderSetUniform(cubeShader, "material_specular", 3fv, 1, MATERIALS[mat].specular.raw);
-                        shaderSetUniform(cubeShader, "material_shininess", 1f, MATERIALS[mat].shininess);
+                        shaderSetUniform(cubeShader, "material_shininess", 1f, MATERIALS[mat].shininess * 128.0f);
                         for (int i = 0; i < cube->meshCount; ++i) {
                                 const struct Mesh *mesh = cube->mesh[i];
                                 glBindVertexArray(mesh->vao);
