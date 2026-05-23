@@ -43,3 +43,4 @@
 - Everything :snake: `snake_case`
 - Avoid unnecessary `typedef`
 - Format as per `.clang-format`
+- Declare the variables at the top of the function (c89 style)
