@@ -267,10 +267,29 @@ something, then verify that it works. And repeat that.
   - Textures can store per fragment values, so these maps are essentially
     textures - image wrapped around the object which we can index.
 
+The following sums it up really nicely. Basically these ambient, diffuse and
+specular are properties of the object, of the surface. These are not
+"lights", but rather how this object appears in light, how it reflects light
+i.e. which parts of the light it absorbs and how much.
 
+Then there are different formulas for calculating these effects, like diffuse
+is just the cos of the angle of light direction with the normal (both unit
+vectors), while specular does just that but for the camera's direction and
+the reflected rays.
+```txt
+nitrix:  But it is true that the final fragment has "light", from three equations ambient/diffuse/specular, and it is true that your light sources will apply a factor on all of those.
+nitrix:  printfdebugging, Basically, a better intuition for now, ambient is the scene environment constant light. The material determines diffuse+specular. Your lights are a multiplicative factor of those, but, intelligently (with angles and stuff).
+nitrix:  printfdebugging, Your dress is red diffuse, if your light is 0, you get nothing visible.
+nitrix:  printfdebugging, Your dress is red diffuse, if your light is vec3(0.2), you see the front of the dress red-ish, and the sides and back are dark.
+nitrix:  printfdebugging, Similarly, Your dress is white diffuse, your light is a bit red vec3(0.2, 0.0, 0.0), same outcome visually.
+nitrix:  Point is they multiply each others. Maybe it's easier if you think of lights as just white for now and as if they're just "factors" [0.0 ... 1.0] to determine how much of the diffuse you see.
+```
 ### Diffuse maps
 - In lit scenes this is usually called a `diffuse map`, what does the 'lit scene' mean here?
   - Does this mean that we take into account some fixed lights and basically
     avoid lighting calculations fro them by storing their values in the
     'diffuse map'?
 
+> [!WARNING]
+> `glms_translate` actually modifies the argument matrix and returns the same,
+> so be cautious and always confirm what the function does.
