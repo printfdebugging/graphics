@@ -301,4 +301,32 @@ nitrix:  Point is they multiply each others. Maybe it's easier if you think of l
 
 This is the [commit](https://github.com/printfdebugging/learnopengl/commit/70559c6c056af5d8c0316db5e1c100b4e28efd77) for this change. I updated the vertex/normal/uv arrays
 with the latest opengl cube data as of this chapter. I wonder how should I
-debug it.
+debug it. I quickly asked an LLM to verify the vertex data, it said "mostly
+fine", then I did it manually on paper, found that the top face data is
+actually clockwise, so I changed that to anticlockwise along with the uv
+coords, but that didn't fix it either.
+
+Just rendering the texture also gave the same result, so it's not the lighting
+code either. Oh, I found the issue. I for some reason thought that there are
+24 uv coordinates, I thought we used 36 for vertices and there were three
+components, but here there are two components so 2/3 or 36 is 24 :) silly me.
+
+How did I catch this?
+
+> [!INFO]
+> When there's an error like "texture not rendering for one face" i.e. a
+> "some part not working" error, try to move that around, try to move the
+> data around to maybe translate the error to other parts while fixing it
+> for the initial case. This way one can gain insights into the nature of
+> the error.
+> 
+> Like above, I thought what if I move the vertices around and when I did
+> that, the texture rendered just fine on the top face, but it didn't on the
+> back face and that was a signal that there's something wrong with the
+> data. Then I looked more closely at the data and the loader code,
+> questioned the assumptions and found the issue.
+
+
+```c
+mesh_load_uv(*model->mesh, uv, 24, 2 * sizeof(float));
+```

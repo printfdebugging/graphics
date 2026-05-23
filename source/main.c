@@ -319,7 +319,7 @@ create_cube_model()
    model->mesh[0]->draw_mode = GL_TRIANGLES;
    mesh_load_vertices(*model->mesh, vertices, 36, 3 * sizeof(float));
    mesh_load_normals(*model->mesh, normals, 36, 3 * sizeof(float));
-   mesh_load_uv(*model->mesh, uv, 24, 2 * sizeof(float));
+   mesh_load_uv(*model->mesh, uv, 36, 2 * sizeof(float));
    return model;
 }
 
