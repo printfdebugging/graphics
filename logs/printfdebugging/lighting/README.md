@@ -1,23 +1,27 @@
-# Lighting
 <!-- mtoc-start -->
 
-* [Phong Model](#phong-model)
-  * [Ambient lighting](#ambient-lighting)
-  * [Diffuse lighting](#diffuse-lighting)
-  * [Specular lighting](#specular-lighting)
-    * [Missunderstanding specular reflection math](#missunderstanding-specular-reflection-math)
-    * [Getting weird specular highlights for materials](#getting-weird-specular-highlights-for-materials)
-      * [gold](#gold)
-      * [red-plastic](#red-plastic)
-      * [custom material](#custom-material)
-      * [black rubber](#black-rubber)
-    * [Found the bug in the code](#found-the-bug-in-the-code)
-      * [Gold](#gold-1)
-      * [Black Rubber](#black-rubber-1)
-    * [There was another bug](#there-was-another-bug)
-  * [Debugging lighting code](#debugging-lighting-code)
+* [Lighting](#lighting)
+  * [Phong Model](#phong-model)
+    * [Ambient lighting](#ambient-lighting)
+    * [Diffuse lighting](#diffuse-lighting)
+    * [Specular lighting](#specular-lighting)
+      * [Missunderstanding specular reflection math](#missunderstanding-specular-reflection-math)
+      * [Getting weird specular highlights for materials](#getting-weird-specular-highlights-for-materials)
+        * [gold](#gold)
+        * [red-plastic](#red-plastic)
+        * [custom material](#custom-material)
+        * [black rubber](#black-rubber)
+      * [Found the bug in the code](#found-the-bug-in-the-code)
+        * [Gold](#gold-1)
+        * [Black Rubber](#black-rubber-1)
+      * [There was another bug](#there-was-another-bug)
+    * [Debugging lighting code](#debugging-lighting-code)
+  * [Lighting maps](#lighting-maps)
+    * [Diffuse maps](#diffuse-maps)
 
 <!-- mtoc-end -->
+
+# Lighting
 
 ## Phong Model
 - Lighting models help simulate real world in limited resources
@@ -253,3 +257,20 @@ Often we make a few changes following the tutorial and the thing breaks
 such that it's even hard to imagine what's going on with it. In such cases,
 it's better to stash the changes and do it one step at a time, change
 something, then verify that it works. And repeat that.
+
+## Lighting maps
+- Material properties are cool, but they aren't flexible (how)?
+  - Objects in real world are made up of multiple materials.
+  - A car has shiny mirrors/metal, rough tires/seats..
+  - We need to extend it by introducing diffuse and specular maps
+  - Help influence diffuse and specular components with more precision
+  - Textures can store per fragment values, so these maps are essentially
+    textures - image wrapped around the object which we can index.
+
+
+### Diffuse maps
+- In lit scenes this is usually called a `diffuse map`, what does the 'lit scene' mean here?
+  - Does this mean that we take into account some fixed lights and basically
+    avoid lighting calculations fro them by storing their values in the
+    'diffuse map'?
+
