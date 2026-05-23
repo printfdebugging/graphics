@@ -11,10 +11,10 @@ camera_create()
       return NULL;
    }
 
-   camera->position = (vec3s) {2.0f, 0.0f, 2.0f};
+   camera->position = (vec3s) {0.0f, 1.0f, 6.0f};
    camera->front = (vec3s) {0.0f, 0.0f, -1.0f};
    camera->up = (vec3s) {0.0f, 1.0f, 0.0f};
-   camera->yaw = -110.0f;
+   camera->yaw = -90.0f;
    camera->pitch = 0.0f;
    camera->x = 400;
    camera->y = 300;

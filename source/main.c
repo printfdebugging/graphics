@@ -74,7 +74,7 @@ main()
       process_input(game.window, game.delta_time);
 
       /* model matrix for light source */
-      vec3s lightpos = {2.0f, 0.0f, 0.0f};
+      vec3s lightpos = {0.0f, 0.0f, 2.0f};
       vec3s lightscale = {0.2f, 0.2f, 0.2f};
 
       mat4s view = camera_get_view_matrix(game.camera);
@@ -85,7 +85,7 @@ main()
 
       /* without the render call below, why are axes not being drawn and instead
        * cube's vertices are being drawn */
-      // drawAxes(axesMesh, axesShader, (mat4s) {}, view, projection);
+      draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
       {
          /* render model*/
