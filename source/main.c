@@ -7,216 +7,269 @@
 #include <string.h>
 
 #include "camera.h"
+#include "game.h"
+#include "material.h"
 #include "mesh.h"
 #include "model.h"
 #include "shader.h"
 #include "window.h"
-#include "material.h"
-#include "game.h"
 
-void processInput(struct Window *window, float deltaTime);
-void mouseCallback(GLFWwindow *window, double xpos, double ypos);
-void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+void process_input(struct window *window, float delta_time);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
-struct Mesh   *createAxesMesh();
-struct Shader *createAxesShader();
-struct Model  *createCubeModel();
-struct Shader *createModelShader();
-struct Shader *createLightShader();
+struct mesh *create_axes_mesh();
+struct shader *create_axes_shader();
+struct model *create_cube_model();
+struct shader *create_cube_shader();
+struct shader *create_light_shader();
 
 /* todo: deprecate this in favour of renderModel */
-void drawAxes(struct Mesh *axesMesh, struct Shader *axesShader, mat4s model, mat4s view, mat4s projection);
+void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model,
+               mat4s view, mat4s projection);
 
-int main() {
-        struct GameData game = { NULL };
-        // return gameRun();
-        game.window = windowCreate(1550.0f, 700.0f, "floating", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
-        if (!game.window) return EXIT_FAILURE;
-        if (windowSetIcon(game.window, ASSETS_DIR "logo.png")) return EXIT_FAILURE;
+int
+main()
+{
+   struct game_data game = {NULL};
+   // return game_run();
+   game.window = window_create(1550.0f, 700.0f, "floating",
+                               (vec4s) {0.0f, 0.0f, 0.0f, 1.0});
+   if (!game.window)
+      return EXIT_FAILURE;
+   if (window_set_icon(game.window, ASSETS_DIR "logo.png"))
+      return EXIT_FAILURE;
 
-        game.camera = cameraCreate();
-        if (!game.camera) return EXIT_FAILURE;
-        cameraAdjustDirection(game.camera);
+   game.camera = camera_create();
+   if (!game.camera)
+      return EXIT_FAILURE;
+   camera_adjust_direction(game.camera);
 
-        glfwSetCursorPosCallback(game.window->window, mouseCallback);
-        glfwSetScrollCallback(game.window->window, scrollCallback);
-        glfwSetWindowUserPointer(game.window->window, &game);
-        windowScaleToMonitorDPI(game.window->window);
+   glfwSetCursorPosCallback(game.window->window, mouse_callback);
+   glfwSetScrollCallback(game.window->window, scroll_callback);
+   glfwSetWindowUserPointer(game.window->window, &game);
+   window_scale_to_monitor_dpi(game.window->window);
 
-        struct Mesh   *axesMesh   = createAxesMesh();
-        struct Shader *axesShader = createAxesShader();
-        if (!axesMesh || !axesShader) return EXIT_FAILURE;
+   struct mesh *axes_mesh = create_axes_mesh();
+   struct shader *axes_shader = create_axes_shader();
+   if (!axes_mesh || !axes_shader)
+      return EXIT_FAILURE;
 
-        struct Model  *cube        = createCubeModel();
-        struct Shader *cubeShader  = createModelShader();
-        struct Shader *lightShader = createLightShader();
-        if (!cube || !cubeShader || !lightShader) return EXIT_FAILURE;
+   struct model *cube = create_cube_model();
+   struct shader *cube_shader = create_cube_shader();
+   struct shader *light_shader = create_light_shader();
+   if (!cube || !cube_shader || !light_shader)
+      return EXIT_FAILURE;
 
-        while (!windowClose(game.window)) {
-                float currentFrame = glfwGetTime();
-                game.deltaTime     = currentFrame - game.lastFrame;
-                game.lastFrame     = currentFrame;
+   while (!window_close(game.window)) {
+      float currentFrame = glfwGetTime();
+      game.delta_time = currentFrame - game.last_frame;
+      game.last_frame = currentFrame;
 
-                windowPollEvents(game.window);
-                windowProcessInput(game.window);
-                windowClearColor(game.window);
-                processInput(game.window, game.deltaTime);
+      window_poll_events(game.window);
+      window_process_input(game.window);
+      window_clear_color(game.window);
+      process_input(game.window, game.delta_time);
 
-                /* model matrix for light source */
-                vec3s lightpos   = { 2.0f, 0.0f, 0.0f };
-                vec3s lightscale = { 0.2f, 0.2f, 0.2f };
+      /* model matrix for light source */
+      vec3s lightpos = {2.0f, 0.0f, 0.0f};
+      vec3s lightscale = {0.2f, 0.2f, 0.2f};
 
-                mat4s view       = cameraGetViewMatrix(game.camera);
-                mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
+      mat4s view = camera_get_view_matrix(game.camera);
+      mat4s projection = glms_perspective(
+         glm_rad(game.camera->fov),
+         (float) game.window->width / (float) game.window->height, 0.1f,
+         100.0f);
 
-                /* without the render call below, why are axes not being drawn and instead cube's vertices are being drawn */
-                // drawAxes(axesMesh, axesShader, (mat4s) {}, view, projection);
+      /* without the render call below, why are axes not being drawn and instead
+       * cube's vertices are being drawn */
+      // drawAxes(axesMesh, axesShader, (mat4s) {}, view, projection);
 
-                {
-                        /* render model*/
-                        cube->model      = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
-                        cube->model      = glms_scale(cube->model, (vec3s) { 1.0f, 1.0f, 1.0f });
-                        cube->view       = view;
-                        cube->projection = projection;
-                        glUseProgram(cubeShader->program);
-                        shaderSetUniform(cubeShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-                        shaderSetUniform(cubeShader, "light_color", 3fv, 1, (vec3s) { 1.0f, 1.0f, 1.0f }.raw);
-                        shaderSetUniform(cubeShader, "light_position", 3fv, 1, lightpos.raw);
-                        shaderSetUniform(cubeShader, "camera_position", 3fv, 1, game.camera->position.raw);
-                        enum material_type mat = GOLD;
-                        shaderSetUniform(cubeShader, "material_ambient", 3fv, 1, MATERIALS[mat].ambient.raw);
-                        shaderSetUniform(cubeShader, "material_diffuse", 3fv, 1, MATERIALS[mat].diffuse.raw);
-                        shaderSetUniform(cubeShader, "material_specular", 3fv, 1, MATERIALS[mat].specular.raw);
-                        shaderSetUniform(cubeShader, "material_shininess", 1f, MATERIALS[mat].shininess * 128.0f);
-                        for (int i = 0; i < cube->meshCount; ++i) {
-                                const struct Mesh *mesh = cube->mesh[i];
-                                glBindVertexArray(mesh->vao);
-                                if (mesh->indexCount) {
-                                        glDrawElements(mesh->drawMode, mesh->indexCount, mesh->indexType, NULL);
-                                } else {
-                                        glDrawArrays(mesh->drawMode, 0, mesh->vertexCount);
-                                }
-                        }
-                }
+      {
+         /* render model*/
+         cube->model = (mat4s) {.raw = GLM_MAT4_IDENTITY_INIT};
+         cube->model = glms_scale(cube->model, (vec3s) {1.0f, 1.0f, 1.0f});
+         cube->view = view;
+         cube->projection = projection;
+         glUseProgram(cube_shader->program);
+         shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE,
+                            &cube->model.col[0].raw[0]);
+         shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE,
+                            &cube->view.col[0].raw[0]);
+         shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE,
+                            &cube->projection.col[0].raw[0]);
+         shader_set_uniform(cube_shader, "light_color", 3fv, 1,
+                            (vec3s) {1.0f, 1.0f, 1.0f}.raw);
+         shader_set_uniform(cube_shader, "light_position", 3fv, 1,
+                            lightpos.raw);
+         shader_set_uniform(cube_shader, "camera_position", 3fv, 1,
+                            game.camera->position.raw);
+         enum material_type mat = GOLD;
+         shader_set_uniform(cube_shader, "material_ambient", 3fv, 1,
+                            MATERIALS[mat].ambient.raw);
+         shader_set_uniform(cube_shader, "material_diffuse", 3fv, 1,
+                            MATERIALS[mat].diffuse.raw);
+         shader_set_uniform(cube_shader, "material_specular", 3fv, 1,
+                            MATERIALS[mat].specular.raw);
+         shader_set_uniform(cube_shader, "material_shininess", 1f,
+                            MATERIALS[mat].shininess * 128.0f);
+         for (int i = 0; i < cube->mesh_count; ++i) {
+            const struct mesh *mesh = cube->mesh[i];
+            glBindVertexArray(mesh->vao);
+            if (mesh->index_count) {
+               glDrawElements(mesh->draw_mode, mesh->index_count,
+                              mesh->index_type, NULL);
+            } else {
+               glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+            }
+         }
+      }
 
-                {
-                        mat4s model_matrix_light = { .raw = GLM_MAT4_IDENTITY_INIT };
-                        model_matrix_light       = glms_translate(model_matrix_light, lightpos);
-                        model_matrix_light       = glms_scale(model_matrix_light, lightscale);
+      {
+         mat4s model_matrix_light = {.raw = GLM_MAT4_IDENTITY_INIT};
+         model_matrix_light = glms_translate(model_matrix_light, lightpos);
+         model_matrix_light = glms_scale(model_matrix_light, lightscale);
 
-                        /* render cube */
-                        cube->view       = view;
-                        cube->projection = projection;
-                        cube->model      = model_matrix_light;
-                        glUseProgram(lightShader->program);
-                        shaderSetUniform(lightShader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-                        shaderSetUniform(lightShader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-                        shaderSetUniform(lightShader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-                        for (int i = 0; i < cube->meshCount; ++i) {
-                                const struct Mesh *mesh = cube->mesh[i];
-                                glBindVertexArray(mesh->vao);
-                                if (mesh->indexCount) {
-                                        glDrawElements(mesh->drawMode, mesh->indexCount, mesh->indexType, NULL);
-                                } else {
-                                        glDrawArrays(mesh->drawMode, 0, mesh->vertexCount);
-                                }
-                        }
-                }
+         /* render cube */
+         cube->view = view;
+         cube->projection = projection;
+         cube->model = model_matrix_light;
+         glUseProgram(light_shader->program);
+         shader_set_uniform(light_shader, "model", Matrix4fv, 1, GL_FALSE,
+                            &cube->model.col[0].raw[0]);
+         shader_set_uniform(light_shader, "view", Matrix4fv, 1, GL_FALSE,
+                            &cube->view.col[0].raw[0]);
+         shader_set_uniform(light_shader, "projection", Matrix4fv, 1, GL_FALSE,
+                            &cube->projection.col[0].raw[0]);
+         for (int i = 0; i < cube->mesh_count; ++i) {
+            const struct mesh *mesh = cube->mesh[i];
+            glBindVertexArray(mesh->vao);
+            if (mesh->index_count) {
+               glDrawElements(mesh->draw_mode, mesh->index_count,
+                              mesh->index_type, NULL);
+            } else {
+               glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+            }
+         }
+      }
 
-                windowSwapBuffers(game.window);
-        }
+      window_swap_buffers(game.window);
+   }
 
-        windowDestroy(game.window);
-        cameraDestroy(game.camera);
-        shaderDestroy(axesShader);
-        meshDestroy(axesMesh);
+   window_destroy(game.window);
+   camera_destroy(game.camera);
+   shader_destroy(axes_shader);
+   mesh_destroy(axes_mesh);
 
-        return 0;
+   return 0;
 }
 
-void processInput(struct Window *window, float delta_time) {
-        struct GameData *data = glfwGetWindowUserPointer(window->window);
-        if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
-                cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
-        if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
-                cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
-        if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
-                cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
-        if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
-                cameraProcessKeyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
+void
+process_input(struct window *window, float delta_time)
+{
+   struct game_data *data = glfwGetWindowUserPointer(window->window);
+   if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
+      camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD,
+                              delta_time);
+   if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
+      camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD,
+                              delta_time);
+   if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
+      camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
+   if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
+      camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
 }
 
-void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
-        struct GameData *data = glfwGetWindowUserPointer(window);
-        cameraProcessMouseMovement(data->camera, (float) xpos, (float) ypos, glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+void
+mouse_callback(GLFWwindow *window, double xpos, double ypos)
+{
+   struct game_data *data = glfwGetWindowUserPointer(window);
+   camera_process_mouse_movement(
+      data->camera, (float) xpos, (float) ypos,
+      glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
 }
 
-void scrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
-        struct GameData *data = glfwGetWindowUserPointer(window);
-        cameraProcessMouseScroll(data->camera, (float) yoffset);
+void
+scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+   struct game_data *data = glfwGetWindowUserPointer(window);
+   camera_process_mouse_scroll(data->camera, (float) yoffset);
 }
 
-struct Mesh *createAxesMesh() {
-        const int AXES               = 2;
-        const int LINES_PER_AXIS     = 501;
-        const int LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
-        const int POINTS_PER_LINE    = 2;
-        const int FLOATS_PER_POINT   = 3;
-        const int count              = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
+struct mesh *
+create_axes_mesh()
+{
+   const int AXES = 2;
+   const int LINES_PER_AXIS = 501;
+   const int LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
+   const int POINTS_PER_LINE = 2;
+   const int FLOATS_PER_POINT = 3;
+   const int count = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
 
-        float vertices[AXES][LINES_PER_AXIS][POINTS_PER_LINE][FLOATS_PER_POINT];
+   float vertices[AXES][LINES_PER_AXIS][POINTS_PER_LINE][FLOATS_PER_POINT];
 
-        for (int z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
-                vertices[0][z + LINES_ON_EACH_SIDE][0][0] = (float) -LINES_ON_EACH_SIDE;
-                vertices[0][z + LINES_ON_EACH_SIDE][0][1] = 0.0f;
-                vertices[0][z + LINES_ON_EACH_SIDE][0][2] = (float) z;
+   for (int z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
+      vertices[0][z + LINES_ON_EACH_SIDE][0][0] = (float) -LINES_ON_EACH_SIDE;
+      vertices[0][z + LINES_ON_EACH_SIDE][0][1] = 0.0f;
+      vertices[0][z + LINES_ON_EACH_SIDE][0][2] = (float) z;
 
-                vertices[0][z + LINES_ON_EACH_SIDE][1][0] = (float) LINES_ON_EACH_SIDE;
-                vertices[0][z + LINES_ON_EACH_SIDE][1][1] = 0.0f;
-                vertices[0][z + LINES_ON_EACH_SIDE][1][2] = (float) z;
-        }
+      vertices[0][z + LINES_ON_EACH_SIDE][1][0] = (float) LINES_ON_EACH_SIDE;
+      vertices[0][z + LINES_ON_EACH_SIDE][1][1] = 0.0f;
+      vertices[0][z + LINES_ON_EACH_SIDE][1][2] = (float) z;
+   }
 
-        for (int x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
-                vertices[1][x + LINES_ON_EACH_SIDE][0][0] = (float) x;
-                vertices[1][x + LINES_ON_EACH_SIDE][0][1] = 0.0f;
-                vertices[1][x + LINES_ON_EACH_SIDE][0][2] = (float) -LINES_ON_EACH_SIDE;
+   for (int x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
+      vertices[1][x + LINES_ON_EACH_SIDE][0][0] = (float) x;
+      vertices[1][x + LINES_ON_EACH_SIDE][0][1] = 0.0f;
+      vertices[1][x + LINES_ON_EACH_SIDE][0][2] = (float) -LINES_ON_EACH_SIDE;
 
-                vertices[1][x + LINES_ON_EACH_SIDE][1][0] = (float) x;
-                vertices[1][x + LINES_ON_EACH_SIDE][1][1] = 0.0f;
-                vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (float) LINES_ON_EACH_SIDE;
-        }
+      vertices[1][x + LINES_ON_EACH_SIDE][1][0] = (float) x;
+      vertices[1][x + LINES_ON_EACH_SIDE][1][1] = 0.0f;
+      vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (float) LINES_ON_EACH_SIDE;
+   }
 
-        struct Mesh *axes_mesh = meshCreate();
-        if (!axes_mesh) return NULL;
+   struct mesh *axes_mesh = mesh_create();
+   if (!axes_mesh)
+      return NULL;
 
-        meshLoadVertices(axes_mesh, &vertices[0][0][0][0], count, 3 * sizeof(float));
-        return axes_mesh;
+   mesh_load_vertices(axes_mesh, &vertices[0][0][0][0], count,
+                      3 * sizeof(float));
+   return axes_mesh;
 }
 
-struct Shader *createAxesShader() {
-        struct Shader *axes_shader = shaderCreate();
-        if (!axes_shader)
-                return NULL;
-        if (shaderLoadFromFile(axes_shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
-                shaderDestroy(axes_shader);
-                return NULL;
-        }
-        return axes_shader;
+struct shader *
+create_axes_shader()
+{
+   struct shader *axes_shader = shader_create();
+   if (!axes_shader)
+      return NULL;
+   if (shader_load_from_file(axes_shader,
+                             ASSETS_DIR "shaders/lines/shader.vert",
+                             ASSETS_DIR "shaders/lines/shader.frag")) {
+      shader_destroy(axes_shader);
+      return NULL;
+   }
+   return axes_shader;
 }
 
-void drawAxes(struct Mesh *axesMesh, struct Shader *axesShader, mat4s model, mat4s view, mat4s projection) {
-        glUseProgram(axesShader->program);
-        shaderSetUniform(axesShader, "view", Matrix4fv, 1, GL_FALSE, &view.col[0].raw[0]);
-        shaderSetUniform(axesShader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
+void
+draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model,
+          mat4s view, mat4s projection)
+{
+   glUseProgram(axes_shader->program);
+   shader_set_uniform(axes_shader, "view", Matrix4fv, 1, GL_FALSE,
+                      &view.col[0].raw[0]);
+   shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE,
+                      &projection.col[0].raw[0]);
 
-        glBindVertexArray(axesMesh->vao);
-        glDrawArrays(GL_LINES, 0, axesMesh->vertexCount);
+   glBindVertexArray(axes_mesh->vao);
+   glDrawArrays(GL_LINES, 0, axes_mesh->vertex_count);
 }
 
-struct Model *createCubeModel() {
-        /* clang-format off */
+struct model *
+create_cube_model()
+{
+   /* clang-format off */
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 
 		-0.5f, -0.5f,  0.5f, 0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f, 
@@ -233,39 +286,47 @@ struct Model *createCubeModel() {
 		0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f,
 		0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f
 	};
-        /* clang-format on */
-        struct Model *model = modelCreate();
-        if (!model) return NULL;
+   /* clang-format on */
+   struct model *model = model_create();
+   if (!model)
+      return NULL;
 
-        /* todo: test this malloc as well, or more like break these steps in the model loader itself */
-        model->mesh      = malloc(sizeof(struct Model *));
-        model->meshCount = 1;
+   /* todo: test this malloc as well, or more like break these steps in the
+    * model loader itself */
+   model->mesh = malloc(sizeof(struct model *));
+   model->mesh_count = 1;
 
-        *model->mesh             = meshCreate();
-        model->mesh[0]->drawMode = GL_TRIANGLES;
-        meshLoadVertices(*model->mesh, vertices, 36, 3 * sizeof(float));
-        meshLoadNormals(*model->mesh, normals, 36, 3 * sizeof(float));
-        return model;
+   *model->mesh = mesh_create();
+   model->mesh[0]->draw_mode = GL_TRIANGLES;
+   mesh_load_vertices(*model->mesh, vertices, 36, 3 * sizeof(float));
+   mesh_load_normals(*model->mesh, normals, 36, 3 * sizeof(float));
+   return model;
 }
 
-struct Shader *createModelShader() {
-        struct Shader *shader = shaderCreate();
-        if (!shader)
-                return NULL;
-        if (shaderLoadFromFile(shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
-                shaderDestroy(shader);
-                return NULL;
-        }
-        return shader;
+struct shader *
+create_cube_shader()
+{
+   struct shader *shader = shader_create();
+   if (!shader)
+      return NULL;
+   if (shader_load_from_file(shader, ASSETS_DIR "shaders/model/shader.vert",
+                             ASSETS_DIR "shaders/model/shader.frag")) {
+      shader_destroy(shader);
+      return NULL;
+   }
+   return shader;
 }
 
-struct Shader *createLightShader() {
-        struct Shader *shader = shaderCreate();
-        if (!shader)
-                return NULL;
-        if (shaderLoadFromFile(shader, ASSETS_DIR "shaders/light/shader.vert", ASSETS_DIR "shaders/light/shader.frag")) {
-                shaderDestroy(shader);
-                return NULL;
-        }
-        return shader;
+struct shader *
+create_light_shader()
+{
+   struct shader *shader = shader_create();
+   if (!shader)
+      return NULL;
+   if (shader_load_from_file(shader, ASSETS_DIR "shaders/light/shader.vert",
+                             ASSETS_DIR "shaders/light/shader.frag")) {
+      shader_destroy(shader);
+      return NULL;
+   }
+   return shader;
 }

@@ -4,25 +4,26 @@
 #include "GLFW/glfw3.h"
 #include "cglm/struct.h"
 
-struct Window {
-        int         width;
-        int         height;
-        const char *title;
-        const char *icon;
-        GLFWwindow *window;
-        vec4s       color;
+struct window {
+   int width;
+   int height;
+   const char *title;
+   const char *icon;
+   GLFWwindow *window;
+   vec4s color;
 };
 
-struct Window *windowCreate(unsigned int width, unsigned int height, const char *title, vec4s color);
+struct window *window_create(unsigned int width, unsigned int height,
+                             const char *title, vec4s color);
 
-void windowSetClearColor(struct Window *window, vec4s color);
-void windowProcessInput(struct Window *window);
-void windowPollEvents(struct Window *window);
-void windowClearColor(struct Window *window);
-void windowSwapBuffers(struct Window *window);
-void windowDestroy(struct Window *window);
-bool windowClose(struct Window *window);
-int  windowSetIcon(struct Window *window, const char *path);
-void windowScaleToMonitorDPI(GLFWwindow *window);
+void window_set_clear_color(struct window *window, vec4s color);
+void window_process_input(struct window *window);
+void window_poll_events(struct window *window);
+void window_clear_color(struct window *window);
+void window_swap_buffers(struct window *window);
+void window_destroy(struct window *window);
+bool window_close(struct window *window);
+int window_set_icon(struct window *window, const char *path);
+void window_scale_to_monitor_dpi(GLFWwindow *window);
 
 #endif

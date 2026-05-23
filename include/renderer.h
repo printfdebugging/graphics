@@ -4,6 +4,6 @@
 #include "model.h"
 #include "shader.h"
 
-void renderModel(struct Model *model, struct Shader *shader);
+void render_model(struct model *model, struct shader *shader);
 
 #endif

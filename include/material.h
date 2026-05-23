@@ -4,39 +4,39 @@
 #include "cglm/struct/vec3.h"
 
 struct material {
-        vec3s ambient;
-        vec3s diffuse;
-        vec3s specular;
-        float shininess;
+   vec3s ambient;
+   vec3s diffuse;
+   vec3s specular;
+   float shininess;
 };
 
 /* http://devernay.free.fr/cours/opengl/materials.html */
 enum material_type {
-        EMERALD,
-        JADE,
-        OBSIDIAN,
-        PEARL,
-        RUBY,
-        TURQUOISE,
-        BRASS,
-        BRONZE,
-        CHROME,
-        COPPER,
-        GOLD,
-        SILVER,
-        BLACK_PLASTIC,
-        CYAN_PLASTIC,
-        GREEN_PLASTIC,
-        RED_PLASTIC,
-        WHITE_PLASTIC,
-        YELLOW_PLASTIC,
-        BLACK_RUBBER,
-        CYAN_RUBBER,
-        GREEN_RUBBER,
-        RED_RUBBER,
-        WHITE_RUBBER,
-        YELLOW_RUBBER,
-        MATERIAL_TYPES_LENGTH,
+   EMERALD,
+   JADE,
+   OBSIDIAN,
+   PEARL,
+   RUBY,
+   TURQUOISE,
+   BRASS,
+   BRONZE,
+   CHROME,
+   COPPER,
+   GOLD,
+   SILVER,
+   BLACK_PLASTIC,
+   CYAN_PLASTIC,
+   GREEN_PLASTIC,
+   RED_PLASTIC,
+   WHITE_PLASTIC,
+   YELLOW_PLASTIC,
+   BLACK_RUBBER,
+   CYAN_RUBBER,
+   GREEN_RUBBER,
+   RED_RUBBER,
+   WHITE_RUBBER,
+   YELLOW_RUBBER,
+   MATERIAL_TYPES_LENGTH,
 };
 
 /* clang-format off */

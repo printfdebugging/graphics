@@ -1,59 +1,64 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "glad/glad.h"
 #include "cglm/struct.h"
+#include "glad/glad.h"
 
 #include "texture.h"
 
-enum MeshAttribute {
-        MESH_ATTRIBUTE_POSITION = 0,
-        MESH_ATTRIBUTE_COLOR    = 1,
-        MESH_ATTRIBUTE_UV       = 2,
-        MESH_ATTRIBUTE_NORMAL   = 3,
-        MESH_ATTRIBUTE_COUNT,
+enum mesh_attribute {
+   MESH_ATTRIBUTE_POSITION = 0,
+   MESH_ATTRIBUTE_COLOR = 1,
+   MESH_ATTRIBUTE_UV = 2,
+   MESH_ATTRIBUTE_NORMAL = 3,
+   MESH_ATTRIBUTE_COUNT,
 };
 
-struct Vertex {
-        vec3s position;
-        vec3s normal;
-        vec3s textureCoordinates;
+struct vertex {
+   vec3s position;
+   vec3s normal;
+   vec3s uv;
 };
 
-struct Mesh {
-        unsigned int vao;
-        unsigned int ebo;
-        unsigned int vboVertex;
-        unsigned int vboColor;
-        unsigned int vboUV;
-        unsigned int vboNormal;
+struct mesh {
+   unsigned int vao;
+   unsigned int ebo;
+   unsigned int vbo_vertex;
+   unsigned int vbo_color;
+   unsigned int vbo_uv;
+   unsigned int vbo_normal;
 
-        unsigned int indexCount;
-        unsigned int vertexCount;
-        unsigned int colorCount;
-        unsigned int UVCount;
-        unsigned int normalCount;
+   unsigned int index_count;
+   unsigned int vertex_count;
+   unsigned int color_count;
+   unsigned int uv_count;
+   unsigned int normal_count;
 
-        unsigned int indexStride;
-        unsigned int vertexStride;
-        unsigned int colorStride;
-        unsigned int UVStride;
-        unsigned int normalStride;
+   unsigned int index_stride;
+   unsigned int vertex_stride;
+   unsigned int color_stride;
+   unsigned int uv_stride;
+   unsigned int normal_stride;
 
-        GLenum indexType;
-        GLenum drawMode;
+   GLenum index_type;
+   GLenum draw_mode;
 
-        struct Texture **textures;
-        unsigned int     textureCount;
+   struct texture **textures;
+   unsigned int texture_count;
 };
 
-struct Mesh *meshCreate();
+struct mesh *mesh_create();
 
-void meshDestroy(struct Mesh *mesh);
-void meshLoadVertices(struct Mesh *mesh, void *data, unsigned int count, unsigned int stride);
-void meshLoadIndices(struct Mesh *mesh, void *data, unsigned int count, GLenum type, unsigned int stride);
-void meshLoadColors(struct Mesh *mesh, void *data, unsigned int count, unsigned int stride);
-void meshLoadUV(struct Mesh *mesh, void *data, unsigned int count, unsigned int stride);
-void meshLoadNormals(struct Mesh *mesh, void *data, unsigned int count, unsigned int stride);
+void mesh_destroy(struct mesh *mesh);
+void mesh_load_vertices(struct mesh *mesh, void *data, unsigned int count,
+                        unsigned int stride);
+void mesh_load_indices(struct mesh *mesh, void *data, unsigned int count,
+                       GLenum type, unsigned int stride);
+void mesh_load_colors(struct mesh *mesh, void *data, unsigned int count,
+                      unsigned int stride);
+void mesh_load_uv(struct mesh *mesh, void *data, unsigned int count,
+                  unsigned int stride);
+void mesh_load_normals(struct mesh *mesh, void *data, unsigned int count,
+                       unsigned int stride);
 
 #endif
