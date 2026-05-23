@@ -140,3 +140,9 @@ struct gl_context
 Why is `Unit` array `MAX_TEXTURE_IMAGE_UNITS * MESA_SHADER_MESH_STAGES` long?
 `MAX_TEXTURE_IMAGE_UNITS` makes sense but not `MESA_SHADER_MESH_STAGES`.
 
+That might be related to extension support though I am not sure. These are
+some of the extensions I will look into later.
+
+- <https://ktstephano.github.io/rendering/opengl/bindless>
+- <https://www.reddit.com/r/opengl/comments/1o2fgns/opengl_mesh_shader_extension_is_merged/>
+- <https://registry.khronos.org/OpenGL/extensions/EXT/EXT_mesh_shader.txt>

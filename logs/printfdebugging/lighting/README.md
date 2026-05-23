@@ -19,6 +19,7 @@
   * [Lighting maps](#lighting-maps)
     * [Diffuse maps](#diffuse-maps)
     * [The diffuse map is not rendering on top and bottom faces](#the-diffuse-map-is-not-rendering-on-top-and-bottom-faces)
+  * [Specular maps](#specular-maps)
 
 <!-- mtoc-end -->
 
@@ -330,3 +331,13 @@ How did I catch this?
 ```c
 mesh_load_uv(*model->mesh, uv, 24, 2 * sizeof(float));
 ```
+
+## Specular maps
+
+- Black and white textures with black -> white representing the intensity of
+  light reflected by each part of the object.
+- We don't use colors in a specular map because the color of the specular
+  highlight mostly determined by the light's color.
+
+![specular-highlights-on-metal-rim](assets/specular-highlights-on-metal-rim.png)
+

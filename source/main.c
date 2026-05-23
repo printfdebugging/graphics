@@ -34,7 +34,7 @@ main()
 {
    struct game_data game = {NULL};
    // return game_run();
-   game.window = window_create(1550.0f, 700.0f, "floating",
+   game.window = window_create(3100.0f, 1400.0f, "floating",
                                (vec4s) {0.0f, 0.0f, 0.0f, 1.0});
    if (!game.window)
       return EXIT_FAILURE;
@@ -66,12 +66,18 @@ main()
 
    struct texture *material_diffuse_map =
       texture_create_from_file(ASSETS_DIR "textures/diffuse.png");
-   if (!material_diffuse_map)
+   struct texture *material_specular_map =
+      texture_create_from_file(ASSETS_DIR "textures/specular.png");
+   if (!material_diffuse_map || !material_specular_map)
       return EXIT_FAILURE;
 
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, material_diffuse_map->texture);
    material_diffuse_map->texture_index = 0;
+
+   glActiveTexture(GL_TEXTURE1);
+   glBindTexture(GL_TEXTURE_2D, material_specular_map->texture);
+   material_specular_map->texture_index = 1;
 
    while (!window_close(game.window)) {
       float currentFrame = glfwGetTime();
@@ -117,12 +123,12 @@ main()
          shader_set_uniform(cube_shader, "camera_position", 3fv, 1,
                             game.camera->position.raw);
          enum material_type mat = GOLD;
-         shader_set_uniform(cube_shader, "material_specular", 3fv, 1,
-                            MATERIALS[mat].specular.raw);
          shader_set_uniform(cube_shader, "material_shininess", 1f,
                             MATERIALS[mat].shininess * 128.0f);
          shader_set_uniform(cube_shader, "material_diffuse_map", 1i,
                             material_diffuse_map->texture_index);
+         shader_set_uniform(cube_shader, "material_specular_map", 1i,
+                            material_specular_map->texture_index);
          for (int i = 0; i < cube->mesh_count; ++i) {
             const struct mesh *mesh = cube->mesh[i];
             glBindVertexArray(mesh->vao);
