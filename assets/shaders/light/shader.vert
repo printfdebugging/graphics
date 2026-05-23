@@ -13,8 +13,10 @@ in vec2 in_uv;
 out vec3 color;
 out vec2 uv;
 
-void main() {
-    gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
-    color = vec3(0.5, 0.5, 0.5);
-    uv = in_uv;
+void
+main()
+{
+   gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
+   color = vec3(0.5, 0.5, 0.5);
+   uv = in_uv;
 }
