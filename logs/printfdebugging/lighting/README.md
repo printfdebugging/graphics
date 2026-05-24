@@ -29,7 +29,7 @@
       * [Emission map animation issue](#emission-map-animation-issue)
 * [Playing around](#playing-around)
   * [X-ray implementation](#x-ray-implementation)
-    * [Implementation details](#implementation-details)
+    * [Xray Implementation details](#xray-implementation-details)
 * [Debugging](#debugging)
   * [qrenderdoc](#qrenderdoc)
 
@@ -414,6 +414,14 @@ texture goes to the right, the left side has lines which I can't explain.
 ![emission-map-moving-left.png](assets/emission-map-moving-left.png)
 ![emission-map-moving-right](assets/emission-map-moving-right.png)
 
+Explaination: The issue here is that i used `GL_CLAMP_TO_EDGE` whereas to get
+the effect i was expecting, i should have used `GL_CLAMP_TO_BORDER`. the first
+image looks fine because its edge transparent and hence the clamp to edge
+effect is also transparent whereas it's visible in the second image as
+there's some color on the edge.
+
+![various-texture-wrapping-methods](assets/various-texture-wrapping-methods.png)
+
 # Playing around
 
 ## X-ray implementation
@@ -428,16 +436,19 @@ texture goes to the right, the left side has lines which I can't explain.
 ![xray-spot-greater-than-zero](assets/xray-spot-greater-than-zero.png)
 ![xray-spot-greater-than-half](assets/xray-spot-greater-than-half.png)
 
-### Implementation details
+### Xray Implementation details
+
 - I imagined it like a cylinder from the camera to the cube surface
 - It's dependent on the camera front direction
 - It should also take into account the normal of the face to see if this is
   the face in front of the camera or is it the back face.
 
 ![xray-spot-impl](assets/xray-spot-impl.png)
-
-
 ![xray-spot-implementation-explaination](assets/xray-spot-implementation-explaination.png)
+
+> [!TODO]
+> Instead of using discard, we could make the fragment color transparent and
+> use blending, this is something to try when I have blending working.
 
 # Debugging
 
