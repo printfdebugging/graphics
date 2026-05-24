@@ -27,6 +27,9 @@
       * [Colored specular map](#colored-specular-map)
     * [Emission map](#emission-map)
       * [Emission map animation issue](#emission-map-animation-issue)
+* [Playing around](#playing-around)
+  * [X-ray implementation](#x-ray-implementation)
+    * [Implementation details](#implementation-details)
 * [Debugging](#debugging)
   * [qrenderdoc](#qrenderdoc)
 
@@ -410,6 +413,31 @@ texture goes to the right, the left side has lines which I can't explain.
 
 ![emission-map-moving-left.png](assets/emission-map-moving-left.png)
 ![emission-map-moving-right](assets/emission-map-moving-right.png)
+
+# Playing around
+
+## X-ray implementation
+- Sending mouse click to the fragment shader, most of the things should happen there.
+- Inspired by [this](https://uploads.disquscdn.com/images/fb236c6b7744f94cc972620040ba2b5556b821ae82d7f01377b1e40693c5ec37.gif) comment on learnopengl.com
+- The X-ray circle is drawn in the camera's direction
+- To create a circle, I used the same idea used to calculate the specular
+  highlight. Using higher shininess value makes the spot smaller, though
+  showing it for values  greater than 0 is not a good idea, instead using
+  something like 0.5 shows a better spot to work with
+
+![xray-spot-greater-than-zero](assets/xray-spot-greater-than-zero.png)
+![xray-spot-greater-than-half](assets/xray-spot-greater-than-half.png)
+
+### Implementation details
+- I imagined it like a cylinder from the camera to the cube surface
+- It's dependent on the camera front direction
+- It should also take into account the normal of the face to see if this is
+  the face in front of the camera or is it the back face.
+
+![xray-spot-impl](assets/xray-spot-impl.png)
+
+
+![xray-spot-implementation-explaination](assets/xray-spot-implementation-explaination.png)
 
 # Debugging
 

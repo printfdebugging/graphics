@@ -111,7 +111,7 @@ main()
 
       /* without the render call below, why are axes not being drawn and instead
        * cube's vertices are being drawn */
-      // draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
+      draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
       {
          /* render model*/
@@ -140,6 +140,8 @@ main()
 
          shader_set_uniform(cube_shader, "camera_position", 3fv, 1,
                             game.camera->position.raw);
+         shader_set_uniform(cube_shader, "camera_front", 3fv, 1,
+                            game.camera->front.raw);
          enum material_type mat = GOLD;
          shader_set_uniform(cube_shader, "material_shininess", 1f,
                             MATERIALS[mat].shininess * 128.0f);

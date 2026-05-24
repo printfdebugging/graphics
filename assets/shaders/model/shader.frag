@@ -1,4 +1,5 @@
 uniform vec3 camera_position;
+uniform vec3 camera_front;
 
 uniform float material_shininess;
 uniform sampler2D material_diffuse_map;
@@ -51,4 +52,11 @@ main()
                  emission_lighting;
 
    outColor = vec4(result, 1.0);
+
+   float xfactor = max(dot(camera_front, -unit_view_direction), 0.0f);
+   float xray_factor = pow(xfactor, 320.0f);
+   if (dot(unit_normal, camera_front) < 0.0f && xray_factor > 0.5f) {
+      discard;
+      // outColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+   }
 }
