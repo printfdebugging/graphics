@@ -20,6 +20,9 @@
     * [Diffuse maps](#diffuse-maps)
     * [The diffuse map is not rendering on top and bottom faces](#the-diffuse-map-is-not-rendering-on-top-and-bottom-faces)
   * [Specular maps](#specular-maps)
+    * [Specular light as a sin wave](#specular-light-as-a-sin-wave)
+      * [at larger sine values](#at-larger-sine-values)
+      * [when sine goes to 0 the rim becomes black](#when-sine-goes-to-0-the-rim-becomes-black)
 
 <!-- mtoc-end -->
 
@@ -340,4 +343,28 @@ mesh_load_uv(*model->mesh, uv, 24, 2 * sizeof(float));
   highlight mostly determined by the light's color.
 
 ![specular-highlights-on-metal-rim](assets/specular-highlights-on-metal-rim.png)
+
+### Specular light as a sin wave
+
+I varied the specular component of the light as a sine wave i.e. it went
+0 to 1 to 0 to 1 with time... and I noticed that when `light_sepcular`
+approached 0, the color of the rim became black, which was darker than the
+ambient color of the rim (as can be seen from parts which are not reflecting
+specular light). I expected the rim to atleast look like it does under
+ambient conditions when sine goes to 0.
+
+```c
+double time = glfwGetTime();
+vec3s light_specular = {
+  sin(time),
+  sin(time),
+  sin(time),
+};
+```
+
+#### at larger sine values
+![specular-at-large-sine-value](assets/specular-at-large-sine-value.png)
+
+#### when sine goes to 0 the rim becomes black
+![specular-at-small-sine-value](assets/specular-at-small-sine-value.png)
 

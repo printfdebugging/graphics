@@ -90,8 +90,17 @@ main()
       process_input(game.window, game.delta_time);
 
       /* model matrix for light source */
-      vec3s lightpos = {0.0f, 0.0f, 2.0f};
-      vec3s lightscale = {0.2f, 0.2f, 0.2f};
+      vec3s light_position = {0.0f, 0.0f, 2.0f};
+      vec3s light_ambient = {0.2f, 0.2f, 0.2f};
+      vec3s light_diffuse = {0.5f, 0.5f, 0.5f};
+      // vec3s light_specular = {1.0f, 1.0f, 1.0f};
+      double time = glfwGetTime();
+      vec3s light_specular = {
+         sin(time),
+         sin(time),
+         sin(time),
+      };
+      vec3s light_scale = {0.2f, 0.2f, 0.2f};
 
       mat4s view = camera_get_view_matrix(game.camera);
       mat4s projection = glms_perspective(
@@ -101,7 +110,7 @@ main()
 
       /* without the render call below, why are axes not being drawn and instead
        * cube's vertices are being drawn */
-      draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
+      // draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
       {
          /* render model*/
@@ -116,10 +125,18 @@ main()
                             &cube->view.col[0].raw[0]);
          shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE,
                             &cube->projection.col[0].raw[0]);
-         shader_set_uniform(cube_shader, "light_color", 3fv, 1,
-                            (vec3s) {1.0f, 1.0f, 1.0f}.raw);
-         shader_set_uniform(cube_shader, "light_position", 3fv, 1,
-                            lightpos.raw);
+
+         {
+            shader_set_uniform(cube_shader, "light_position", 3fv, 1,
+                               light_position.raw);
+            shader_set_uniform(cube_shader, "light_ambient", 3fv, 1,
+                               light_ambient.raw);
+            shader_set_uniform(cube_shader, "light_diffuse", 3fv, 1,
+                               light_diffuse.raw);
+            shader_set_uniform(cube_shader, "light_specular", 3fv, 1,
+                               light_specular.raw);
+         }
+
          shader_set_uniform(cube_shader, "camera_position", 3fv, 1,
                             game.camera->position.raw);
          enum material_type mat = GOLD;
@@ -143,8 +160,9 @@ main()
 
       {
          mat4s model_matrix_light = {.raw = GLM_MAT4_IDENTITY_INIT};
-         model_matrix_light = glms_translate(model_matrix_light, lightpos);
-         model_matrix_light = glms_scale(model_matrix_light, lightscale);
+         model_matrix_light =
+            glms_translate(model_matrix_light, light_position);
+         model_matrix_light = glms_scale(model_matrix_light, light_scale);
 
          /* render cube */
          cube->view = view;

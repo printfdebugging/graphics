@@ -1,12 +1,13 @@
-uniform vec3 light_color;
-uniform vec3 light_position;  /* for diffuse calculation, this is in world space
-                                 coordinates as well */
-uniform vec3 camera_position; /* for specular calculation, this is also world
-                                 space coordinate.*/
+uniform vec3 camera_position;
 
 uniform float material_shininess;
 uniform sampler2D material_diffuse_map;
 uniform sampler2D material_specular_map;
+
+uniform vec3 light_position;
+uniform vec3 light_ambient;
+uniform vec3 light_diffuse;
+uniform vec3 light_specular;
 
 in vec3 position; /* in world space coordinates. */
 in vec3 color;
@@ -18,13 +19,14 @@ out vec4 outColor;
 void
 main()
 {
-   vec3 ambient_lighting = light_color * texture(material_diffuse_map, uv).rgb;
+   vec3 ambient_lighting =
+      light_ambient * texture(material_diffuse_map, uv).rgb;
 
    vec3 unit_light_direction = normalize(light_position - position);
    vec3 unit_normal = normalize(normal);
    float diffuse_factor = max(dot(unit_normal, unit_light_direction), 0.0);
    vec3 diffuse_lighting =
-      light_color * (diffuse_factor * texture(material_diffuse_map, uv).rgb);
+      light_diffuse * (diffuse_factor * texture(material_diffuse_map, uv).rgb);
 
    vec3 unit_view_direction = normalize(camera_position - position);
    vec3 unit_reflected_direction =
@@ -33,7 +35,8 @@ main()
       pow(max(dot(unit_view_direction, unit_reflected_direction), 0.0),
           material_shininess);
    vec3 specular_lighting =
-      light_color * (specular_factor * texture(material_specular_map, uv).rgb);
+      light_specular *
+      (specular_factor * texture(material_specular_map, uv).rgb);
 
    vec3 result = (ambient_lighting + diffuse_lighting + specular_lighting);
 
