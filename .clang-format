@@ -3,6 +3,7 @@
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: Consecutive
 
+AlwaysBreakBeforeMultilineStrings: true
 AllowAllArgumentsOnNextLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
