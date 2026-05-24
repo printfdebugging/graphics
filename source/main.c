@@ -87,9 +87,9 @@ main()
    material_emission_map->texture_index = 3;
 
    while (!window_close(game.window)) {
-      float currentFrame = glfwGetTime();
-      game.delta_time = currentFrame - game.last_frame;
-      game.last_frame = currentFrame;
+      float current_frame = glfwGetTime();
+      game.delta_time = current_frame - game.last_frame;
+      game.last_frame = current_frame;
 
       window_poll_events(game.window);
       window_process_input(game.window);
