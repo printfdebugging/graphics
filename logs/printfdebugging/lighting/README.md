@@ -23,6 +23,7 @@
     * [Specular light as a sin wave](#specular-light-as-a-sin-wave)
       * [at larger sine values](#at-larger-sine-values)
       * [when sine goes to 0 the rim becomes black](#when-sine-goes-to-0-the-rim-becomes-black)
+      * [Actually that is correct](#actually-that-is-correct)
 
 <!-- mtoc-end -->
 
@@ -351,7 +352,7 @@ I varied the specular component of the light as a sine wave i.e. it went
 approached 0, the color of the rim became black, which was darker than the
 ambient color of the rim (as can be seen from parts which are not reflecting
 specular light). I expected the rim to atleast look like it does under
-ambient conditions when sine goes to 0.
+ambient conditions when sine goes to 0. 
 
 ```c
 double time = glfwGetTime();
@@ -368,3 +369,13 @@ vec3s light_specular = {
 #### when sine goes to 0 the rim becomes black
 ![specular-at-small-sine-value](assets/specular-at-small-sine-value.png)
 
+
+#### Actually that is correct
+
+:) sine goes from -1 to 1, that's why it's like that. I thought it goes from
+0 to 1, silly me. setting the specular light color to 0 gave the results as
+expected, no specular highlights, just the same as with ambient and diffuse
+lighting (i forgot the diffuse part above).
+
+Also when we set the specular light color to something else, say blue, the
+reflections are also blue, as expected.

@@ -93,13 +93,7 @@ main()
       vec3s light_position = {0.0f, 0.0f, 2.0f};
       vec3s light_ambient = {0.2f, 0.2f, 0.2f};
       vec3s light_diffuse = {0.5f, 0.5f, 0.5f};
-      // vec3s light_specular = {1.0f, 1.0f, 1.0f};
-      double time = glfwGetTime();
-      vec3s light_specular = {
-         sin(time),
-         sin(time),
-         sin(time),
-      };
+      vec3s light_specular = {1.0f, 1.0f, 1.0f};
       vec3s light_scale = {0.2f, 0.2f, 0.2f};
 
       mat4s view = camera_get_view_matrix(game.camera);
