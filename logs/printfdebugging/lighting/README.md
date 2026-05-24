@@ -18,17 +18,17 @@
     * [Debugging lighting code](#debugging-lighting-code)
   * [Lighting maps](#lighting-maps)
     * [Diffuse maps](#diffuse-maps)
-    * [The diffuse map is not rendering on top and bottom faces](#the-diffuse-map-is-not-rendering-on-top-and-bottom-faces)
-  * [Specular maps](#specular-maps)
-    * [Specular light as a sin wave](#specular-light-as-a-sin-wave)
-      * [at larger sine values](#at-larger-sine-values)
-      * [when sine goes to 0 the rim becomes black](#when-sine-goes-to-0-the-rim-becomes-black)
-      * [Actually that is correct](#actually-that-is-correct)
-    * [Colored specular map](#colored-specular-map)
-  * [Emission map](#emission-map)
-    * [Emission map animation issue](#emission-map-animation-issue)
-  * [Debugging](#debugging)
-    * [qrenderdoc](#qrenderdoc)
+      * [The diffuse map is not rendering on top and bottom faces](#the-diffuse-map-is-not-rendering-on-top-and-bottom-faces)
+    * [Specular maps](#specular-maps)
+      * [Specular light as a sin wave](#specular-light-as-a-sin-wave)
+        * [at larger sine values](#at-larger-sine-values)
+        * [when sine goes to 0 the rim becomes black](#when-sine-goes-to-0-the-rim-becomes-black)
+        * [Actually that is correct](#actually-that-is-correct)
+      * [Colored specular map](#colored-specular-map)
+    * [Emission map](#emission-map)
+      * [Emission map animation issue](#emission-map-animation-issue)
+* [Debugging](#debugging)
+  * [qrenderdoc](#qrenderdoc)
 
 <!-- mtoc-end -->
 
@@ -305,7 +305,7 @@ nitrix:  Point is they multiply each others. Maybe it's easier if you think of l
 > `glms_translate` actually modifies the argument matrix and returns the same,
 > so be cautious and always confirm what the function does.
 
-### The diffuse map is not rendering on top and bottom faces
+#### The diffuse map is not rendering on top and bottom faces
 
 ![diffuse-map-not-rendering-on-top-and-bottom-faces](assets/diffuse-map-not-rendering-on-top-and-bottom-faces.png)
 
@@ -341,7 +341,7 @@ How did I catch this?
 mesh_load_uv(*model->mesh, uv, 24, 2 * sizeof(float));
 ```
 
-## Specular maps
+### Specular maps
 
 - Black and white textures with black -> white representing the intensity of
   light reflected by each part of the object.
@@ -350,7 +350,7 @@ mesh_load_uv(*model->mesh, uv, 24, 2 * sizeof(float));
 
 ![specular-highlights-on-metal-rim](assets/specular-highlights-on-metal-rim.png)
 
-### Specular light as a sin wave
+#### Specular light as a sin wave
 
 I varied the specular component of the light as a sine wave i.e. it went
 0 to 1 to 0 to 1 with time... and I noticed that when `light_sepcular`
@@ -368,14 +368,14 @@ vec3s light_specular = {
 };
 ```
 
-#### at larger sine values
+##### at larger sine values
 ![specular-at-large-sine-value](assets/specular-at-large-sine-value.png)
 
-#### when sine goes to 0 the rim becomes black
+##### when sine goes to 0 the rim becomes black
 ![specular-at-small-sine-value](assets/specular-at-small-sine-value.png)
 
 
-#### Actually that is correct
+##### Actually that is correct
 
 :) sine goes from -1 to 1, that's why it's like that. I thought it goes from
 0 to 1, silly me. setting the specular light color to 0 gave the results as
@@ -385,12 +385,12 @@ lighting (i forgot the diffuse part above).
 Also when we set the specular light color to something else, say blue, the
 reflections are also blue, as expected.
 
-### Colored specular map
+#### Colored specular map
 - These look unrealistic
 
 ![colored-specular-highlights](assets/colored-specular-highlights.png)
 
-## Emission map
+### Emission map
 - Contains emission values per fragment
 - Emission values are colors an object may emit as if it contains a light source itself.
 - Like glowing eyes of a robot, light strips on a container etc.
@@ -401,7 +401,7 @@ was easy to figure out.
 
 ![emission-map-usage](assets/emission-map-usage.png)
 
-### Emission map animation issue
+#### Emission map animation issue
 
 I set the texture's s and t wraps to `GL_CLAMP_TO_EDGE` in `texture.c` and
 then animated the texture using `uv + vec2(sin(time), 0.0f)`, it's fine when
@@ -411,7 +411,7 @@ texture goes to the right, the left side has lines which I can't explain.
 ![emission-map-moving-left.png](assets/emission-map-moving-left.png)
 ![emission-map-moving-right](assets/emission-map-moving-right.png)
 
-## Debugging
+# Debugging
 
 ### qrenderdoc
 
