@@ -68,7 +68,10 @@ main()
       texture_create_from_file(ASSETS_DIR "textures/diffuse.png");
    struct texture *material_specular_map =
       texture_create_from_file(ASSETS_DIR "textures/specular.png");
-   if (!material_diffuse_map || !material_specular_map)
+   struct texture *material_emission_map =
+      texture_create_from_file(ASSETS_DIR "textures/matrix.jpg");
+   if (!material_diffuse_map || !material_specular_map ||
+       !material_emission_map)
       return EXIT_FAILURE;
 
    glActiveTexture(GL_TEXTURE0);
@@ -78,6 +81,10 @@ main()
    glActiveTexture(GL_TEXTURE1);
    glBindTexture(GL_TEXTURE_2D, material_specular_map->texture);
    material_specular_map->texture_index = 1;
+
+   glActiveTexture(GL_TEXTURE3);
+   glBindTexture(GL_TEXTURE_2D, material_emission_map->texture);
+   material_emission_map->texture_index = 3;
 
    while (!window_close(game.window)) {
       float currentFrame = glfwGetTime();
@@ -92,7 +99,7 @@ main()
       /* model matrix for light source */
       vec3s light_position = {0.0f, 0.0f, 2.0f};
       vec3s light_ambient = {0.2f, 0.2f, 0.2f};
-      vec3s light_diffuse = {0.5f, 0.5f, 0.5f};
+      vec3s light_diffuse = {0.2f, 0.2f, 0.2f};
       vec3s light_specular = {1.0f, 1.0f, 1.0f};
       vec3s light_scale = {0.2f, 0.2f, 0.2f};
 
@@ -140,6 +147,8 @@ main()
                             material_diffuse_map->texture_index);
          shader_set_uniform(cube_shader, "material_specular_map", 1i,
                             material_specular_map->texture_index);
+         shader_set_uniform(cube_shader, "material_emission_map", 1i,
+                            material_emission_map->texture_index);
          for (int i = 0; i < cube->mesh_count; ++i) {
             const struct mesh *mesh = cube->mesh[i];
             glBindVertexArray(mesh->vao);

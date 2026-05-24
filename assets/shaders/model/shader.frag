@@ -3,6 +3,7 @@ uniform vec3 camera_position;
 uniform float material_shininess;
 uniform sampler2D material_diffuse_map;
 uniform sampler2D material_specular_map;
+uniform sampler2D material_emission_map;
 
 uniform vec3 light_position;
 uniform vec3 light_ambient;
@@ -34,11 +35,18 @@ main()
    float specular_factor =
       pow(max(dot(unit_view_direction, unit_reflected_direction), 0.0),
           material_shininess);
+
    vec3 specular_lighting =
       light_specular *
       (specular_factor * texture(material_specular_map, uv).rgb);
 
-   vec3 result = (ambient_lighting + diffuse_lighting + specular_lighting);
+   vec3 emission_lighting = vec3(0.0f);
+   if (texture(material_specular_map, uv).rgb == vec3(0.0f)) {
+      emission_lighting = texture(material_emission_map, uv).rgb;
+   }
+
+   vec3 result = (ambient_lighting + diffuse_lighting + specular_lighting) +
+                 emission_lighting;
 
    outColor = vec4(result, 1.0);
 }

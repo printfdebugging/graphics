@@ -24,6 +24,10 @@
       * [at larger sine values](#at-larger-sine-values)
       * [when sine goes to 0 the rim becomes black](#when-sine-goes-to-0-the-rim-becomes-black)
       * [Actually that is correct](#actually-that-is-correct)
+    * [Colored specular map](#colored-specular-map)
+  * [Emission map](#emission-map)
+  * [Debugging](#debugging)
+    * [qrenderdoc](#qrenderdoc)
 
 <!-- mtoc-end -->
 
@@ -379,3 +383,35 @@ lighting (i forgot the diffuse part above).
 
 Also when we set the specular light color to something else, say blue, the
 reflections are also blue, as expected.
+
+### Colored specular map
+- These look unrealistic
+
+![colored-specular-highlights](assets/colored-specular-highlights.png)
+
+## Emission map
+- Contains emission values per fragment
+- Emission values are colors an object may emit as if it contains a light source itself.
+- Like glowing eyes of a robot, light strips on a container etc.
+
+The tutorial missed some part from the shader where we are to show the
+emission texture in only the places where the specular map is black, but it
+was easy to figure out.
+
+![emission-map-usage](assets/emission-map-usage.png)
+
+## Debugging
+
+### qrenderdoc
+
+I was trying to add another texture but I don't know how, it just wasn't
+showing up. Running the application through qrenderdoc showed that it's
+missing i.e. there's some issue with the loading code. qrenderdoc ftw! As
+always, it was a typo!
+```c
+   glActiveTexture(GL_TEXTURE2);
+   glBindTexture(GL_TEXTURE3, material_colored_specular_map->texture);
+   material_colored_specular_map->texture_index = 2;
+```
+
+![missing-texture](assets/missing-texture.png)
