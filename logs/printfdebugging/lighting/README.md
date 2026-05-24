@@ -26,6 +26,7 @@
       * [Actually that is correct](#actually-that-is-correct)
     * [Colored specular map](#colored-specular-map)
   * [Emission map](#emission-map)
+    * [Emission map animation issue](#emission-map-animation-issue)
   * [Debugging](#debugging)
     * [qrenderdoc](#qrenderdoc)
 
@@ -399,6 +400,16 @@ emission texture in only the places where the specular map is black, but it
 was easy to figure out.
 
 ![emission-map-usage](assets/emission-map-usage.png)
+
+### Emission map animation issue
+
+I set the texture's s and t wraps to `GL_CLAMP_TO_EDGE` in `texture.c` and
+then animated the texture using `uv + vec2(sin(time), 0.0f)`, it's fine when
+the texture goes to the left, the right side remains clean, but when the
+texture goes to the right, the left side has lines which I can't explain.
+
+![emission-map-moving-left.png](assets/emission-map-moving-left.png)
+![emission-map-moving-right](assets/emission-map-moving-right.png)
 
 ## Debugging
 

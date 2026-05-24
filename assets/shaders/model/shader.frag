@@ -9,6 +9,7 @@ uniform vec3 light_position;
 uniform vec3 light_ambient;
 uniform vec3 light_diffuse;
 uniform vec3 light_specular;
+uniform float time;
 
 in vec3 position; /* in world space coordinates. */
 in vec3 color;
@@ -42,7 +43,8 @@ main()
 
    vec3 emission_lighting = vec3(0.0f);
    if (texture(material_specular_map, uv).rgb == vec3(0.0f)) {
-      emission_lighting = texture(material_emission_map, uv).rgb;
+      emission_lighting =
+         texture(material_emission_map, uv + vec2(sin(time), 0.0f)).rgb;
    }
 
    vec3 result = (ambient_lighting + diffuse_lighting + specular_lighting) +

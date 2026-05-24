@@ -149,6 +149,7 @@ main()
                             material_specular_map->texture_index);
          shader_set_uniform(cube_shader, "material_emission_map", 1i,
                             material_emission_map->texture_index);
+         shader_set_uniform(cube_shader, "time", 1f, current_frame);
          for (int i = 0; i < cube->mesh_count; ++i) {
             const struct mesh *mesh = cube->mesh[i];
             glBindVertexArray(mesh->vao);
