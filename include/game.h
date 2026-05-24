@@ -9,11 +9,11 @@
  * accessible from all other subsystems wherever they are needed, or maybe in
  * the game code, who knows we might do some cool things with them. */
 struct game_data {
-   struct window *window;
-   struct camera *camera;
+        struct window *window;
+        struct camera *camera;
 
-   float last_frame;
-   float delta_time;
+        float last_frame;
+        float delta_time;
 };
 
 int game_run();

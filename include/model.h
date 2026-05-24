@@ -7,12 +7,12 @@
 #include "mesh.h"
 
 struct model {
-   struct mesh **mesh;
-   uint32_t mesh_count;
+        struct mesh **mesh;
+        uint32_t mesh_count;
 
-   mat4s model;
-   mat4s view;
-   mat4s projection;
+        mat4s model;
+        mat4s view;
+        mat4s projection;
 };
 
 struct model *model_create();
