@@ -34,5 +34,6 @@ void camera_process_mouse_scroll(struct camera *camera, float yoffset);
 void camera_adjust_direction(struct camera *camera);
 mat4s camera_get_view_matrix(struct camera *camera);
 void camera_destroy(struct camera *camera);
+void camera_print_info(struct camera *camera, FILE *descriptor);
 
 #endif

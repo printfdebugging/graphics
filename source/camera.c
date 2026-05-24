@@ -133,3 +133,38 @@ camera_destroy(struct camera *camera)
 {
    free(camera);
 }
+
+void
+camera_print_info(struct camera *camera, FILE *descriptor)
+{
+   char buf[1024];
+   const char *camera_info_string =
+      "camera {\n"
+      "   .position = { %f, %f, %f }\n"
+      "   .front    = { %f, %f, %f }\n"
+      "   .up       = { %f, %f, %f }\n"
+      "   .yaw      =  %f\n"
+      "   .pitch    =  %f\n"
+      "   .x        =  %f\n"
+      "   .y        =  %f\n"
+      "   .fov      =  %f\n"
+      "   .movement_speed     =  %f\n"
+      "   .mouse_sensitivity  =  %f\n"
+      "};\n";
+
+   /* clang-format off */
+   snprintf(buf, sizeof(buf), camera_info_string,
+      camera->position.x, camera->position.y, camera->position.z,
+      camera->front.x, camera->front.y, camera->front.z,
+      camera->up.x, camera->up.y, camera->up.z,
+      camera->yaw,
+      camera->pitch,
+      camera->x,
+      camera->y,
+      camera->fov,
+      camera->movement_speed,
+      camera->mouse_sensitivity);
+   /* clang-format on */
+
+   fprintf(descriptor, "%s\n", buf);
+}
