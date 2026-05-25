@@ -5,35 +5,25 @@ in vec3 in_position;
 
 out vec3 color;
 
-bool
-is_xaxis()
-{
+bool is_xaxis() {
         return in_position.y == 0.0f && in_position.z == 0.0f;
 }
 
-bool
-is_yaxis()
-{
+bool is_yaxis() {
         return in_position.x == 0.0f && in_position.z == 0.0f;
 }
 
-bool
-is_zaxis()
-{
+bool is_zaxis() {
         return in_position.x == 0.0f && in_position.y == 0.0f;
 }
 
-bool
-is_grid_edge()
-{
+bool is_grid_edge() {
         return int(in_position.x) % 10 == 0 &&
                int(in_position.y) % 10 == 0 &&
                int(in_position.z) % 10 == 0;
 }
 
-void
-main()
-{
+void main() {
         gl_Position = projection * view * vec4(in_position.xyz, 1.0);
         if (is_xaxis()) {
                 color = vec3(0.69f, 0.22f, 0.29f);
