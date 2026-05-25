@@ -27,13 +27,14 @@ void main() {
         float diffuse_factor = max(dot(unit_normal, unit_light_direction), 0.0);
         vec3 diffuse_lighting = light_diffuse * (diffuse_factor * texture(material_diffuse_map, uv).rgb);
 
+        vec3 texture_rgb = texture(material_specular_map, uv).rgb;
         vec3 unit_view_direction = normalize(camera_position - position);
         vec3 unit_reflected_direction = normalize(reflect(-unit_light_direction, unit_normal));
         float specular_factor = pow(max(dot(unit_view_direction, unit_reflected_direction), 0.0), material_shininess);
-        vec3 specular_lighting = light_specular * (specular_factor * texture(material_specular_map, uv).rgb);
+        vec3 specular_lighting = light_specular * (specular_factor * texture_rgb);
 
         vec3 emission_lighting = vec3(0.0f);
-        if (texture(material_specular_map, uv).rgb == vec3(0.0f)) {
+        if (texture_rgb == vec3(0.0f)) {
                 emission_lighting = texture(material_emission_map, uv + vec2(sin(time), 0.0f)).rgb;
         }
 
