@@ -65,6 +65,25 @@ target_compile_definitions(${APPLICATION} PRIVATE
         ASSETS_DIR="$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/assets/>$<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_DATAROOTDIR}/${PROJECT_ASSETS_DIR}>"
 )
 
+target_compile_options(${APPLICATION} PRIVATE
+        -Wall
+        -Wextra
+        -Wfloat-equal
+        -Wundef
+        -Wshadow
+        -Wpointer-arith
+        -Wcast-align
+        -Wstrict-prototypes
+        -Wwrite-strings
+        -Wcast-qual
+        -Wswitch-default
+        -Wswitch-enum
+        -Wconversion
+        -Wunreachable-code
+        -Wpedantic
+        # -Werror
+)
+
 target_include_directories(${APPLICATION}
         PUBLIC include
 )
