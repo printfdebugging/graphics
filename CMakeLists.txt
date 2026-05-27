@@ -68,7 +68,6 @@ target_compile_definitions(${APPLICATION} PRIVATE
 target_compile_options(${APPLICATION} PRIVATE
         -Wall
         -Wextra
-        -Wfloat-equal
         -Wundef
         -Wshadow
         -Wpointer-arith
@@ -81,6 +80,7 @@ target_compile_options(${APPLICATION} PRIVATE
         -Wconversion
         -Wunreachable-code
         -Wpedantic
+        # -Wfloat-equal
         # -Werror
 )
 
