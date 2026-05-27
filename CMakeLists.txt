@@ -82,6 +82,7 @@ target_compile_options(${APPLICATION} PRIVATE
         -Wpedantic
         -fsanitize=undefined
         -fsanitize=address
+        -DLSAN_OPTIONS=verbosity=1:log_threads=1
         # -Wfloat-equal
         # -Werror
 )
