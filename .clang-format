@@ -11,6 +11,7 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
 BinPackParameters: false
+BinPackLongBracedList: true
 BreakBeforeBraces: Attach
 ColumnLimit: 0
 ExperimentalAutoDetectBinPacking: false
@@ -20,7 +21,7 @@ TabWidth: 8
 IndentWidth: 8
 UseTab: Never
 IndentPPDirectives: None
-AlignArrayOfStructures: Left
+AlignArrayOfStructures: None
 AlwaysBreakBeforeMultilineStrings: false
 AllowShortLoopsOnASingleLine: true
 SortUsingDeclarations: true
