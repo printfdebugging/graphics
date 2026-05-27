@@ -20,14 +20,14 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 # TODO: comment out this cmake file nicely & also disable the thing which
 # rebuilds/configures the project when i make changes to this file
 
-add_subdirectory(cmake/stb SYSTEM)
-add_subdirectory(cmake/cgltf SYSTEM)
-add_subdirectory(subprojects/cglm SYSTEM)
-add_subdirectory(subprojects/glfw SYSTEM)
-add_subdirectory(subprojects/glad SYSTEM)
-add_subdirectory(subprojects/freetype SYSTEM)
-add_subdirectory(subprojects/harfbuzz SYSTEM)
-add_subdirectory(subprojects/miniaudio SYSTEM)
+add_subdirectory(cmake/stb)
+add_subdirectory(cmake/cgltf)
+add_subdirectory(subprojects/cglm)
+add_subdirectory(subprojects/glfw)
+add_subdirectory(subprojects/glad)
+add_subdirectory(subprojects/freetype)
+add_subdirectory(subprojects/harfbuzz)
+add_subdirectory(subprojects/miniaudio)
 
 set(CMAKE_C_STANDARD 23)
 add_compile_options(-std=gnu23)
