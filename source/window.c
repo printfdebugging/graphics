@@ -158,6 +158,22 @@ i8 window_set_icon(struct window *window, const char *path) {
         return 0;
 }
 
+i8 window_set_cursor_icon(struct window *window, const char *path, i32 size) {
+        GLFWimage image;
+        int image_channel_count;
+        image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
+        if (!image.pixels) {
+                fprintf(stderr, "failed to read window icon: %s", path);
+                return 1;
+        }
+
+        GLFWcursor *cursor = glfwCreateCursor(&image, size, size);
+        glfwSetCursor(window->window, cursor);
+
+        stbi_image_free(image.pixels);
+        return 0;
+}
+
 void window_scale_to_monitor_dpi(GLFWwindow *window) {
         f32 xscale = 1, yscale = 1;
         glfwGetWindowContentScale(window, &xscale, &yscale);

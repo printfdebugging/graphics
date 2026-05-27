@@ -36,6 +36,8 @@ int main() {
                 return EXIT_FAILURE;
         if (window_set_icon(game.window, ASSETS_DIR "logo.png"))
                 return EXIT_FAILURE;
+        if (window_set_cursor_icon(game.window, ASSETS_DIR "textures/sandbox/cursor.png", 32))
+                return EXIT_FAILURE;
 
         game.camera = camera_create();
         game.light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };

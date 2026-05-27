@@ -11,6 +11,7 @@ struct window {
         i32 height;
         const char *title;
         const char *icon;
+        const char *cursor;
         GLFWwindow *window;
         vec4s color;
 };
@@ -24,6 +25,7 @@ void window_swap_buffers(struct window *window);
 void window_destroy(struct window *window);
 bool window_close(struct window *window);
 i8 window_set_icon(struct window *window, const char *path);
+i8 window_set_cursor_icon(struct window *window, const char *path, i32 size);
 void window_scale_to_monitor_dpi(GLFWwindow *window);
 
 #endif
