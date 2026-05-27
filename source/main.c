@@ -131,8 +131,10 @@ int main() {
                         shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
 
                         {
-                                shader_set_uniform(cube_shader, "light_position", 3fv, 1, game.light_position.raw);
-                                shader_set_uniform(cube_shader, "light_direction", 3fv, 1, light_direction.raw);
+                                shader_set_uniform(cube_shader, "light_position", 3fv, 1, game.camera->position.raw);
+                                shader_set_uniform(cube_shader, "light_direction", 3fv, 1, game.camera->front.raw);
+                                shader_set_uniform(cube_shader, "light_cutoff", 1f, (float) cos(glm_rad(12.5f)));
+
                                 shader_set_uniform(cube_shader, "light_ambient", 3fv, 1, light_ambient.raw);
                                 shader_set_uniform(cube_shader, "light_diffuse", 3fv, 1, light_diffuse.raw);
                                 shader_set_uniform(cube_shader, "light_specular", 3fv, 1, light_specular.raw);
@@ -162,30 +164,6 @@ int main() {
                         }
                 }
 
-                {
-                        mat4s model_matrix_light = { .raw = GLM_MAT4_IDENTITY_INIT };
-                        model_matrix_light = glms_translate(model_matrix_light, game.light_position);
-                        model_matrix_light = glms_scale(model_matrix_light, light_scale);
-
-                        /* render cube */
-                        cube->view = view;
-                        cube->projection = projection;
-                        cube->model = model_matrix_light;
-                        glUseProgram(light_shader->program);
-                        shader_set_uniform(light_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-                        shader_set_uniform(light_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-                        shader_set_uniform(light_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-                        for (int i = 0; i < cube->mesh_count; ++i) {
-                                const struct mesh *mesh = cube->mesh[i];
-                                glBindVertexArray(mesh->vao);
-                                if (mesh->index_count) {
-                                        glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
-                                } else {
-                                        glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
-                                }
-                        }
-                }
-
                 window_swap_buffers(game.window);
         }
 
@@ -198,25 +176,15 @@ int main() {
 }
 
 void process_input(struct window *window, float delta_time) {
-        // struct game_data *data = glfwGetWindowUserPointer(window->window);
-        // if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
-        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
-        // if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
-        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
-        // if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
-        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
-        // if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
-        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
-
         struct game_data *data = glfwGetWindowUserPointer(window->window);
         if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
-                data->light_position.z -= 0.1f;
+                camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
         if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
-                data->light_position.z += 0.1f;
+                camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
         if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
-                data->light_position.x -= 0.1f;
+                camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
         if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
-                data->light_position.x += 0.1f;
+                camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {

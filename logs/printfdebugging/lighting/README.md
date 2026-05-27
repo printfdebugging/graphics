@@ -31,6 +31,9 @@
     * [directional light](#directional-light)
     * [point lights](#point-lights)
       * [attenuation](#attenuation)
+    * [spotlight](#spotlight)
+      * [flashlight](#flashlight)
+        * [special goggle effect](#special-goggle-effect)
 * [Playing around](#playing-around)
   * [X-ray implementation](#x-ray-implementation)
     * [Xray Implementation details](#xray-implementation-details)
@@ -441,8 +444,8 @@ there's some color on the edge.
 - *light direction vector* is from the fragment to the source (has been till now)
 - position vectors should have *w* component as 1 for translation and projection to properly apply
 - direction vectors should have `w=0` so that translations don't change it
-- **are directional lights always diffuse?** -> no. both diffuse and specular lighting code use that.
-- **why not directional lights, is there just one directional light per scene?**
+- are directional lights always diffuse? -> no. both diffuse and specular lighting code use that.
+- why not directional lights, is there just one directional light per scene? -> probably
 
 ![directional-lighting](assets/directional-lighting.png)
 
@@ -456,10 +459,35 @@ there's some color on the edge.
 - linear function is one way to do it, but that looks fake
 - we have *constant*, *linear* and *quadratic* float values to specify attenuation
 - applies to all types of lighting, ambient, diffuse & specular. it's like a lighting strength factor
+- seems to suggest that attenuation isn't considered for directional lights, like sun dosn't get dimmer with distance ;)
+- emission maps must be having their own attenuation values, do they?
 
 ![attenuation-when-light-close-up](assets/attenuation-when-light-close-up.png)
 ![attenuation-when-light-far-away](assets/attenuation-when-light-far-away.png)
 
+### spotlight
+- doesn't shoot light in all directions, only in specific direction
+- has a radius within which the objects are visible, eg lamp and torch
+- the light rays make a cone with the apex at the light, not a cylinder
+- defined by world-space *position*, *direction* and cutoff *angle* (for radius)
+- this is similar to xray implementation
+- this too will have attenuation, it's a directed point light after all
+
+#### flashlight
+- is a spotlight located at the viewer's position
+- usually aimed straight ahead from player's perspective
+- directed spotlight, with direction and position continuously updated as player changes orientation
+- we pass cos of angle instead of angle to make comparisons easy with the dot in fs (arcos is an expensive operation)
+- it's to imagine angles and cos/sine values, be aware of their range and how they affect things, confusing names make it worst
+
+##### special goggle effect
+- emission map is only visible when fragment falls in the cone of the flashlight effectively acting as a special reality filter
+- i remember certin games had some items to identify the right tile to step on, or the box with the treasures
+- this can be used in games to also pass on some encoded message and can be a nice easteregg
+- the opposite is also as useful, to denoise the lights and find the target, like thermal goggles
+
+![special-goggles-implementation](assets/special-goggles-implementation.png)
+![denoise-goggles](assets/denoise-goggles.png)
 
 # Playing around
 
