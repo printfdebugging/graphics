@@ -16,9 +16,9 @@ void render_model(struct model *model, struct shader *shader) {
                 const struct mesh *mesh = model->mesh[i];
                 glBindVertexArray(mesh->vao);
                 if (mesh->index_count) {
-                        glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
+                        glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
                 } else {
-                        glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+                        glDrawArrays(mesh->draw_mode, 0, (i32) mesh->vertex_count);
                 }
         }
 }

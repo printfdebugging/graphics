@@ -95,6 +95,8 @@ int main() {
                 vec3s light_specular = { { 1.0f, 1.0f, 1.0f } };
                 vec3s light_scale = { { 0.2f, 0.2f, 0.2f } };
                 vec3s light_direction = { { -0.2f, -1.0f, -0.3f } };  // this is directional light
+                (void) light_scale;
+                (void) light_direction;
 
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
@@ -158,9 +160,9 @@ int main() {
                                 const struct mesh *mesh = cube->mesh[j];
                                 glBindVertexArray(mesh->vao);
                                 if (mesh->index_count) {
-                                        glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
+                                        glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
                                 } else {
-                                        glDrawArrays(mesh->draw_mode, 0, mesh->vertex_count);
+                                        glDrawArrays(mesh->draw_mode, 0, (i32) mesh->vertex_count);
                                 }
                         }
                 }
@@ -168,10 +170,21 @@ int main() {
                 window_swap_buffers(game.window);
         }
 
-        window_destroy(game.window);
-        camera_destroy(game.camera);
-        shader_destroy(axes_shader);
+        /* move to a separate cleanup function, or rather make the subsystems init/cleanup themselves */
+
         mesh_destroy(axes_mesh);
+        model_destroy(cube);
+
+        shader_destroy(axes_shader);
+        shader_destroy(cube_shader);
+        shader_destroy(light_shader);
+
+        texture_destroy(material_diffuse_map);
+        texture_destroy(material_specular_map);
+        texture_destroy(material_emission_map);
+
+        camera_destroy(game.camera);
+        window_destroy(game.window);
 
         return 0;
 }
@@ -200,33 +213,33 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 }
 
 struct mesh *create_axes_mesh() {
-        const int AXES = 2;
-        const int LINES_PER_AXIS = 501;
-        const int LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
-        const int POINTS_PER_LINE = 2;
-        const int FLOATS_PER_POINT = 3;
-        const int count = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
+        const u32 AXES = 2;
+        const u32 LINES_PER_AXIS = 501;
+        const u32 LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
+        const u32 POINTS_PER_LINE = 2;
+        const u32 FLOATS_PER_POINT = 3;
+        const u32 count = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
 
-        float vertices[AXES][LINES_PER_AXIS][POINTS_PER_LINE][FLOATS_PER_POINT];
+        f32 vertices[AXES][LINES_PER_AXIS][POINTS_PER_LINE][FLOATS_PER_POINT];
 
-        for (int z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
-                vertices[0][z + LINES_ON_EACH_SIDE][0][0] = (float) -LINES_ON_EACH_SIDE;
+        for (u32 z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
+                vertices[0][z + LINES_ON_EACH_SIDE][0][0] = (f32) -LINES_ON_EACH_SIDE;
                 vertices[0][z + LINES_ON_EACH_SIDE][0][1] = 0.0f;
-                vertices[0][z + LINES_ON_EACH_SIDE][0][2] = (float) z;
+                vertices[0][z + LINES_ON_EACH_SIDE][0][2] = (f32) z;
 
-                vertices[0][z + LINES_ON_EACH_SIDE][1][0] = (float) LINES_ON_EACH_SIDE;
+                vertices[0][z + LINES_ON_EACH_SIDE][1][0] = (f32) LINES_ON_EACH_SIDE;
                 vertices[0][z + LINES_ON_EACH_SIDE][1][1] = 0.0f;
-                vertices[0][z + LINES_ON_EACH_SIDE][1][2] = (float) z;
+                vertices[0][z + LINES_ON_EACH_SIDE][1][2] = (f32) z;
         }
 
-        for (int x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
-                vertices[1][x + LINES_ON_EACH_SIDE][0][0] = (float) x;
+        for (u32 x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
+                vertices[1][x + LINES_ON_EACH_SIDE][0][0] = (f32) x;
                 vertices[1][x + LINES_ON_EACH_SIDE][0][1] = 0.0f;
-                vertices[1][x + LINES_ON_EACH_SIDE][0][2] = (float) -LINES_ON_EACH_SIDE;
+                vertices[1][x + LINES_ON_EACH_SIDE][0][2] = (f32) -LINES_ON_EACH_SIDE;
 
-                vertices[1][x + LINES_ON_EACH_SIDE][1][0] = (float) x;
+                vertices[1][x + LINES_ON_EACH_SIDE][1][0] = (f32) x;
                 vertices[1][x + LINES_ON_EACH_SIDE][1][1] = 0.0f;
-                vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (float) LINES_ON_EACH_SIDE;
+                vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (f32) LINES_ON_EACH_SIDE;
         }
 
         struct mesh *axes_mesh = mesh_create();
@@ -255,7 +268,7 @@ void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, 
         shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
 
         glBindVertexArray(axes_mesh->vao);
-        glDrawArrays(GL_LINES, 0, axes_mesh->vertex_count);
+        glDrawArrays(GL_LINES, 0, (i32) axes_mesh->vertex_count);
 }
 
 struct model *create_cube_model() {

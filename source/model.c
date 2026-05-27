@@ -63,8 +63,8 @@ static GLenum gltf_primitive_type_to_gl_type(cgltf_primitive_type type) {
  */
 static char *get_image_path_from_uri(const char *model_file_path, const char *image_uri) {
         const char *last_separator = strrchr(model_file_path, '/');
-        int base_path_size = sizeof(char) * (last_separator - model_file_path + 1);
-        int image_path_size = sizeof(char) * strlen(image_uri);
+        u64 base_path_size = sizeof(char) * (u64) (last_separator - model_file_path + 1);
+        u64 image_path_size = sizeof(char) * strlen(image_uri);
         char *image_path = malloc(base_path_size + image_path_size + 1);
 
         snprintf(image_path, base_path_size, "%s", model_file_path);
@@ -73,14 +73,14 @@ static char *get_image_path_from_uri(const char *model_file_path, const char *im
         return image_path;
 }
 
-static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, u32 *count, i32 *stride) {
+static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, u64 *count, u64 *stride) {
         const cgltf_buffer_view *buffer_view = accessor->buffer_view;
-        const int offset = accessor->offset + buffer_view->offset;
-        const int data_size = accessor->count * cgltf_calc_size(accessor->type, accessor->component_type);
+        const u64 offset = accessor->offset + buffer_view->offset;
+        const u64 data_size = accessor->count * cgltf_calc_size(accessor->type, accessor->component_type);
+        (void) data_size;
 
-        /* todo: i heard that offset was in bytes, but data is a void * which is 64
-         * bits = 8 bytes */
-        *data = (buffer_view->buffer->data + offset);
+        /* todo: i heard that offset was in bytes, but data is a void * which is 64 bits = 8 bytes */
+        *data = ((u64 *) buffer_view->buffer->data + offset);
         *count = accessor->count;
         *stride = buffer_view->stride;
 }
@@ -96,7 +96,7 @@ struct model *model_create() {
 }
 
 void model_destroy(struct model *model) {
-        for (int i = 0; i < model->mesh_count; ++i) {
+        for (u64 i = 0; i < model->mesh_count; ++i) {
                 mesh_destroy(*(model->mesh + i));
         }
 
@@ -126,7 +126,7 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
         }
 
         model->mesh = malloc(sizeof(struct mesh *) * data->meshes_count);
-        model->mesh_count = data->meshes_count;
+        model->mesh_count = (u32) data->meshes_count;
 
         /* iterate over all the meshes - meshes have primitives */
         for (u64 i = 0; i < data->meshes_count; ++i) {
@@ -137,16 +137,16 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
                 /* todo: check meshptr, if mesh_create was successful or not. */
                 *meshptr = mesh_create();
                 struct mesh *mesh = *meshptr;
-                for (int j = 0; j < gltf_mesh->primitives_count; ++j) {
+                for (u64 j = 0; j < gltf_mesh->primitives_count; ++j) {
                         const cgltf_primitive *primitive = &gltf_mesh->primitives[j];
 
                         if (primitive->indices) {
-                                void *data = NULL;
-                                int count = 0;
-                                int stride = 0;
+                                void *index_data = NULL;
+                                u64 count = 0;
+                                u64 stride = 0;
                                 GLenum type = gltf_component_type_to_gl_type(primitive->indices->component_type);
-                                accessor_point_to_data(primitive->indices, &data, &count, &stride);
-                                mesh_load_indices(mesh, data, count, type, stride);
+                                accessor_point_to_data(primitive->indices, &index_data, &count, &stride);
+                                mesh_load_indices(mesh, index_data, (u32) count, type, (i32) stride);
                         }
 
                         /* materials array defines various materials and their various
@@ -166,7 +166,7 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
                                                 fprintf(stderr, "image is in the buffer_view\n");
                                                 exit(1);
                                         } else if (image->uri) {
-                                                const char *image_path = get_image_path_from_uri(filepath, image->uri);
+                                                char *image_path = get_image_path_from_uri(filepath, image->uri);
                                                 mesh->texture_count += 1;
                                                 mesh->textures = realloc(mesh->textures, sizeof(struct texture **) * mesh->texture_count);
 
@@ -190,13 +190,13 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
                         const u64 attribute_count = primitive->attributes_count;
                         for (u64 k = 0; k < attribute_count; ++k) {
                                 const cgltf_attribute *attribute = &primitive->attributes[k];
-                                void *data = NULL;
-                                u32 count = 0;
-                                i32 stride = 0;
+                                void *attr_data = NULL;
+                                u64 count = 0;
+                                u64 stride = 0;
                                 switch (attribute->type) {
                                         case cgltf_attribute_type_position: {
-                                                accessor_point_to_data(attribute->data, &data, &count, &stride);
-                                                mesh_load_vertices(mesh, data, count, stride);
+                                                accessor_point_to_data(attribute->data, &attr_data, &count, &stride);
+                                                mesh_load_vertices(mesh, attr_data, (u32) count, (i32) stride);
                                         } break;
                                         case cgltf_attribute_type_normal: {
                                         } break;
@@ -204,8 +204,8 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
                                                 /* todo: check if this attribute->index property actually
                                                  * is an index in the textures array i.e. pointing to the texture
                                                  * these texture coordinates are for. */
-                                                accessor_point_to_data(attribute->data, &data, &count, &stride);
-                                                mesh_load_uv(mesh, data, count, stride);
+                                                accessor_point_to_data(attribute->data, &attr_data, &count, &stride);
+                                                mesh_load_uv(mesh, attr_data, (u32) count, (i32) stride);
                                                 /* where to load the texture? surely a texture is a part of the
                                                  * "mesh", so it probably should be loaded here since we are
                                                  * loading texture coordinates. */

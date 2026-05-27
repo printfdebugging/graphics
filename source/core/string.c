@@ -131,12 +131,12 @@ i8 string_append_file(struct string *string, const char *path) {
                 return 1;
 
         i8 status = string_append(string, file_contents->data);
-        free(file_contents);
+        string_destroy(file_contents);
         return status;
 }
 
 void string_destroy(struct string *string) {
-        if (string->data)
-                free(string->data);
+        if (!string) return;
+        if (string->data) free(string->data);
         free(string);
 }

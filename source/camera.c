@@ -30,7 +30,7 @@ struct camera *camera_create() {
 }
 
 void camera_process_keyboard(struct camera *camera, enum camera_direction direction, f64 delta_time) {
-        const f32 cameraSpeed = camera->movement_speed * delta_time;
+        const f32 cameraSpeed = camera->movement_speed * (f32) delta_time;
 
         switch (direction) {
                 case CAMERA_DIRECTION_FORWARD: {

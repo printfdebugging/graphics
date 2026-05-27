@@ -57,10 +57,9 @@ static i8 shader_linked_successfully(u32 program) {
 }
 
 static void shader_bind_variable_names(u32 program) {
-        for (enum mesh_attribute i = MESH_ATTRIBUTE_POSITION;
-             i < MESH_ATTRIBUTE_COUNT;
-             ++i)
+        for (enum mesh_attribute i = MESH_ATTRIBUTE_POSITION; i < MESH_ATTRIBUTE_COUNT; ++i) {
                 glBindAttribLocation(program, i, shader_variable_names[i]);
+        }
 }
 
 struct shader *shader_create() {
@@ -85,12 +84,18 @@ i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *f
         struct string *vsource = string_create(NULL);
         if (!vsource)
                 return 1;
-        if (string_append(vsource, version))
+        if (string_append(vsource, version)) {
+                string_destroy(vsource);
                 return 1;
-        if (string_append(vsource, shader_float_precision_declaration))
+        }
+        if (string_append(vsource, shader_float_precision_declaration)) {
+                string_destroy(vsource);
                 return 1;
-        if (string_append_file(vsource, vpath))
+        }
+        if (string_append_file(vsource, vpath)) {
+                string_destroy(vsource);
                 return 1;
+        }
 
         u32 vshader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vshader, 1, (const char **) &vsource->data, NULL);

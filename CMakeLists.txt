@@ -22,7 +22,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 add_subdirectory(cmake/stb)
 add_subdirectory(cmake/cgltf)
-add_subdirectory(subprojects/cglm)
+add_subdirectory(subprojects/cglm SYSTEM)
 add_subdirectory(subprojects/glfw)
 add_subdirectory(subprojects/glad)
 add_subdirectory(subprojects/freetype)
@@ -74,7 +74,6 @@ target_compile_options(${APPLICATION} PRIVATE
         -Wcast-align
         -Wstrict-prototypes
         -Wwrite-strings
-        -Wcast-qual
         -Wswitch-default
         -Wswitch-enum
         -Wconversion
@@ -83,6 +82,7 @@ target_compile_options(${APPLICATION} PRIVATE
         -fsanitize=undefined
         -fsanitize=address
         -DLSAN_OPTIONS=verbosity=1:log_threads=1
+        # -Wcast-qual
         # -Wfloat-equal
         # -Werror
 )
