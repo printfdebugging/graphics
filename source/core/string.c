@@ -1,9 +1,22 @@
-#include "core/string.h"
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "core/string.h"
+#include "core/defines.h"
+
+static u64 string_get_extra_capacity(struct string *string) {
+        if (!string || string->capacity == 0)
+                return 0;
+        if (string->capacity == string->length + 1) /* capacity < length can never happen */
+                return 0;
+        return string->capacity - (string->length + 1);
+}
+
+static u64 string_calculate_new_capacity_for_length(u64 length) {
+        return (u64) (ceil((f64) length / DEFAULT_STRING_CAPACITY) * DEFAULT_STRING_CAPACITY);
+}
 
 struct string *string_create(const char *data) {
         struct string *string = malloc(sizeof(struct string));
@@ -17,7 +30,7 @@ struct string *string_create(const char *data) {
                 return string;
 
         string->length = strlen(data);
-        string->capacity = ceil((string->length + 1) / DEFAULT_STRING_CAPACITY) * DEFAULT_STRING_CAPACITY;
+        string->capacity = string_calculate_new_capacity_for_length(string->length + 1);
         string->data = malloc(string->capacity);
 
         if (!string->data) {
@@ -37,7 +50,7 @@ struct string *string_create_from_file(const char *path) {
         }
 
         fseek(file, 0, SEEK_END);
-        long length = ftell(file);
+        i64 length = ftell(file);
         fseek(file, 0, SEEK_SET);
 
         if (length < 0) {
@@ -47,8 +60,8 @@ struct string *string_create_from_file(const char *path) {
         }
 
         struct string *string = string_create(NULL);
-        string->length = length;
-        string->capacity = ceil((string->length + 1) / DEFAULT_STRING_CAPACITY) * DEFAULT_STRING_CAPACITY;
+        string->length = (u64) length;
+        string->capacity = string_calculate_new_capacity_for_length(string->length + 1);
         string->data = malloc(string->capacity);
 
         if (!string->data) {
@@ -57,9 +70,9 @@ struct string *string_create_from_file(const char *path) {
                 return NULL;
         }
 
-        int readCount = fread(string->data, 1, string->length, file);
-        if (readCount < string->length || readCount == 0) {
-                fprintf(stderr, "read returned %i which is either 0 or less than %li", readCount, length);
+        u64 read_count = fread(string->data, 1, string->length, file);
+        if (read_count < string->length || read_count == 0) {
+                fprintf(stderr, "read returned %li which is either 0 or less than %li", read_count, length);
                 fclose(file);
                 string_destroy(string);
                 return NULL;
@@ -75,30 +88,31 @@ struct string *string_create_from_file(const char *path) {
         return string;
 }
 
-int string_append(struct string *string, const char *part) {
+i8 string_append(struct string *string, const char *part) {
         if (!part) {
                 fprintf(stderr, "cannot append NULL to string\n");
                 return 1;
         }
 
-        int length = strlen(part);
-        int empty_space = string->capacity - (string->length + 1);
-        bool not_enough_space = empty_space < length + 1;
+        u64 length = strlen(part);
+        u64 extra_capacity = string_get_extra_capacity(string);
+        b8 not_enough_space = extra_capacity < length + 1;
 
         if (not_enough_space) {
-                /* expand the buffer in multiples of `DEFAULT_STRING_CAPACITY` */
-                int new_capacity = ceil((string->length + 1 + length + 1) / DEFAULT_STRING_CAPACITY) * DEFAULT_STRING_CAPACITY;
+                /* expand in multiples of `DEFAULT_STRING_CAPACITY` */
+                u64 new_capacity = string_calculate_new_capacity_for_length(string->length + 1 + length + 1);
                 char *buffer = malloc(new_capacity);
                 if (!buffer) {
                         fprintf(stderr, "failed to allocate larger buffer for string to append");
                         return 1;
                 }
 
-                memcpy(buffer, string->data, string->length);
-                buffer[string->length] = '\0';
+                if (string->data) {
+                        memcpy(buffer, string->data, string->length);
+                        buffer[string->length] = '\0';
+                        free(string->data);
+                }
 
-                /* free the old memory and point to the new larger buffer */
-                free(string->data);
                 string->data = buffer;
                 string->capacity = new_capacity;
         }
@@ -111,12 +125,12 @@ int string_append(struct string *string, const char *part) {
         return 0;
 }
 
-int string_append_file(struct string *string, const char *path) {
+i8 string_append_file(struct string *string, const char *path) {
         struct string *file_contents = string_create_from_file(path);
         if (!file_contents)
                 return 1;
 
-        int status = string_append(string, file_contents->data);
+        i8 status = string_append(string, file_contents->data);
         free(file_contents);
         return status;
 }

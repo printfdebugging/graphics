@@ -1,4 +1,10 @@
+#include "glad/glad.h"
+
 #include "renderer.h"
+#include "mesh.h"
+#include "model.h"
+#include "shader.h"
+#include "core/defines.h"
 
 void render_model(struct model *model, struct shader *shader) {
         glUseProgram(shader->program);
@@ -6,7 +12,7 @@ void render_model(struct model *model, struct shader *shader) {
         shader_set_uniform(shader, "view", Matrix4fv, 1, GL_FALSE, &model->view.col[0].raw[0]);
         shader_set_uniform(shader, "projection", Matrix4fv, 1, GL_FALSE, &model->projection.col[0].raw[0]);
 
-        for (int i = 0; i < model->mesh_count; ++i) {
+        for (u32 i = 0; i < model->mesh_count; ++i) {
                 const struct mesh *mesh = model->mesh[i];
                 glBindVertexArray(mesh->vao);
                 if (mesh->index_count) {

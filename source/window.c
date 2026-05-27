@@ -1,19 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "GLFW/glfw3.h"
+#include "cglm/struct.h"
 #include "glad/glad.h"
 #include "stb_image.h"
 
 #include "game.h"
-#include "logger.h"
 #include "window.h"
+#include "core/defines.h"
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <dwmapi.h>
 #include "GLFW/glfw3native.h"
 #endif
-
-#include <stdlib.h>
-#include <string.h>
 
 #ifdef _WIN32
 static bool
@@ -30,7 +31,7 @@ __msw_is_dark_mode() {
 }
 #endif
 
-static void __window_frame_buffer_resize_callback(GLFWwindow *window, int width, int height) {
+static void __window_frame_buffer_resize_callback(GLFWwindow *window, i32 width, i32 height) {
         struct game_data *data = glfwGetWindowUserPointer(window);
         data->window->width = width;
         data->window->height = height;
@@ -38,7 +39,7 @@ static void __window_frame_buffer_resize_callback(GLFWwindow *window, int width,
         glViewport(0, 0, width, height);
 }
 
-struct window *window_create(unsigned int width, unsigned int height, const char *title, vec4s color) {
+struct window *window_create(i32 width, i32 height, const char *title, vec4s color) {
         if (!glfwInit()) {
                 fprintf(stderr, "failed to initialize glfw");
                 return NULL;
@@ -141,7 +142,7 @@ bool window_close(struct window *window) {
         return glfwWindowShouldClose(window->window);
 }
 
-int window_set_icon(struct window *window, const char *path) {
+i8 window_set_icon(struct window *window, const char *path) {
         GLFWimage image;
         int image_channel_count;
         image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
@@ -158,10 +159,12 @@ int window_set_icon(struct window *window, const char *path) {
 }
 
 void window_scale_to_monitor_dpi(GLFWwindow *window) {
-        float xscale = 1, yscale = 1;
+        f32 xscale = 1, yscale = 1;
         glfwGetWindowContentScale(window, &xscale, &yscale);
         struct game_data *data = glfwGetWindowUserPointer(window);
         if (data) {
-                __window_frame_buffer_resize_callback(window, data->window->width * xscale, data->window->height * yscale);
+                i32 width = (i32) ((f32) data->window->width * xscale);
+                i32 height = (i32) ((f32) data->window->height * yscale);
+                __window_frame_buffer_resize_callback(window, width, height);
         }
 }

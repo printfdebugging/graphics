@@ -3,13 +3,15 @@
 
 #include "glad/glad.h"
 
+#include "core/defines.h"
+
 struct shader {
-        unsigned int program;
+        u32 program;
 };
 
 struct shader *shader_create();
 void shader_destroy(struct shader *shader);
-int shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
+i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
 
 #define shader_set_uniform(shader, name, type, ...)                                                \
         {                                                                                          \

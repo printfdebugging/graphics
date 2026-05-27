@@ -1,6 +1,12 @@
-#include "GLFW/glfw3.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "cglm/struct.h"
 
 #include "camera.h"
+#include "cglm/util.h"
+#include "core/defines.h"
 
 struct camera *camera_create() {
         struct camera *camera = malloc(sizeof(struct camera));
@@ -9,9 +15,9 @@ struct camera *camera_create() {
                 return NULL;
         }
 
-        camera->position = (vec3s) { 0.0f, 1.0f, 6.0f };
-        camera->front = (vec3s) { 0.0f, 0.0f, -1.0f };
-        camera->up = (vec3s) { 0.0f, 1.0f, 0.0f };
+        camera->position = (vec3s) { { 0.0f, 1.0f, 6.0f } };
+        camera->front = (vec3s) { { 0.0f, 0.0f, -1.0f } };
+        camera->up = (vec3s) { { 0.0f, 1.0f, 0.0f } };
         camera->yaw = -90.0f;
         camera->pitch = 0.0f;
         camera->x = 400;
@@ -23,8 +29,8 @@ struct camera *camera_create() {
         return camera;
 }
 
-void camera_process_keyboard(struct camera *camera, enum camera_direction direction, float deltaTime) {
-        const float cameraSpeed = camera->movement_speed * deltaTime;
+void camera_process_keyboard(struct camera *camera, enum camera_direction direction, f64 delta_time) {
+        const f32 cameraSpeed = camera->movement_speed * delta_time;
 
         switch (direction) {
                 case CAMERA_DIRECTION_FORWARD: {
@@ -64,18 +70,18 @@ void camera_adjust_direction(struct camera *camera) {
                 camera->pitch = -89.0f;
 
         vec3s direction = {
-                .x = cos(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch)),
-                .y = sin(glm_rad(camera->pitch)),
-                .z = sin(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch)),
+                .x = (f32) (cos(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch))),
+                .y = (f32) (sin(glm_rad(camera->pitch))),
+                .z = (f32) (sin(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch))),
         };
 
         direction = glms_normalize(direction);
         camera->front = direction;
 }
 
-static bool left_button_was_pressed = false;
+static b8 left_button_was_pressed = false;
 
-void camera_process_mouse_movement(struct camera *camera, float x, float y, bool left_button_pressed) {
+void camera_process_mouse_movement(struct camera *camera, f32 x, f32 y, b8 left_button_pressed) {
         if (!left_button_pressed) {
                 left_button_was_pressed = false;
                 return;
@@ -88,8 +94,8 @@ void camera_process_mouse_movement(struct camera *camera, float x, float y, bool
                 return;
         }
 
-        float xoffset = camera->x - x;
-        float yoffset = camera->y - y;
+        f32 xoffset = camera->x - x;
+        f32 yoffset = camera->y - y;
         xoffset *= camera->mouse_sensitivity;
         yoffset *= camera->mouse_sensitivity;
 
@@ -101,8 +107,8 @@ void camera_process_mouse_movement(struct camera *camera, float x, float y, bool
         camera_adjust_direction(camera);
 }
 
-void camera_process_mouse_scroll(struct camera *camera, float yoffset) {
-        camera->fov -= (float) yoffset;
+void camera_process_mouse_scroll(struct camera *camera, f32 yoffset) {
+        camera->fov -= (f32) yoffset;
         if (camera->fov < 1.0)
                 camera->fov = 1.0f;
         if (camera->fov > 45.0f)

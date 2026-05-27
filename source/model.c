@@ -1,10 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "cgltf.h"
+
 #include "model.h"
 #include "mesh.h"
 #include "texture.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include "cgltf.h"
+#include "core/defines.h"
 
 static GLenum gltf_component_type_to_gl_type(cgltf_component_type type) {
         switch (type) {
@@ -22,6 +25,7 @@ static GLenum gltf_component_type_to_gl_type(cgltf_component_type type) {
                         return GL_FLOAT;
                 case cgltf_component_type_invalid:
                 case cgltf_component_type_max_enum:
+                default:
                         fprintf(stderr, "error: invalid gltf component type\n");
                         exit(1);
                         break;
@@ -46,6 +50,7 @@ static GLenum gltf_primitive_type_to_gl_type(cgltf_primitive_type type) {
                         return GL_TRIANGLE_FAN;
                 case cgltf_primitive_type_invalid:
                 case cgltf_primitive_type_max_enum:
+                default:
                         fprintf(stderr, "error: invalid gltf primitive type\n");
                         exit(1);
                         break;
@@ -68,7 +73,7 @@ static char *get_image_path_from_uri(const char *model_file_path, const char *im
         return image_path;
 }
 
-static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, int *count, int *stride) {
+static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, u32 *count, i32 *stride) {
         const cgltf_buffer_view *buffer_view = accessor->buffer_view;
         const int offset = accessor->offset + buffer_view->offset;
         const int data_size = accessor->count * cgltf_calc_size(accessor->type, accessor->component_type);
@@ -103,7 +108,7 @@ void model_destroy(struct model *model) {
 /* todo: try out multiple models from the assets and see what works. */
 /* note: assuming only one primitive in the primitives array for now */
 
-int model_load_from_file(struct model *model, const char *filepath) {
+i8 model_load_from_file(struct model *model, const char *filepath) {
         cgltf_data *data = NULL;
         cgltf_result result;
         const cgltf_options options = { 0 };
@@ -124,7 +129,7 @@ int model_load_from_file(struct model *model, const char *filepath) {
         model->mesh_count = data->meshes_count;
 
         /* iterate over all the meshes - meshes have primitives */
-        for (int i = 0; i < data->meshes_count; ++i) {
+        for (u64 i = 0; i < data->meshes_count; ++i) {
                 /*         struct mesh  */
                 // contoinue here
                 const cgltf_mesh *gltf_mesh = &data->meshes[i];
@@ -182,12 +187,12 @@ int model_load_from_file(struct model *model, const char *filepath) {
                                 mesh->draw_mode = gltf_primitive_type_to_gl_type(primitive->type);
                         }
 
-                        const int attribute_count = primitive->attributes_count;
-                        for (int k = 0; k < attribute_count; ++k) {
+                        const u64 attribute_count = primitive->attributes_count;
+                        for (u64 k = 0; k < attribute_count; ++k) {
                                 const cgltf_attribute *attribute = &primitive->attributes[k];
                                 void *data = NULL;
-                                int count = 0;
-                                int stride = 0;
+                                u32 count = 0;
+                                i32 stride = 0;
                                 switch (attribute->type) {
                                         case cgltf_attribute_type_position: {
                                                 accessor_point_to_data(attribute->data, &data, &count, &stride);
@@ -213,6 +218,7 @@ int model_load_from_file(struct model *model, const char *filepath) {
                                         case cgltf_attribute_type_weights:
                                         case cgltf_attribute_type_custom:
                                         case cgltf_attribute_type_max_enum:
+                                        default:
                                                 fprintf(stderr, "attribute type not handled: %i\n", attribute->type);
                                                 break;
                                 }

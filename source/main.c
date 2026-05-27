@@ -1,10 +1,9 @@
-#include "GLFW/glfw3.h"
-#include "cglm/struct.h"
-#include "cglm/struct/affine.h"
-#include "glad/glad.h"
-
+#include <math.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "cglm/struct.h"
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
 #include "camera.h"
 #include "game.h"
@@ -14,8 +13,9 @@
 #include "shader.h"
 #include "texture.h"
 #include "window.h"
+#include "core/defines.h"
 
-void process_input(struct window *window, float delta_time);
+void process_input(struct window *window, f64 delta_time);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
@@ -80,7 +80,7 @@ int main() {
         material_emission_map->texture_index = 3;
 
         while (!window_close(game.window)) {
-                float current_frame = glfwGetTime();
+                f64 current_frame = glfwGetTime();
                 game.delta_time = current_frame - game.last_frame;
                 game.last_frame = current_frame;
 
@@ -116,9 +116,9 @@ int main() {
                         { { -1.3f, 1.0f, -1.5f } }
                 };
 
-                for (unsigned int i = 0; i < 10; ++i) {
+                for (u32 i = 0; i < 10; ++i) {
                         /* render model*/
-                        float angle = 20.0f * (float) i;
+                        f32 angle = 20.0f * (f32) i;
                         cube->model = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
                         cube->model = glms_translate(cube->model, cube_positions[i]);
                         cube->model = glms_rotate(cube->model, angle, (vec3s) { { 1.0f, 0.3f, 0.5f } });
@@ -133,8 +133,8 @@ int main() {
                         {
                                 shader_set_uniform(cube_shader, "light_position", 3fv, 1, game.camera->position.raw);
                                 shader_set_uniform(cube_shader, "light_direction", 3fv, 1, game.camera->front.raw);
-                                shader_set_uniform(cube_shader, "light_inner_cutoff", 1f, (float) cos(glm_rad(12.5f)));
-                                shader_set_uniform(cube_shader, "light_outer_cutoff", 1f, (float) cos(glm_rad(17.5f)));
+                                shader_set_uniform(cube_shader, "light_inner_cutoff", 1f, (f32) cos(glm_rad(12.5f)));
+                                shader_set_uniform(cube_shader, "light_outer_cutoff", 1f, (f32) cos(glm_rad(17.5f)));
 
                                 shader_set_uniform(cube_shader, "light_ambient", 3fv, 1, light_ambient.raw);
                                 shader_set_uniform(cube_shader, "light_diffuse", 3fv, 1, light_diffuse.raw);
@@ -152,10 +152,10 @@ int main() {
                         shader_set_uniform(cube_shader, "material_shininess", 1f, MATERIALS[mat].shininess * 128.0f);
                         shader_set_uniform(cube_shader, "material_diffuse_map", 1i, material_diffuse_map->texture_index);
                         shader_set_uniform(cube_shader, "material_specular_map", 1i, material_specular_map->texture_index);
-                        shader_set_uniform(cube_shader, "material_emission_map", 1i, material_emission_map->texture_index);
-                        shader_set_uniform(cube_shader, "time", 1f, current_frame);
-                        for (int i = 0; i < cube->mesh_count; ++i) {
-                                const struct mesh *mesh = cube->mesh[i];
+                        // shader_set_uniform(cube_shader, "material_emission_map", 1i, material_emission_map->texture_index);
+                        // shader_set_uniform(cube_shader, "time", 1f, (f32) current_frame);
+                        for (u32 j = 0; j < cube->mesh_count; ++j) {
+                                const struct mesh *mesh = cube->mesh[j];
                                 glBindVertexArray(mesh->vao);
                                 if (mesh->index_count) {
                                         glDrawElements(mesh->draw_mode, mesh->index_count, mesh->index_type, NULL);
@@ -176,7 +176,7 @@ int main() {
         return 0;
 }
 
-void process_input(struct window *window, float delta_time) {
+void process_input(struct window *window, f64 delta_time) {
         struct game_data *data = glfwGetWindowUserPointer(window->window);
         if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
                 camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
@@ -194,6 +194,7 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+        (void) xoffset;
         struct game_data *data = glfwGetWindowUserPointer(window);
         camera_process_mouse_scroll(data->camera, (float) yoffset);
 }
@@ -248,6 +249,7 @@ struct shader *create_axes_shader() {
 }
 
 void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection) {
+        (void) model;
         glUseProgram(axes_shader->program);
         shader_set_uniform(axes_shader, "view", Matrix4fv, 1, GL_FALSE, &view.col[0].raw[0]);
         shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);

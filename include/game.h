@@ -2,8 +2,10 @@
 #define GAME_H
 
 #include "cglm/struct.h"
+
 #include "camera.h"
 #include "window.h"
+#include "core/defines.h"
 
 /* this is the game data which is passed around in the callbacks. this is  not
  * a place to store textures etc, they live separately, though they should be
@@ -13,11 +15,11 @@ struct game_data {
         struct window *window;
         struct camera *camera;
 
-        float last_frame;
-        float delta_time;
+        f64 last_frame;
+        f64 delta_time;
         vec3s light_position;
 };
 
-int game_run();
+i8 game_run();
 
 #endif

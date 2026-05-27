@@ -1,12 +1,12 @@
-#include "shader.h"
-#include "logger.h"
-#include "mesh.h"
-#include "core/string.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "glad/glad.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "shader.h"
+#include "mesh.h"
+#include "core/defines.h"
+#include "core/string.h"
 
 static const char *shader_variable_names[] = {
         [MESH_ATTRIBUTE_POSITION] = "in_position",
@@ -26,13 +26,13 @@ static const char *shader_float_precision_declaration =
     "    precision mediump float;\n"
     "#endif\n";
 
-static int shader_compiled_successfully(unsigned int shader, const char *filepath) {
-        int success;
+static i8 shader_compiled_successfully(u32 shader, const char *filepath) {
+        i32 success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (success)
                 return 0;
 
-        int info_log_len;
+        i32 info_log_len;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_log_len);
 
         char info_log[info_log_len];
@@ -41,13 +41,13 @@ static int shader_compiled_successfully(unsigned int shader, const char *filepat
         return 1;
 }
 
-static int shader_linked_successfully(unsigned int program) {
-        int success;
+static i8 shader_linked_successfully(u32 program) {
+        i32 success;
         glGetProgramiv(program, GL_LINK_STATUS, &success);
         if (success)
                 return 0;
 
-        int info_log_len;
+        i32 info_log_len;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_log_len);
 
         char info_log[info_log_len];
@@ -56,7 +56,7 @@ static int shader_linked_successfully(unsigned int program) {
         return 1;
 }
 
-static void shader_bind_variable_names(unsigned int program) {
+static void shader_bind_variable_names(u32 program) {
         for (enum mesh_attribute i = MESH_ATTRIBUTE_POSITION;
              i < MESH_ATTRIBUTE_COUNT;
              ++i)
@@ -74,7 +74,7 @@ struct shader *shader_create() {
         return shader;
 }
 
-int shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath) {
+i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath) {
         /* read and compile vertex shader */
 
         // TODO: instead stringify the part to append first and
@@ -92,7 +92,7 @@ int shader_load_from_file(struct shader *shader, const char *vpath, const char *
         if (string_append_file(vsource, vpath))
                 return 1;
 
-        unsigned int vshader = glCreateShader(GL_VERTEX_SHADER);
+        u32 vshader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vshader, 1, (const char **) &vsource->data, NULL);
         glCompileShader(vshader);
         string_destroy(vsource);
@@ -116,7 +116,7 @@ int shader_load_from_file(struct shader *shader, const char *vpath, const char *
         if (string_append_file(fsource, fpath))
                 return 1;
 
-        unsigned int fshader = glCreateShader(GL_FRAGMENT_SHADER);
+        u32 fshader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fshader, 1, (const char **) &fsource->data, NULL);
         glCompileShader(fshader);
         string_destroy(fsource);
@@ -125,7 +125,7 @@ int shader_load_from_file(struct shader *shader, const char *vpath, const char *
                 return 1;
 
         /* create shader program */
-        unsigned int sprogram = glCreateProgram();
+        u32 sprogram = glCreateProgram();
         if (sprogram == 0) {
                 fprintf(stderr, "failed to create shader program\n");
                 return 1;

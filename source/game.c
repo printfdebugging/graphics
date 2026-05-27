@@ -1,5 +1,6 @@
 #include "game.h"
+#include "core/defines.h"
 
-int game_run() {
+i8 game_run() {
         return 0;
 }

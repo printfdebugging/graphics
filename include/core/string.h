@@ -1,6 +1,8 @@
 #ifndef CORE_STRING_H
 #define CORE_STRING_H
 
+#include "core/defines.h"
+
 #define DEFAULT_STRING_CAPACITY 512.0f
 
 struct string {
@@ -11,14 +13,14 @@ struct string {
          * of the memory used by the string which would be
          * `length + 1` with that `+1` for the `\0` byte.
          */
-        int length;
+        u64 length;
 
         /*
          * `capacity` is the total number of bytes the data
          * buffer has been allocated. we allocate it in multiples
          * of `DEFAULT_STRING_CAPACITY`.
          */
-        int capacity;
+        u64 capacity;
 };
 
 struct string *string_create(const char *data);
@@ -30,8 +32,8 @@ struct string *string_create_from_file(const char *path);
  * this function doesn't free part (infact it assumes part
  * to be stack allocated).
  */
-int string_append(struct string *string, const char *part);
-int string_append_file(struct string *string, const char *path);
+i8 string_append(struct string *string, const char *part);
+i8 string_append_file(struct string *string, const char *path);
 void string_destroy(struct string *string);
 
 #endif

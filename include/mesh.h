@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 
 #include "texture.h"
+#include "core/defines.h"
 
 enum mesh_attribute {
         MESH_ATTRIBUTE_POSITION = 0,
@@ -28,17 +29,17 @@ struct mesh {
         unsigned int vbo_uv;
         unsigned int vbo_normal;
 
-        unsigned int index_count;
-        unsigned int vertex_count;
-        unsigned int color_count;
-        unsigned int uv_count;
-        unsigned int normal_count;
+        u32 index_count;
+        u32 vertex_count;
+        u32 color_count;
+        u32 uv_count;
+        u32 normal_count;
 
-        unsigned int index_stride;
-        unsigned int vertex_stride;
-        unsigned int color_stride;
-        unsigned int uv_stride;
-        unsigned int normal_stride;
+        i32 index_stride;
+        i32 vertex_stride;
+        i32 color_stride;
+        i32 uv_stride;
+        i32 normal_stride;
 
         GLenum index_type;
         GLenum draw_mode;
@@ -49,10 +50,10 @@ struct mesh {
 
 struct mesh *mesh_create();
 void mesh_destroy(struct mesh *mesh);
-void mesh_load_vertices(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
-void mesh_load_indices(struct mesh *mesh, void *data, unsigned int count, GLenum type, unsigned int stride);
-void mesh_load_colors(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
-void mesh_load_uv(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
-void mesh_load_normals(struct mesh *mesh, void *data, unsigned int count, unsigned int stride);
+void mesh_load_vertices(struct mesh *mesh, void *data, u32 count, i32 stride);
+void mesh_load_indices(struct mesh *mesh, void *data, u32 count, GLenum type, i32 stride);
+void mesh_load_colors(struct mesh *mesh, void *data, u32 count, i32 stride);
+void mesh_load_uv(struct mesh *mesh, void *data, u32 count, i32 stride);
+void mesh_load_normals(struct mesh *mesh, void *data, u32 count, i32 stride);
 
 #endif
