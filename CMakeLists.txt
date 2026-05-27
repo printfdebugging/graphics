@@ -55,7 +55,7 @@ add_executable(${APPLICATION}
         source/shader.c
         source/texture.c
         source/window.c
-        source/utils.c
+        source/core/string.c
         source/camera.c
 )
 

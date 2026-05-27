@@ -1,7 +1,7 @@
 #include "shader.h"
 #include "logger.h"
 #include "mesh.h"
-#include "utils.h"
+#include "core/string.h"
 
 #include "glad/glad.h"
 

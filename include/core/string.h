@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef CORE_STRING_H
+#define CORE_STRING_H
 
 #define DEFAULT_STRING_CAPACITY 512.0f
 
