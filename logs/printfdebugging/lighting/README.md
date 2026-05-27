@@ -27,6 +27,10 @@
       * [Colored specular map](#colored-specular-map)
     * [Emission map](#emission-map)
       * [Emission map animation issue](#emission-map-animation-issue)
+  * [Light casters](#light-casters)
+    * [directional light](#directional-light)
+    * [point lights](#point-lights)
+      * [attenuation](#attenuation)
 * [Playing around](#playing-around)
   * [X-ray implementation](#x-ray-implementation)
     * [Xray Implementation details](#xray-implementation-details)
@@ -421,6 +425,41 @@ effect is also transparent whereas it's visible in the second image as
 there's some color on the edge.
 
 ![various-texture-wrapping-methods](assets/various-texture-wrapping-methods.png)
+
+## Light casters
+- previously we used point light i.e. source is a single point in space
+- but there are several other types of lights
+- a source that casts light on object is called a *light caster*.
+
+### directional light
+- light source infinitely far away
+- light rays come from the same direction, almost parallel irrespective of viewer's position
+- independent of the location of light
+- eg: sun can be preceived as being a directional light (atleast on the scale of a city/town)
+- since light direction is same, lighting calculations will be similar for each object
+- *light direction vector* is important to us, not *light position*
+- *light direction vector* is from the fragment to the source (has been till now)
+- position vectors should have *w* component as 1 for translation and projection to properly apply
+- direction vectors should have `w=0` so that translations don't change it
+- **are directional lights always diffuse?** -> no. both diffuse and specular lighting code use that.
+- **why not directional lights, is there just one directional light per scene?**
+
+![directional-lighting](assets/directional-lighting.png)
+
+### point lights
+- scattered throughout the scene
+- has a position in the world, illuminates in all directions
+- light rays fade out over distance, eg: lightbulb, torch
+
+#### attenuation
+- it's the reduction in light  intensity over distance
+- linear function is one way to do it, but that looks fake
+- we have *constant*, *linear* and *quadratic* float values to specify attenuation
+- applies to all types of lighting, ambient, diffuse & specular. it's like a lighting strength factor
+
+![attenuation-when-light-close-up](assets/attenuation-when-light-close-up.png)
+![attenuation-when-light-far-away](assets/attenuation-when-light-far-away.png)
+
 
 # Playing around
 

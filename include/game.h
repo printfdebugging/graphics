@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "cglm/struct.h"
 #include "camera.h"
 #include "window.h"
 
@@ -14,6 +15,7 @@ struct game_data {
 
         float last_frame;
         float delta_time;
+        vec3s light_position;
 };
 
 int game_run();

@@ -29,15 +29,16 @@ struct shader *create_light_shader();
 void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
 
 int main() {
-        struct game_data game = { NULL };
+        struct game_data game = { 0 };
         // return game_run();
-        game.window = window_create(3100.0f, 1400.0f, "floating", (vec4s) { 0.0f, 0.0f, 0.0f, 1.0 });
+        game.window = window_create(3100.0f, 1400.0f, "floating", (vec4s) { { 0.0f, 0.0f, 0.0f, 1.0 } });
         if (!game.window)
                 return EXIT_FAILURE;
         if (window_set_icon(game.window, ASSETS_DIR "logo.png"))
                 return EXIT_FAILURE;
 
         game.camera = camera_create();
+        game.light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
         if (!game.camera)
                 return EXIT_FAILURE;
         camera_adjust_direction(game.camera);
@@ -89,11 +90,11 @@ int main() {
                 process_input(game.window, game.delta_time);
 
                 /* model matrix for light source */
-                vec3s light_position = { 0.0f, 0.0f, 2.0f };
-                vec3s light_ambient = { 0.2f, 0.2f, 0.2f };
-                vec3s light_diffuse = { 0.2f, 0.2f, 0.2f };
-                vec3s light_specular = { 1.0f, 1.0f, 1.0f };
-                vec3s light_scale = { 0.2f, 0.2f, 0.2f };
+                vec3s light_ambient = { { 0.2f, 0.2f, 0.2f } };
+                vec3s light_diffuse = { { 0.2f, 0.2f, 0.2f } };
+                vec3s light_specular = { { 1.0f, 1.0f, 1.0f } };
+                vec3s light_scale = { { 0.2f, 0.2f, 0.2f } };
+                vec3s light_direction = { { -0.2f, -1.0f, -0.3f } };  // this is directional light
 
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
@@ -102,10 +103,26 @@ int main() {
                  * cube's vertices are being drawn */
                 draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
-                {
+                vec3s cube_positions[] = {
+                        { { 0.0f, 0.0f, 0.0f } },
+                        { { 2.0f, 5.0f, -15.0f } },
+                        { { -1.5f, -2.2f, -2.5f } },
+                        { { -3.8f, -2.0f, -12.3f } },
+                        { { 2.4f, -0.4f, -3.5f } },
+                        { { -1.7f, 3.0f, -7.5f } },
+                        { { 1.3f, -2.0f, -2.5f } },
+                        { { 1.5f, 2.0f, -2.5f } },
+                        { { 1.5f, 0.2f, -1.5f } },
+                        { { -1.3f, 1.0f, -1.5f } }
+                };
+
+                for (uint i = 0; i < 10; ++i) {
                         /* render model*/
+                        float angle = 20.0f * (float) i;
                         cube->model = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
-                        cube->model = glms_scale(cube->model, (vec3s) { 1.0f, 1.0f, 1.0f });
+                        cube->model = glms_translate(cube->model, cube_positions[i]);
+                        cube->model = glms_rotate(cube->model, angle, (vec3s) { { 1.0f, 0.3f, 0.5f } });
+                        cube->model = glms_scale(cube->model, (vec3s) { { 1.0f, 1.0f, 1.0f } });
                         cube->view = view;
                         cube->projection = projection;
                         glUseProgram(cube_shader->program);
@@ -114,14 +131,19 @@ int main() {
                         shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
 
                         {
-                                shader_set_uniform(cube_shader, "light_position", 3fv, 1, light_position.raw);
+                                shader_set_uniform(cube_shader, "light_position", 3fv, 1, game.light_position.raw);
+                                shader_set_uniform(cube_shader, "light_direction", 3fv, 1, light_direction.raw);
                                 shader_set_uniform(cube_shader, "light_ambient", 3fv, 1, light_ambient.raw);
                                 shader_set_uniform(cube_shader, "light_diffuse", 3fv, 1, light_diffuse.raw);
                                 shader_set_uniform(cube_shader, "light_specular", 3fv, 1, light_specular.raw);
+
+                                shader_set_uniform(cube_shader, "light_attr_constant", 1f, 1.0f);
+                                shader_set_uniform(cube_shader, "light_attr_linear", 1f, 0.09f);
+                                shader_set_uniform(cube_shader, "light_attr_quadratic", 1f, 0.032f);
                         }
 
                         shader_set_uniform(cube_shader, "camera_position", 3fv, 1, game.camera->position.raw);
-                        shader_set_uniform(cube_shader, "camera_front", 3fv, 1, game.camera->front.raw);
+                        // shader_set_uniform(cube_shader, "camera_front", 3fv, 1, game.camera->front.raw);
 
                         enum material_type mat = GOLD;
                         shader_set_uniform(cube_shader, "material_shininess", 1f, MATERIALS[mat].shininess * 128.0f);
@@ -142,7 +164,7 @@ int main() {
 
                 {
                         mat4s model_matrix_light = { .raw = GLM_MAT4_IDENTITY_INIT };
-                        model_matrix_light = glms_translate(model_matrix_light, light_position);
+                        model_matrix_light = glms_translate(model_matrix_light, game.light_position);
                         model_matrix_light = glms_scale(model_matrix_light, light_scale);
 
                         /* render cube */
@@ -176,15 +198,25 @@ int main() {
 }
 
 void process_input(struct window *window, float delta_time) {
+        // struct game_data *data = glfwGetWindowUserPointer(window->window);
+        // if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
+        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
+        // if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
+        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
+        // if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
+        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
+        // if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
+        //         camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
+
         struct game_data *data = glfwGetWindowUserPointer(window->window);
         if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
-                camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
+                data->light_position.z -= 0.1f;
         if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
-                camera_process_keyboard(data->camera, CAMERA_DIRECTION_BACKWARD, delta_time);
+                data->light_position.z += 0.1f;
         if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
-                camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
+                data->light_position.x -= 0.1f;
         if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
-                camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
+                data->light_position.x += 0.1f;
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
