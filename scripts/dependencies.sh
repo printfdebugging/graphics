@@ -40,12 +40,9 @@ if [ -f "/etc/os-release" ]; then
 				'make' \
 				'clang' \
 				'gdb' \
-				'rustup' \
 				'ccache' \
-				'vulkan-devel'
-
-			rustup default stable
-			rustup component add rust-analyzer
+				'vulkan-devel' \
+				'libasan'
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
