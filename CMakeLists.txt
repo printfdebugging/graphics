@@ -80,6 +80,8 @@ target_compile_options(${APPLICATION} PRIVATE
         -Wconversion
         -Wunreachable-code
         -Wpedantic
+        -fsanitize=undefined
+        -fsanitize=address
         # -Wfloat-equal
         # -Werror
 )
@@ -102,6 +104,11 @@ target_link_libraries(${APPLICATION} PUBLIC
         $<$<BOOL:${WIN32}>:dwmapi>
         $<$<BOOL:${UNIX}>:vulkan>
         $<$<BOOL:${WIN32}>:vulkan-1>
+)
+
+target_link_options(${APPLICATION} PRIVATE
+        -fsanitize=undefined
+        -fsanitize=address
 )
 
 install(
