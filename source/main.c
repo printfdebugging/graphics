@@ -116,7 +116,7 @@ int main() {
                         { { -1.3f, 1.0f, -1.5f } }
                 };
 
-                for (uint i = 0; i < 10; ++i) {
+                for (unsigned int i = 0; i < 10; ++i) {
                         /* render model*/
                         float angle = 20.0f * (float) i;
                         cube->model = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
