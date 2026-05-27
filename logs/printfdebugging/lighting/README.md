@@ -41,6 +41,7 @@
     * [Xray Implementation details](#xray-implementation-details)
 * [Debugging](#debugging)
   * [qrenderdoc](#qrenderdoc)
+* [mini project](#mini-project)
 
 <!-- mtoc-end -->
 
@@ -504,6 +505,9 @@ there's some color on the edge.
 ![denoise-goggles](assets/denoise-goggles.png)
 
 ## multiple lights
+- organized the fragment shader
+- the key lesson is scrapping it and doing it from scratch by yourself, without looking
+- see how far you can go that way
 
 # Playing around
 
@@ -548,3 +552,14 @@ always, it was a typo!
 ```
 
 ![missing-texture](assets/missing-texture.png)
+
+# mini project
+- [ ] minecraft like terrain generation
+- [ ] water, sand, rock, dirt, dimond, gold etc blocks
+- [ ] 1 minute day/night cycle with directional lighting
+- [ ] custom game cursors, grab and pointer
+- [ ] some glowing bushes on the mountain
+- [ ] some clouds
+- [ ] a cherryblosm on the top of the mountain
+- [ ] some glowing climbers hanging from it
+- [ ] waterfall (animation of translucent textures?)
