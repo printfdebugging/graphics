@@ -35,6 +35,7 @@
       * [flashlight](#flashlight)
         * [soft flashlight outline](#soft-flashlight-outline)
         * [special goggle effect](#special-goggle-effect)
+  * [multiple lights](#multiple-lights)
 * [Playing around](#playing-around)
   * [X-ray implementation](#x-ray-implementation)
     * [Xray Implementation details](#xray-implementation-details)
@@ -501,6 +502,8 @@ there's some color on the edge.
 
 ![special-goggles-implementation](assets/special-goggles-implementation.png)
 ![denoise-goggles](assets/denoise-goggles.png)
+
+## multiple lights
 
 # Playing around
 
