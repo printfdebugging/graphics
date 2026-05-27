@@ -33,6 +33,7 @@
       * [attenuation](#attenuation)
     * [spotlight](#spotlight)
       * [flashlight](#flashlight)
+        * [soft flashlight outline](#soft-flashlight-outline)
         * [special goggle effect](#special-goggle-effect)
 * [Playing around](#playing-around)
   * [X-ray implementation](#x-ray-implementation)
@@ -471,7 +472,7 @@ there's some color on the edge.
 - the light rays make a cone with the apex at the light, not a cylinder
 - defined by world-space *position*, *direction* and cutoff *angle* (for radius)
 - this is similar to xray implementation
-- this too will have attenuation, it's a directed point light after all
+- this too will have *attenuation*, it's a directed point light after all
 
 #### flashlight
 - is a spotlight located at the viewer's position
@@ -479,6 +480,18 @@ there's some color on the edge.
 - directed spotlight, with direction and position continuously updated as player changes orientation
 - we pass cos of angle instead of angle to make comparisons easy with the dot in fs (arcos is an expensive operation)
 - it's to imagine angles and cos/sine values, be aware of their range and how they affect things, confusing names make it worst
+- note: i had to increase the diffuse color to get more brightness for the spot
+
+![flash-light](assets/flash-light.png)
+
+##### soft flashlight outline
+- but the sharp edges don't look realistic
+- a ring around this cone (another big cone) where the dimming happens
+- we need another angle for outer cone
+- we interpolate from the inner cone's edge to the outer cone's edge over the cos difference
+
+![soft-edge-flashlight](assets/soft-edge-flashlight.png)
+![soft-edge-math](assets/soft-edge-math.png)
 
 ##### special goggle effect
 - emission map is only visible when fragment falls in the cone of the flashlight effectively acting as a special reality filter

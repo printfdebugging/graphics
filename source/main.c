@@ -90,8 +90,8 @@ int main() {
                 process_input(game.window, game.delta_time);
 
                 /* model matrix for light source */
-                vec3s light_ambient = { { 0.2f, 0.2f, 0.2f } };
-                vec3s light_diffuse = { { 0.2f, 0.2f, 0.2f } };
+                vec3s light_ambient = { { 0.1f, 0.1f, 0.1f } };
+                vec3s light_diffuse = { { 0.8f, 0.8f, 0.8f } };
                 vec3s light_specular = { { 1.0f, 1.0f, 1.0f } };
                 vec3s light_scale = { { 0.2f, 0.2f, 0.2f } };
                 vec3s light_direction = { { -0.2f, -1.0f, -0.3f } };  // this is directional light
@@ -101,7 +101,7 @@ int main() {
 
                 /* without the render call below, why are axes not being drawn and instead
                  * cube's vertices are being drawn */
-                draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
+                // draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
 
                 vec3s cube_positions[] = {
                         { { 0.0f, 0.0f, 0.0f } },
@@ -133,7 +133,8 @@ int main() {
                         {
                                 shader_set_uniform(cube_shader, "light_position", 3fv, 1, game.camera->position.raw);
                                 shader_set_uniform(cube_shader, "light_direction", 3fv, 1, game.camera->front.raw);
-                                shader_set_uniform(cube_shader, "light_cutoff", 1f, (float) cos(glm_rad(12.5f)));
+                                shader_set_uniform(cube_shader, "light_inner_cutoff", 1f, (float) cos(glm_rad(12.5f)));
+                                shader_set_uniform(cube_shader, "light_outer_cutoff", 1f, (float) cos(glm_rad(17.5f)));
 
                                 shader_set_uniform(cube_shader, "light_ambient", 3fv, 1, light_ambient.raw);
                                 shader_set_uniform(cube_shader, "light_diffuse", 3fv, 1, light_diffuse.raw);

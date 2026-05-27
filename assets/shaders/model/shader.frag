@@ -8,7 +8,9 @@ uniform sampler2D material_emission_map;
 
 uniform vec3 light_position;
 uniform vec3 light_direction;
-uniform float light_cutoff;
+/* cos of angles of inner and outer cones of the flashlight */
+uniform float light_inner_cutoff;
+uniform float light_outer_cutoff;
 
 uniform vec3 light_ambient;
 uniform vec3 light_diffuse;
@@ -41,23 +43,21 @@ void main() {
         float specular_factor = pow(max(dot(unit_view_direction, unit_reflected_direction), 0.0), material_shininess);
         vec3 specular_lighting = light_specular * (specular_factor * texture_rgb);
 
-        vec3 emission_lighting = vec3(0.0f);
-        if (texture_rgb == vec3(0.0f)) {
-                emission_lighting = texture(material_emission_map, uv + vec2(sin(time), 0.0f)).rgb;
-        }
+        // vec3 emission_lighting = vec3(0.0f);
+        // if (texture_rgb == vec3(0.0f)) {
+        //         emission_lighting = texture(material_emission_map, uv + vec2(sin(time), 0.0f)).rgb;
+        // }
 
         float distance = length(light_position - position);
         float attenuation = 1.0 / (light_attr_constant + (light_attr_linear * distance) + (light_attr_quadratic * (distance * distance)));
 
-        vec3 result;
-
         /* todo: use better/standard names for these to avoid confusion. */
+        /* warn: these are bad names, theta can easily be confused/mis-imagined as the angle whereas
+         * it's the cose of that and the relationship is inverse, angle inc, cos dec */
         float theta = dot(unit_light_direction, normalize(-light_direction));
-        if (theta > light_cutoff) {
-                result = (ambient_lighting + diffuse_lighting + specular_lighting) * attenuation;
-        } else {
-                result = ambient_lighting + emission_lighting;
-        }
+        float epsilon = light_inner_cutoff - light_outer_cutoff;                   /* remember cos decreases as we go from 0 to 90 */
+        float intensity = clamp((theta - light_outer_cutoff) / epsilon, 0.0, 1.0); /* handles the case where theta becomes negative  */
+        vec3 result = (ambient_lighting + diffuse_lighting + specular_lighting) * attenuation * intensity;
 
         outColor = vec4(result, 1.0);
 
