@@ -1,72 +1,125 @@
-uniform vec3 camera_position;
-uniform vec3 camera_front;
+/**!
+ * material properties
+ * @var mat_diffuse_map  -   index of the texture containing the object's colors
+ * @var mat_specular_map -   index of the (typically) monochrome texture representing the shiny parts of the object
+ * @var mat_shininess    -   shininess value, larger the shininess, lesser scattering of light, clear reflection, more metallic
+ */
+uniform sampler2D mat_diff_map;
+uniform sampler2D mat_spec_map;
+uniform sampler2D mat_emit_map;
+uniform float mat_shininess;
 
-uniform float material_shininess;
-uniform sampler2D material_diffuse_map;
-uniform sampler2D material_specular_map;
-uniform sampler2D material_emission_map;
+/**!
+ * camera properties
+ * @var cam_pos         - camera position in world space coordinates
+ * @var cam_front_dir   - the direction vector of the camera's face i.e. where the player is looking
+ */
+uniform vec3 cam_pos;
+uniform vec3 cam_front_dir;
 
-uniform vec3 light_position;
-uniform vec3 light_direction;
-/* cos of angles of inner and outer cones of the flashlight */
-uniform float light_inner_cutoff;
-uniform float light_outer_cutoff;
+/**!
+ * directional light properties
+ * @var dlt_dir  - directional light direction
+ * @var dlt_amb  - directional light's contribution to ambient light
+ * @var dlt_diff - directional light's contribution to the diffuse lighting on the objects
+ * @var dlt_spec - directional light's contribution to specular reflections from the objects
+ */
+uniform vec3 dlt_dir;
+uniform vec3 dlt_amb;
+uniform vec3 dlt_diff;
+uniform vec3 dlt_spec;
 
-uniform vec3 light_ambient;
-uniform vec3 light_diffuse;
-uniform vec3 light_specular;
-
-uniform float light_attr_constant;
-uniform float light_attr_linear;
-uniform float light_attr_quadratic;
-
-uniform float time;
-
-in vec3 position; /* in world space coordinates. */
-in vec3 color;
+/**!
+ * vertex shader output variables
+ *  @param [in] position - position of the fragment in world space coordinates
+ *  @param [in] uv       - texture coordinates
+ *  @param [in] normal   - normal at the fragment surface
+ */
+in vec3 position;
 in vec2 uv;
-in vec3 normal; /* from vertex shader, for diffuse calculation*/
+in vec3 normal;
 
-out vec4 outColor;
+/**!
+ * fragment shader output variables;
+ * @param [out] out_color  - output color from the fragment shader
+ */
+out vec4 out_color;
 
+/**!
+ * point light properties
+ * @attr plt_attr_const, plt_attr_linear, plt_attr_quad - attenuation factors to vary intensity based on distance
+ * @attr plt_amb, plt_diff, plt_spec                    - light properties
+ * @attr plt_pos                                        - position in world space coordinates
+ */
+uniform vec3 plt_pos;
+uniform vec3 plt_amb;
+uniform vec3 plt_diff;
+uniform vec3 plt_spec;
+
+uniform float plt_att_const;
+uniform float plt_att_linear;
+uniform float plt_att_quad;
+
+/**!
+ * @param [in] lightpos - position of the point light (in world space coordinates)
+ * @param [in] amb      - ambient component of the light
+ * @param [in] diff     - diffuse component of the light
+ * @param [in] spec     - specular component of the light
+ * @param [in] cons     - attenuation constant factor
+ * @param [in] linear   - attenuation linear factor (wrt distance)
+ * @param [in] quad     - attenuation quadratic factor (wrt distance)
+ * @param [in] _cam_dir - unit vector pointing from the fragment towards the camera
+ * @param [in] _normal  - unit normal vector at the fragment
+ */
+vec3 calc_plt(vec3 lightpos, vec3 amb, vec3 diff, vec3 spec, float cons, float linear, float quad, vec3 _cam_dir, vec3 _normal);
+
+/**!
+ * @param [in] lightdir - direction of the light, from a source infinitely far away towards the fragments
+ * @param [in] amb      - ambient component of the light
+ * @param [in] diff     - diffuse component of the light
+ * @param [in] spec     - specular component of the light
+ * @param [in] _cam_dir - unit vector pointing from the fragment towards the camera
+ * @param [in] _normal  - unit normal vector at the fragment
+ */
+vec3 calc_dlt(vec3 lightdir, vec3 amb, vec3 diff, vec3 spec, vec3 _cam_dir, vec3 _normal);
+
+/**!
+ * @info variables define with an '_' (underscore) at the front are normalized
+ */
 void main() {
-        vec3 ambient_lighting = light_ambient * texture(material_diffuse_map, uv).rgb;
+        vec3 _normal = normalize(normal);
+        vec3 _cam_dir = normalize(cam_pos - position);
 
-        vec3 unit_light_direction = normalize(light_position - position);
-        vec3 unit_normal = normalize(normal);
-        float diffuse_factor = max(dot(unit_normal, unit_light_direction), 0.0);
-        vec3 diffuse_lighting = light_diffuse * (diffuse_factor * texture(material_diffuse_map, uv).rgb);
+        vec3 color = calc_plt(plt_pos, plt_amb, plt_diff, plt_spec, plt_att_const, plt_att_linear, plt_att_quad, _cam_dir, _normal);
+        color += calc_dlt(dlt_dir, dlt_amb, dlt_diff, dlt_spec, _cam_dir, _normal);
+        out_color = vec4(color, 1.0);
+}
 
-        vec3 texture_rgb = texture(material_specular_map, uv).rgb;
-        vec3 unit_view_direction = normalize(camera_position - position);
-        vec3 unit_reflected_direction = normalize(reflect(-unit_light_direction, unit_normal));
-        float specular_factor = pow(max(dot(unit_view_direction, unit_reflected_direction), 0.0), material_shininess);
-        vec3 specular_lighting = light_specular * (specular_factor * texture_rgb);
+vec3 calc_plt(vec3 lightpos, vec3 amb, vec3 diff, vec3 spec, float cons, float linear, float quad, vec3 _cam_dir, vec3 _normal) {
+        vec3 _dir = normalize(lightpos - position); /* unit vector from fragment to light */
+        vec3 _reflected = normalize(reflect(-_dir, _normal));
+        float dist = distance(position, lightpos);
+        float att = 1.0 / ((cons) + (linear * dist) + (quad * (dist * dist)));
 
-        // vec3 emission_lighting = vec3(0.0f);
-        // if (texture_rgb == vec3(0.0f)) {
-        //         emission_lighting = texture(material_emission_map, uv + vec2(sin(time), 0.0f)).rgb;
-        // }
+        float fdiff = max(dot(_dir, _normal), 0.0);
+        float fspec = pow(max(dot(_reflected, _cam_dir), 0.0f), mat_shininess);
 
-        float distance = length(light_position - position);
-        float attenuation = 1.0 / (light_attr_constant + (light_attr_linear * distance) + (light_attr_quadratic * (distance * distance)));
+        vec3 light_amb = amb * texture(mat_diff_map, uv).rgb;
+        vec3 light_diff = diff * fdiff * texture(mat_diff_map, uv).rgb;
+        vec3 light_spec = spec * fspec * texture(mat_spec_map, uv).rgb;
 
-        /* todo: use better/standard names for these to avoid confusion. */
-        /* warn: these are bad names, theta can easily be confused/mis-imagined as the angle whereas
-         * it's the cose of that and the relationship is inverse, angle inc, cos dec */
-        float theta = dot(unit_light_direction, normalize(-light_direction));
-        float epsilon = light_inner_cutoff - light_outer_cutoff;                   /* remember cos decreases as we go from 0 to 90 */
-        float intensity = clamp((theta - light_outer_cutoff) / epsilon, 0.0, 1.0); /* handles the case where theta becomes negative  */
-        vec3 result = (ambient_lighting + diffuse_lighting + specular_lighting) * attenuation * intensity;
+        return (light_amb + light_diff + light_spec) * att;
+}
 
-        outColor = vec4(result, 1.0);
+vec3 calc_dlt(vec3 lightdir, vec3 amb, vec3 diff, vec3 spec, vec3 _cam_dir, vec3 _normal) {
+        vec3 _dir = normalize(-lightdir); /* unit vector from fragment towards light source */
+        vec3 _reflected = normalize(reflect(-_dir, _normal));
 
-        /* todo: properly define #defines to enable/disable features from c code */
-        /* todo: standardize in/local/out variable names so that there's no confusion */
-        // float xfactor = max(dot(camera_front, -unit_view_direction), 0.0f);
-        // float xray_factor = pow(xfactor, 320.0f);
-        // if (dot(unit_normal, camera_front) < 0.0f && xray_factor > 0.5f) {
-        //         discard;
-        //         // outColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-        // }
+        float fdiff = max(dot(_dir, _normal), 0.0f);
+        float fspec = pow(max(dot(_reflected, _cam_dir), 0.0f), mat_shininess);
+
+        vec3 light_amb = amb * texture(mat_diff_map, uv).rgb;
+        vec3 light_diff = diff * fdiff * texture(mat_diff_map, uv).rgb;
+        vec3 light_spec = spec * fspec * texture(mat_spec_map, uv).rgb;
+        return (light_amb + light_diff + light_spec);
 }

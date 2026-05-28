@@ -92,13 +92,14 @@ int main() {
                 process_input(game.window, game.delta_time);
 
                 /* model matrix for light source */
-                vec3s light_ambient = { { 0.1f, 0.1f, 0.1f } };
-                vec3s light_diffuse = { { 0.8f, 0.8f, 0.8f } };
-                vec3s light_specular = { { 1.0f, 1.0f, 1.0f } };
-                vec3s light_scale = { { 0.2f, 0.2f, 0.2f } };
-                vec3s light_direction = { { -0.2f, -1.0f, -0.3f } };  // this is directional light
-                (void) light_scale;
-                (void) light_direction;
+                vec3s plt_amb = { { 0.1f, 0.1f, 0.1f } };
+                vec3s plt_diff = { { 0.8f, 0.8f, 0.8f } };
+                vec3s plt_spec = { { 1.0f, 1.0f, 1.0f } };
+
+                vec3s dlt_dir = { { -1.0f, -1.0f, -1.0f } };
+                vec3s dlt_amb = { { 0.1f, 0.1f, 0.0f } };
+                vec3s dlt_diff = { { 0.2f, 0.2f, 0.0f } };
+                vec3s dlt_spec = { { 1.0f, 1.0f, 0.0f } };
 
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
@@ -135,31 +136,58 @@ int main() {
                         shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
 
                         {
-                                shader_set_uniform(cube_shader, "light_position", 3fv, 1, game.camera->position.raw);
-                                shader_set_uniform(cube_shader, "light_direction", 3fv, 1, game.camera->front.raw);
-                                shader_set_uniform(cube_shader, "light_inner_cutoff", 1f, (f32) cos(glm_rad(12.5f)));
-                                shader_set_uniform(cube_shader, "light_outer_cutoff", 1f, (f32) cos(glm_rad(17.5f)));
-
-                                shader_set_uniform(cube_shader, "light_ambient", 3fv, 1, light_ambient.raw);
-                                shader_set_uniform(cube_shader, "light_diffuse", 3fv, 1, light_diffuse.raw);
-                                shader_set_uniform(cube_shader, "light_specular", 3fv, 1, light_specular.raw);
-
-                                shader_set_uniform(cube_shader, "light_attr_constant", 1f, 1.0f);
-                                shader_set_uniform(cube_shader, "light_attr_linear", 1f, 0.09f);
-                                shader_set_uniform(cube_shader, "light_attr_quadratic", 1f, 0.032f);
+                                shader_set_uniform(cube_shader, "plt_pos", 3fv, 1, game.light_position.raw);
+                                shader_set_uniform(cube_shader, "plt_amb", 3fv, 1, plt_amb.raw);
+                                shader_set_uniform(cube_shader, "plt_diff", 3fv, 1, plt_diff.raw);
+                                shader_set_uniform(cube_shader, "plt_spec", 3fv, 1, plt_spec.raw);
+                                shader_set_uniform(cube_shader, "plt_att_const", 1f, 1.0f);
+                                shader_set_uniform(cube_shader, "plt_att_linear", 1f, 0.09f);
+                                shader_set_uniform(cube_shader, "plt_att_quad", 1f, 0.032f);
+                        }
+                        {
+                                shader_set_uniform(cube_shader, "dlt_dir", 3fv, 1, dlt_dir.raw);
+                                shader_set_uniform(cube_shader, "dlt_amb", 3fv, 1, dlt_amb.raw);
+                                shader_set_uniform(cube_shader, "dlt_diff", 3fv, 1, dlt_diff.raw);
+                                shader_set_uniform(cube_shader, "dlt_spec", 3fv, 1, dlt_spec.raw);
+                        }
+                        {
+                                shader_set_uniform(cube_shader, "cam_pos", 3fv, 1, game.camera->position.raw);
+                                // shader_set_uniform(cube_shader, "cam_front_dir", 3fv, 1, game.camera->front.raw);
+                        }
+                        {
+                                shader_set_uniform(cube_shader, "mat_shininess", 1f, 512.0f);
+                                shader_set_uniform(cube_shader, "mat_diff_map", 1i, material_diffuse_map->texture_index);
+                                shader_set_uniform(cube_shader, "mat_spec_map", 1i, material_specular_map->texture_index);
+                                // shader_set_uniform(cube_shader, "material_emission_map", 1i, material_emission_map->texture_index);
                         }
 
-                        shader_set_uniform(cube_shader, "camera_position", 3fv, 1, game.camera->position.raw);
-                        // shader_set_uniform(cube_shader, "camera_front", 3fv, 1, game.camera->front.raw);
-
-                        enum material_type mat = GOLD;
-                        shader_set_uniform(cube_shader, "material_shininess", 1f, MATERIALS[mat].shininess * 128.0f);
-                        shader_set_uniform(cube_shader, "material_diffuse_map", 1i, material_diffuse_map->texture_index);
-                        shader_set_uniform(cube_shader, "material_specular_map", 1i, material_specular_map->texture_index);
-                        // shader_set_uniform(cube_shader, "material_emission_map", 1i, material_emission_map->texture_index);
-                        // shader_set_uniform(cube_shader, "time", 1f, (f32) current_frame);
                         for (u32 j = 0; j < cube->mesh_count; ++j) {
                                 const struct mesh *mesh = cube->mesh[j];
+                                glBindVertexArray(mesh->vao);
+                                if (mesh->index_count) {
+                                        glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
+                                } else {
+                                        glDrawArrays(mesh->draw_mode, 0, (i32) mesh->vertex_count);
+                                }
+                        }
+                }
+
+                {
+                        vec3s light_scale = { { 0.2f, 0.2f, 0.2f } };
+                        mat4s model_matrix_light = { .raw = GLM_MAT4_IDENTITY_INIT };
+                        model_matrix_light = glms_translate(model_matrix_light, game.light_position);
+                        model_matrix_light = glms_scale(model_matrix_light, light_scale);
+
+                        /* render cube */
+                        cube->view = view;
+                        cube->projection = projection;
+                        cube->model = model_matrix_light;
+                        glUseProgram(light_shader->program);
+                        shader_set_uniform(light_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
+                        shader_set_uniform(light_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
+                        shader_set_uniform(light_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
+                        for (u64 i = 0; i < cube->mesh_count; ++i) {
+                                const struct mesh *mesh = cube->mesh[i];
                                 glBindVertexArray(mesh->vao);
                                 if (mesh->index_count) {
                                         glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
@@ -191,7 +219,7 @@ int main() {
         return 0;
 }
 
-void process_input(struct window *window, f64 delta_time) {
+void input_move_camera(struct window *window, f64 delta_time) {
         struct game_data *data = glfwGetWindowUserPointer(window->window);
         if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
                 camera_process_keyboard(data->camera, CAMERA_DIRECTION_FORWARD, delta_time);
@@ -201,6 +229,24 @@ void process_input(struct window *window, f64 delta_time) {
                 camera_process_keyboard(data->camera, CAMERA_DIRECTION_LEFT, delta_time);
         if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
                 camera_process_keyboard(data->camera, CAMERA_DIRECTION_RIGHT, delta_time);
+}
+
+void input_move_point_light(struct window *window, f64 delta_time) {
+        (void) delta_time;
+        struct game_data *data = glfwGetWindowUserPointer(window->window);
+        if (glfwGetKey(window->window, GLFW_KEY_W) == GLFW_PRESS)
+                data->light_position.z -= 0.1f;
+        if (glfwGetKey(window->window, GLFW_KEY_S) == GLFW_PRESS)
+                data->light_position.z += 0.1f;
+        if (glfwGetKey(window->window, GLFW_KEY_A) == GLFW_PRESS)
+                data->light_position.x -= 0.1f;
+        if (glfwGetKey(window->window, GLFW_KEY_D) == GLFW_PRESS)
+                data->light_position.x += 0.1f;
+}
+
+void process_input(struct window *window, f64 delta_time) {
+        // input_move_point_light(window, delta_time);
+        input_move_camera(window, delta_time);
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {

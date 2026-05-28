@@ -23,7 +23,7 @@ struct camera *camera_create() {
         camera->x = 400;
         camera->y = 300;
         camera->fov = 45.0f;
-        camera->movement_speed = 7.5f;
+        camera->movement_speed = 17.5f;
         camera->mouse_sensitivity = 0.1f;
 
         return camera;
