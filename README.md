@@ -1,3 +1,5 @@
+# Graphics
+
 ## Environment Setup
 
 - Windows
@@ -6,41 +8,31 @@
 
 ## Dependencies
 
-- Windows
-  - Run `./scripts/dependencies.sh` from `MSYS2 CLANG64` shell
-  - This installs compilers, build tools etc
-- Archlinux
-  - Run `./scripts/dependencies.sh` from "THE BASH"
-  - You use Arch BTW, so no spoon feeding for you!
+- On Windows, open the `MSYS2 CLANG64` shell
+- On Linux, use "THE BASH"
+- Run `./scripts/dependencies.sh`, this installs compilers, build tools etc
 
-## Libraries
-
-- Different libraries use different build systems, like `meson`, `cmake`, `autotools`
-- External libraries that we use are included as submodules in `./subprojects`
-- All build systems discover installed libraries through `pkgconf`
-- We build the libraries one by one and install them in `./install`
-- These libraries generate pkg-config files in `./install/lib/pkgconfig`
-- Run `./scripts/externals.sh` to build and install these libraries
-  - Run in "THE BASH" on Archlinux
-  - Run in `MSYS2 CLANG64` shell on Windows
-- We use a bash script to compile/install external libraries because other ways are painful
+> [!NOTE]
+> `dependencies.sh` only installs packages for Archlinux and MSYS2. If you
+> use some other distribution, feel free to find the equivalent package
+> namnes and add them to the script, thanks!
 
 ## Bulid Steps
 
-- With CMake
-  - This is a CMake project
-  - Source files live in `./source`, header files live in `./include`
-  - See `./scripts/build.sh` for the full CMake command
-- With Script
-  - Windows: Run the `./scripts/build.sh` script from `MSYS2 CLANG64` shell (or Git Bash if path has `C:\msys64\clang64\bin`)
-  - Archlinux: Run the `./scripts/build.sh` script in "THE BASH"
-- With VSCode
-  - Install `ms-vscode.cpptools-extension-pack` extension pack
-  - Press `<Shift+F5>` to build the project and attach a debugger
+```bash
+# pull in the git submodules
+git submodule update --init --recursive 
+
+# build with cmake
+cmake -B build
+cmake --build build
+
+# run the executable
+./build/executable
+```
 
 ## Style
 
 - Everything :snake: `snake_case`
-- Avoid unnecessary `typedef`
+- Avoid unnecessary `typedef`ing
 - Format as per `.clang-format`
-- Declare the variables at the top of the function (c89 style)
