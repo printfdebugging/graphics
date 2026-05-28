@@ -1,6 +1,6 @@
 /**!
  * material properties
- * @var mat_diffuse_map  -   index of the texture containing the object's colors
+ * @var mat_diffuse_map  -   index of the texture containing the diffuse colors each fragment reflects
  * @var mat_specular_map -   index of the (typically) monochrome texture representing the shiny parts of the object
  * @var mat_shininess    -   shininess value, larger the shininess, lesser scattering of light, clear reflection, more metallic
  */
@@ -20,9 +20,9 @@ uniform vec3 cam_front_dir;
 /**!
  * directional light properties
  * @var dlt_dir  - directional light direction
- * @var dlt_amb  - directional light's contribution to ambient light
- * @var dlt_diff - directional light's contribution to the diffuse lighting on the objects
- * @var dlt_spec - directional light's contribution to specular reflections from the objects
+ * @var dlt_amb  - ambient intensity of the directional light
+ * @var dlt_diff - diffuse intensity of the directional light
+ * @var dlt_spec - specular intensity of the directional light
  */
 uniform vec3 dlt_dir;
 uniform vec3 dlt_amb;
@@ -48,7 +48,7 @@ out vec4 out_color;
 /**!
  * point light properties
  * @attr plt_attr_const, plt_attr_linear, plt_attr_quad - attenuation factors to vary intensity based on distance
- * @attr plt_amb, plt_diff, plt_spec                    - light properties
+ * @attr plt_amb, plt_diff, plt_spec                    - light intensities of a point light
  * @attr plt_pos                                        - position in world space coordinates
  */
 uniform vec3 plt_pos;
