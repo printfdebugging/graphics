@@ -42,7 +42,8 @@ if [ -f "/etc/os-release" ]; then
 				'gdb' \
 				'ccache' \
 				'vulkan-devel' \
-				'libasan'
+				'libasan' \
+                                'meson'
 		}
 		;;
 	*) echo "distribution not supported" && exit 1 ;;
