@@ -5,9 +5,10 @@
 # core
 - [x] introduce types in `core/defines.h`
 - [x] fix sanitizer and compiler warnings
-- [ ] add doxygen comments in the headers
+- [x] rename from learnopengl to graphics
 - [ ] model loading
 - [ ] rope data structure for utf-8 string handling
 - [ ] harfbuzz unicode (utf-8) font rendering on gpu
+- [ ] add doxygen comments in the headers
 - [ ] a fast/customizable/beautiful and declarative widget toolkit
-- [ ] rename from learnopengl to graphics-template once the tutorial is complete
+- [ ] host on github pages, create example project to show all the widgets, like collabora's design-system

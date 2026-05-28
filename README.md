@@ -15,7 +15,7 @@
 > [!NOTE]
 > `dependencies.sh` only installs packages for Archlinux and MSYS2. If you
 > use some other distribution, feel free to find the equivalent package
-> namnes and add them to the script, thanks!
+> names and add them to the script, thanks!
 
 ## Bulid Steps
 
