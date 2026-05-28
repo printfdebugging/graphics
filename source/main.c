@@ -131,11 +131,13 @@ int main() {
                         cube->view = view;
                         cube->projection = projection;
                         glUseProgram(cube_shader->program);
+                        /* note:  don't call these each frame, instead call them once and store the location */
                         shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
                         shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
                         shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
 
                         {
+                                /* note:  don't call these each frame, instead call them once and store the location */
                                 shader_set_uniform(cube_shader, "plt_pos", 3fv, 1, game.light_position.raw);
                                 shader_set_uniform(cube_shader, "plt_amb", 3fv, 1, plt_amb.raw);
                                 shader_set_uniform(cube_shader, "plt_diff", 3fv, 1, plt_diff.raw);
@@ -145,16 +147,19 @@ int main() {
                                 shader_set_uniform(cube_shader, "plt_att_quad", 1f, 0.032f);
                         }
                         {
+                                /* note:  don't call these each frame, instead call them once and store the location */
                                 shader_set_uniform(cube_shader, "dlt_dir", 3fv, 1, dlt_dir.raw);
                                 shader_set_uniform(cube_shader, "dlt_amb", 3fv, 1, dlt_amb.raw);
                                 shader_set_uniform(cube_shader, "dlt_diff", 3fv, 1, dlt_diff.raw);
                                 shader_set_uniform(cube_shader, "dlt_spec", 3fv, 1, dlt_spec.raw);
                         }
                         {
+                                /* note:  don't call these each frame, instead call them once and store the location */
                                 shader_set_uniform(cube_shader, "cam_pos", 3fv, 1, game.camera->position.raw);
                                 // shader_set_uniform(cube_shader, "cam_front_dir", 3fv, 1, game.camera->front.raw);
                         }
                         {
+                                /* note:  don't call these each frame, instead call them once and store the location */
                                 shader_set_uniform(cube_shader, "mat_shininess", 1f, 512.0f);
                                 shader_set_uniform(cube_shader, "mat_diff_map", 1i, material_diffuse_map->texture_index);
                                 shader_set_uniform(cube_shader, "mat_spec_map", 1i, material_specular_map->texture_index);

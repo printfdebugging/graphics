@@ -1,5 +1,6 @@
 # shaders
 - [ ] use include guards in shaders and organize the code (don't over engineer)
+- [ ] store the uniform locations, call glGetUniformLocation once, do it in the model loading chapter
 
 # core
 - [x] introduce types in `core/defines.h`
