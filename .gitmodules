@@ -19,3 +19,21 @@
 [submodule "subprojects/harfbuzz"]
 	path = subprojects/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz
+[submodule "subprojects/bear"]
+	path = subprojects/bear
+	url = https://github.com/rizsotto/Bear.git
+[submodule "subprojects/sdl"]
+	path = subprojects/sdl
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "subprojects/ffmpeg"]
+	path = subprojects/ffmpeg
+	url = https://git.ffmpeg.org/ffmpeg.git
+[submodule "subprojects/libplacebo"]
+	path = subprojects/libplacebo
+	url = https://code.videolan.org/videolan/libplacebo.git
+[submodule "subprojects/libass"]
+	path = subprojects/libass
+	url = https://github.com/libass/libass.git
+[submodule "subprojects/mpv"]
+	path = subprojects/mpv
+	url = https://github.com/mpv-player/mpv.git
