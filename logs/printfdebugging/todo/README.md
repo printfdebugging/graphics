@@ -1,5 +1,7 @@
 # shaders
 - [ ] use include guards in shaders and organize the code (don't over engineer)
+- [ ] add xray function
+- [ ] add flashlight
 
 # core
 - [x] introduce types in `core/defines.h`
