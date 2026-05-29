@@ -41,7 +41,7 @@ int main() {
 
         ensure_not_null(game.camera = camera_create((struct camera) {
             CAMERA_DEFAULTS,
-            .position = { 0.0f, 0.0f, 8.0f },
+            .position = { { 0.0f, 0.0f, 8.0f } },
             .movement_speed = 5.0f,
         }));
 

@@ -85,6 +85,8 @@ target_compile_options(${APPLICATION} PRIVATE
         # -Wcast-qual
         # -Wfloat-equal
         # -Werror
+        -Wno-override-init
+        -Wno-override-init-side-effects
 )
 
 target_include_directories(${APPLICATION}
