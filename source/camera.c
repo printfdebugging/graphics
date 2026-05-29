@@ -8,25 +8,15 @@
 #include "cglm/util.h"
 #include "core/defines.h"
 
-struct camera *camera_create() {
-        struct camera *camera = malloc(sizeof(struct camera));
-        if (!camera) {
+struct camera *camera_create(struct camera camera) {
+        struct camera *cam = malloc(sizeof(struct camera));
+        if (!cam) {
                 fprintf(stderr, "failed to allocate memory for camera\n");
                 return NULL;
         }
 
-        camera->position = (vec3s) { { 0.0f, 1.0f, 6.0f } };
-        camera->front = (vec3s) { { 0.0f, 0.0f, -1.0f } };
-        camera->up = (vec3s) { { 0.0f, 1.0f, 0.0f } };
-        camera->yaw = -90.0f;
-        camera->pitch = 0.0f;
-        camera->x = 400;
-        camera->y = 300;
-        camera->fov = 45.0f;
-        camera->movement_speed = 17.5f;
-        camera->mouse_sensitivity = 0.1f;
-
-        return camera;
+        *cam = camera;
+        return cam;
 }
 
 void camera_process_keyboard(struct camera *camera, enum camera_direction direction, f64 delta_time) {

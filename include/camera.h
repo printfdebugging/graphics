@@ -14,6 +14,18 @@ enum camera_direction {
         CAMERA_DIRECTION_RIGHT = 3
 };
 
+#define CAMERA_DEFAULTS                               \
+        .position = (vec3s) { { 0.0f, 1.0f, 6.0f } }, \
+        .front = (vec3s) { { 0.0f, 0.0f, -1.0f } },   \
+        .up = (vec3s) { { 0.0f, 1.0f, 0.0f } },       \
+        .yaw = -90.0f,                                \
+        .pitch = 0.0f,                                \
+        .x = 400,                                     \
+        .y = 300,                                     \
+        .fov = 45.0f,                                 \
+        .movement_speed = 17.5f,                      \
+        .mouse_sensitivity = 0.1f
+
 struct camera {
         vec3s position;
         vec3s front;
@@ -29,7 +41,7 @@ struct camera {
         f32 mouse_sensitivity;
 };
 
-struct camera *camera_create();
+struct camera *camera_create(struct camera camera);
 void camera_process_keyboard(struct camera *camera, enum camera_direction direction, f64 delta_time);
 void camera_process_mouse_movement(struct camera *camera, f32 x, f32 y, b8 left_button_pressed);
 void camera_process_mouse_scroll(struct camera *camera, f32 yoffset);

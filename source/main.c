@@ -30,16 +30,22 @@ void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, 
 
 int main() {
         struct game_data game = { 0 };
-        // return game_run();
-        game.window = window_create(3100.0f, 1400.0f, "floating", (vec4s) { { 0.0f, 0.0f, 0.0f, 1.0 } });
+        game.window = window_create((struct window) {
+            WINDOW_DEFAULTS,
+        });
+
         if (!game.window)
                 return EXIT_FAILURE;
-        if (window_set_icon(game.window, ASSETS_DIR "logo.png"))
-                return EXIT_FAILURE;
-        if (window_set_cursor_icon(game.window, ASSETS_DIR "textures/sandbox/cursor.png", 32))
+
+        game.camera = camera_create((struct camera) {
+            CAMERA_DEFAULTS,
+            .position = { 0.0f, 0.0f, 8.0f },
+            .movement_speed = 5.0f,
+        });
+
+        if (!game.camera)
                 return EXIT_FAILURE;
 
-        game.camera = camera_create();
         game.light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
         if (!game.camera)
                 return EXIT_FAILURE;
@@ -81,6 +87,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, material_emission_map->texture);
         material_emission_map->texture_index = 3;
 
+        // return game_run();
         while (!window_close(game.window)) {
                 f64 current_frame = glfwGetTime();
                 game.delta_time = current_frame - game.last_frame;

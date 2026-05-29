@@ -39,7 +39,13 @@ static void __window_frame_buffer_resize_callback(GLFWwindow *window, i32 width,
         glViewport(0, 0, width, height);
 }
 
-struct window *window_create(i32 width, i32 height, const char *title, vec4s color) {
+struct window *window_create(struct window window) {
+        if (window.window) {
+                /* after this, who will own the window.window if it exists? */
+                /* for now we don't do anything and don't allow that */
+                return NULL;
+        }
+
         if (!glfwInit()) {
                 fprintf(stderr, "failed to initialize glfw");
                 return NULL;
@@ -55,14 +61,14 @@ struct window *window_create(i32 width, i32 height, const char *title, vec4s col
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
 
-        GLFWwindow *window = glfwCreateWindow((int) width, (int) height, title, NULL, NULL);
-        if (!window) {
+        window.window = glfwCreateWindow(window.width, window.height, window.title, NULL, NULL);
+        if (!window.window) {
                 fprintf(stderr, "failed to create glfw winodw\n");
                 glfwTerminate();
                 return NULL;
         }
 
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(window.window);
         if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
                 fprintf(stderr, "failed to initialize glad\n");
                 glfwTerminate();
@@ -76,8 +82,14 @@ struct window *window_create(i32 width, i32 height, const char *title, vec4s col
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 #endif
 
-        glfwSetFramebufferSizeCallback(window, __window_frame_buffer_resize_callback);
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        if (window_set_icon(&window, window.icon) || window_set_cursor_icon(&window, window.cursor, window.cursor_size)) {
+                fprintf(stderr, "failed to set window icon or cursor icon\n");
+                glfwTerminate();
+                return NULL;
+        }
+
+        glfwSetFramebufferSizeCallback(window.window, __window_frame_buffer_resize_callback);
+        glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSwapInterval(1);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
@@ -90,20 +102,15 @@ struct window *window_create(i32 width, i32 height, const char *title, vec4s col
         // glEnable(GL_BLEND);
         // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        struct window *win = malloc(sizeof(struct window));
-        if (!win) {
+        struct window *window_obj = malloc(sizeof(struct window));
+        if (!window_obj) {
                 fprintf(stderr, "failed to initialize glad\n");
                 glfwTerminate();
                 return NULL;
         }
 
-        win->width = width;
-        win->height = height;
-        win->title = title;
-        win->color = color;
-        win->window = window;
-        win->icon = NULL;
-        return win;
+        *window_obj = window;
+        return window_obj;
 }
 
 void window_set_clear_color(struct window *window, vec4s color) {
