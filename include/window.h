@@ -30,7 +30,6 @@ struct window {
 };
 
 struct window *window_create(struct window window);
-struct window *__window_create(struct window window);
 void window_set_clear_color(struct window *window, vec4s color);
 void window_process_input(struct window *window);
 void window_poll_events(struct window *window);
