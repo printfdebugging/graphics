@@ -28,27 +28,24 @@ struct shader *create_light_shader();
 /* todo: deprecate this in favour of renderModel */
 void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
 
+#define ensure_not_null(x)           \
+        if ((x) == NULL) {           \
+                return EXIT_FAILURE; \
+        }
+
 int main() {
         struct game_data game = { 0 };
-        game.window = window_create((struct window) {
-            WINDOW_DEFAULTS,
-        });
+        ensure_not_null(game.window = window_create((struct window) {
+                WINDOW_DEFAULTS,
+        }));
 
-        if (!game.window)
-                return EXIT_FAILURE;
-
-        game.camera = camera_create((struct camera) {
+        ensure_not_null(game.camera = camera_create((struct camera) {
             CAMERA_DEFAULTS,
             .position = { 0.0f, 0.0f, 8.0f },
             .movement_speed = 5.0f,
-        });
-
-        if (!game.camera)
-                return EXIT_FAILURE;
+        }));
 
         game.light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
-        if (!game.camera)
-                return EXIT_FAILURE;
         camera_adjust_direction(game.camera);
 
         /* these should be moved to the window layer, we would want to have many
