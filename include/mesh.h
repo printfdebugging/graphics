@@ -21,6 +21,8 @@ struct vertex {
         vec3s uv;
 };
 
+/* do i also need to store the mesh vertex data? */
+/* we need to compile shaders per mesh? or do we create meshes such that a shader which provides a few options can handle that. */
 struct mesh {
         unsigned int vao;
         unsigned int ebo;

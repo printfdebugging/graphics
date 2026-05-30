@@ -3,6 +3,7 @@
 
 #include "cglm/struct.h"
 
+/* todo: a material has textures */
 struct material {
         const vec3s ambient;
         const vec3s diffuse;
