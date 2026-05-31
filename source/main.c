@@ -158,7 +158,7 @@ struct mesh *create_axes_mesh() {
         if (!axes_mesh)
                 return NULL;
 
-        mesh_load_vertices(axes_mesh, &vertices[0][0][0][0], count, 3 * sizeof(float));
+        mesh_load_vertices(axes_mesh, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
         return axes_mesh;
 }
 
