@@ -35,6 +35,6 @@ void main() {
                 if (is_grid_edge())
                         color = vec3(0.39f, 0.39f, 0.39f);
                 else
-                        color = vec3(0.29f, 0.29f, 0.29f);
+                        color = vec3(0.15f, 0.15f, 0.15f);
         }
 }

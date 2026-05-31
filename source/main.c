@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdlib.h>
 
 #include "cglm/struct.h"
@@ -7,11 +6,8 @@
 
 #include "camera.h"
 #include "game.h"
-#include "material.h"
 #include "mesh.h"
-#include "model.h"
 #include "shader.h"
-#include "texture.h"
 #include "window.h"
 #include "core/defines.h"
 
@@ -21,9 +17,6 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 struct mesh *create_axes_mesh();
 struct shader *create_axes_shader();
-struct model *create_cube_model();
-struct shader *create_cube_shader();
-struct shader *create_light_shader();
 
 /* todo: deprecate this in favour of renderModel */
 void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
@@ -41,8 +34,9 @@ int main() {
 
         ensure_not_null(game.camera = camera_create((struct camera) {
             CAMERA_DEFAULTS,
-            .position = { { 0.0f, 0.0f, 8.0f } },
+            .position = { { 0.0f, 4.0f, 9.0f } },
             .movement_speed = 5.0f,
+            .pitch = -30.0f,
         }));
 
         game.light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
@@ -60,30 +54,6 @@ int main() {
         if (!axes_mesh || !axes_shader)
                 return EXIT_FAILURE;
 
-        struct model *cube = create_cube_model();
-        struct shader *cube_shader = create_cube_shader();
-        struct shader *light_shader = create_light_shader();
-        if (!cube || !cube_shader || !light_shader)
-                return EXIT_FAILURE;
-
-        struct texture *material_diffuse_map = texture_create_from_file(ASSETS_DIR "textures/diffuse.png");
-        struct texture *material_specular_map = texture_create_from_file(ASSETS_DIR "textures/specular.png");
-        struct texture *material_emission_map = texture_create_from_file(ASSETS_DIR "textures/matrix.jpg");
-        if (!material_diffuse_map || !material_specular_map || !material_emission_map)
-                return EXIT_FAILURE;
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, material_diffuse_map->texture);
-        material_diffuse_map->texture_index = 0;
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, material_specular_map->texture);
-        material_specular_map->texture_index = 1;
-
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, material_emission_map->texture);
-        material_emission_map->texture_index = 3;
-
         // return game_run();
         while (!window_close(game.window)) {
                 f64 current_frame = glfwGetTime();
@@ -95,132 +65,17 @@ int main() {
                 window_clear_color(game.window);
                 process_input(game.window, game.delta_time);
 
-                /* model matrix for light source */
-                vec3s plt_amb = { { 0.1f, 0.1f, 0.1f } };
-                vec3s plt_diff = { { 0.8f, 0.8f, 0.8f } };
-                vec3s plt_spec = { { 1.0f, 1.0f, 1.0f } };
-
-                vec3s dlt_dir = { { -1.0f, -1.0f, -1.0f } };
-                vec3s dlt_amb = { { 0.1f, 0.1f, 0.0f } };
-                vec3s dlt_diff = { { 0.2f, 0.2f, 0.0f } };
-                vec3s dlt_spec = { { 1.0f, 1.0f, 0.0f } };
-
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
 
-                /* without the render call below, why are axes not being drawn and instead
-                 * cube's vertices are being drawn */
-                // draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
-
-                vec3s cube_positions[] = {
-                        { { 0.0f, 0.0f, 0.0f } },
-                        { { 2.0f, 5.0f, -15.0f } },
-                        { { -1.5f, -2.2f, -2.5f } },
-                        { { -3.8f, -2.0f, -12.3f } },
-                        { { 2.4f, -0.4f, -3.5f } },
-                        { { -1.7f, 3.0f, -7.5f } },
-                        { { 1.3f, -2.0f, -2.5f } },
-                        { { 1.5f, 2.0f, -2.5f } },
-                        { { 1.5f, 0.2f, -1.5f } },
-                        { { -1.3f, 1.0f, -1.5f } }
-                };
-
-                for (u32 i = 0; i < 10; ++i) {
-                        /* render model*/
-                        f32 angle = 20.0f * (f32) i;
-                        cube->model = (mat4s) { .raw = GLM_MAT4_IDENTITY_INIT };
-                        cube->model = glms_translate(cube->model, cube_positions[i]);
-                        cube->model = glms_rotate(cube->model, angle, (vec3s) { { 1.0f, 0.3f, 0.5f } });
-                        cube->model = glms_scale(cube->model, (vec3s) { { 1.0f, 1.0f, 1.0f } });
-                        cube->view = view;
-                        cube->projection = projection;
-                        glUseProgram(cube_shader->program);
-                        /* note:  don't call these each frame, instead call them once and store the location */
-                        shader_set_uniform(cube_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-                        shader_set_uniform(cube_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-                        shader_set_uniform(cube_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-
-                        {
-                                /* note:  don't call these each frame, instead call them once and store the location */
-                                shader_set_uniform(cube_shader, "plt_pos", 3fv, 1, game.light_position.raw);
-                                shader_set_uniform(cube_shader, "plt_amb", 3fv, 1, plt_amb.raw);
-                                shader_set_uniform(cube_shader, "plt_diff", 3fv, 1, plt_diff.raw);
-                                shader_set_uniform(cube_shader, "plt_spec", 3fv, 1, plt_spec.raw);
-                                shader_set_uniform(cube_shader, "plt_att_const", 1f, 1.0f);
-                                shader_set_uniform(cube_shader, "plt_att_linear", 1f, 0.09f);
-                                shader_set_uniform(cube_shader, "plt_att_quad", 1f, 0.032f);
-                        }
-                        {
-                                /* note:  don't call these each frame, instead call them once and store the location */
-                                shader_set_uniform(cube_shader, "dlt_dir", 3fv, 1, dlt_dir.raw);
-                                shader_set_uniform(cube_shader, "dlt_amb", 3fv, 1, dlt_amb.raw);
-                                shader_set_uniform(cube_shader, "dlt_diff", 3fv, 1, dlt_diff.raw);
-                                shader_set_uniform(cube_shader, "dlt_spec", 3fv, 1, dlt_spec.raw);
-                        }
-                        {
-                                /* note:  don't call these each frame, instead call them once and store the location */
-                                shader_set_uniform(cube_shader, "cam_pos", 3fv, 1, game.camera->position.raw);
-                                // shader_set_uniform(cube_shader, "cam_front_dir", 3fv, 1, game.camera->front.raw);
-                        }
-                        {
-                                /* note:  don't call these each frame, instead call them once and store the location */
-                                shader_set_uniform(cube_shader, "mat_shininess", 1f, 512.0f);
-                                shader_set_uniform(cube_shader, "mat_diff_map", 1i, material_diffuse_map->texture_index);
-                                shader_set_uniform(cube_shader, "mat_spec_map", 1i, material_specular_map->texture_index);
-                                // shader_set_uniform(cube_shader, "material_emission_map", 1i, material_emission_map->texture_index);
-                        }
-
-                        for (u32 j = 0; j < cube->mesh_count; ++j) {
-                                const struct mesh *mesh = cube->mesh[j];
-                                glBindVertexArray(mesh->vao);
-                                if (mesh->index_count) {
-                                        glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
-                                } else {
-                                        glDrawArrays(mesh->draw_mode, 0, (i32) mesh->vertex_count);
-                                }
-                        }
-                }
-
-                {
-                        vec3s light_scale = { { 0.2f, 0.2f, 0.2f } };
-                        mat4s model_matrix_light = { .raw = GLM_MAT4_IDENTITY_INIT };
-                        model_matrix_light = glms_translate(model_matrix_light, game.light_position);
-                        model_matrix_light = glms_scale(model_matrix_light, light_scale);
-
-                        /* render cube */
-                        cube->view = view;
-                        cube->projection = projection;
-                        cube->model = model_matrix_light;
-                        glUseProgram(light_shader->program);
-                        shader_set_uniform(light_shader, "model", Matrix4fv, 1, GL_FALSE, &cube->model.col[0].raw[0]);
-                        shader_set_uniform(light_shader, "view", Matrix4fv, 1, GL_FALSE, &cube->view.col[0].raw[0]);
-                        shader_set_uniform(light_shader, "projection", Matrix4fv, 1, GL_FALSE, &cube->projection.col[0].raw[0]);
-                        for (u64 i = 0; i < cube->mesh_count; ++i) {
-                                const struct mesh *mesh = cube->mesh[i];
-                                glBindVertexArray(mesh->vao);
-                                if (mesh->index_count) {
-                                        glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
-                                } else {
-                                        glDrawArrays(mesh->draw_mode, 0, (i32) mesh->vertex_count);
-                                }
-                        }
-                }
-
+                draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
                 window_swap_buffers(game.window);
         }
 
         /* move to a separate cleanup function, or rather make the subsystems init/cleanup themselves */
 
         mesh_destroy(axes_mesh);
-        model_destroy(cube);
-
         shader_destroy(axes_shader);
-        shader_destroy(cube_shader);
-        shader_destroy(light_shader);
-
-        texture_destroy(material_diffuse_map);
-        texture_destroy(material_specular_map);
-        texture_destroy(material_emission_map);
 
         camera_destroy(game.camera);
         window_destroy(game.window);
@@ -270,16 +125,16 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
 }
 
 struct mesh *create_axes_mesh() {
-        const u32 AXES = 2;
-        const u32 LINES_PER_AXIS = 501;
-        const u32 LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
-        const u32 POINTS_PER_LINE = 2;
-        const u32 FLOATS_PER_POINT = 3;
-        const u32 count = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
+        const i32 AXES = 2;
+        const i32 LINES_PER_AXIS = 11;
+        const i32 LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
+        const i32 POINTS_PER_LINE = 2;
+        const i32 FLOATS_PER_POINT = 3;
+        const i32 count = AXES * LINES_PER_AXIS * POINTS_PER_LINE;
 
         f32 vertices[AXES][LINES_PER_AXIS][POINTS_PER_LINE][FLOATS_PER_POINT];
 
-        for (u32 z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
+        for (i32 z = -LINES_ON_EACH_SIDE; z <= LINES_ON_EACH_SIDE; ++z) {
                 vertices[0][z + LINES_ON_EACH_SIDE][0][0] = (f32) -LINES_ON_EACH_SIDE;
                 vertices[0][z + LINES_ON_EACH_SIDE][0][1] = 0.0f;
                 vertices[0][z + LINES_ON_EACH_SIDE][0][2] = (f32) z;
@@ -289,7 +144,7 @@ struct mesh *create_axes_mesh() {
                 vertices[0][z + LINES_ON_EACH_SIDE][1][2] = (f32) z;
         }
 
-        for (u32 x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
+        for (i32 x = -LINES_ON_EACH_SIDE; x <= LINES_ON_EACH_SIDE; ++x) {
                 vertices[1][x + LINES_ON_EACH_SIDE][0][0] = (f32) x;
                 vertices[1][x + LINES_ON_EACH_SIDE][0][1] = 0.0f;
                 vertices[1][x + LINES_ON_EACH_SIDE][0][2] = (f32) -LINES_ON_EACH_SIDE;
@@ -326,71 +181,4 @@ void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, 
 
         glBindVertexArray(axes_mesh->vao);
         glDrawArrays(GL_LINES, 0, (i32) axes_mesh->vertex_count);
-}
-
-struct model *create_cube_model() {
-        /* clang-format off */
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f,  0.5f, -0.5f, 0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
-		-0.5f, -0.5f,  0.5f, 0.5f, -0.5f,  0.5f, 0.5f,  0.5f,  0.5f, 0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f, 0.5f,  0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f,  0.5f, 0.5f,  0.5f,  0.5f,
-		-0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f,  0.5f, 0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
-		-0.5f,  0.5f, -0.5f, 0.5f,  0.5f, -0.5f, 0.5f,  0.5f,  0.5f, 0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f,
-	};
-	float normals[] = {
-		0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f, 0.0f,  0.0f, -1.0f,
-		0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-		-1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f,
-		0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, -1.0f,  0.0f,
-		0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f, 0.0f,  1.0f,  0.0f,
-	};
-	float uv[] = {
-		0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-	};
-
-        /* clang-format on */
-        struct model *model = model_create();
-        if (!model)
-                return NULL;
-
-        /* todo: test this malloc as well, or more like break these steps in the
-         * model loader itself */
-        model->mesh = malloc(sizeof(struct model *));
-        model->mesh_count = 1;
-
-        *model->mesh = mesh_create();
-        model->mesh[0]->draw_mode = GL_TRIANGLES;
-        mesh_load_vertices(*model->mesh, vertices, 36, 3 * sizeof(float));
-        mesh_load_normals(*model->mesh, normals, 36, 3 * sizeof(float));
-        mesh_load_uv(*model->mesh, uv, 36, 2 * sizeof(float));
-        return model;
-}
-
-struct shader *create_cube_shader() {
-        struct shader *shader = shader_create();
-        if (!shader)
-                return NULL;
-        if (shader_load_from_file(shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) {
-                shader_destroy(shader);
-                return NULL;
-        }
-        return shader;
-}
-
-struct shader *create_light_shader() {
-        struct shader *shader = shader_create();
-        if (!shader)
-                return NULL;
-        if (shader_load_from_file(shader, ASSETS_DIR "shaders/light/shader.vert", ASSETS_DIR "shaders/light/shader.frag")) {
-                shader_destroy(shader);
-                return NULL;
-        }
-        return shader;
 }

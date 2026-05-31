@@ -3,3 +3,6 @@ run:
 
 clean:
 	rm -rf build
+
+renderdoc:
+	LD_PRELOAD=/usr/lib/libasan.so qrenderdoc
