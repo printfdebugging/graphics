@@ -7,6 +7,8 @@
   * [Getting help from the compiler](#getting-help-from-the-compiler)
     * [Compiler flags](#compiler-flags)
     * [Address Sanitizers](#address-sanitizers)
+  * [abstractions](#abstractions)
+    * [error return codes](#error-return-codes)
 
 <!-- mtoc-end -->
 # C
@@ -66,3 +68,6 @@ AddressSanitizer:DEADLYSIGNAL
 AddressSanitizer: nested bug in the same thread, aborting.
 make: *** [Makefile:2: run] Error 1
 ```
+## abstractions
+### error return codes
+- cgltf's approach to error codes (as enums) is quite nice

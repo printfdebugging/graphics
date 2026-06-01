@@ -46,6 +46,7 @@ struct mesh {
         GLenum index_type;
         GLenum draw_mode;
 
+        /* todo: mesh has materials a shader */
         struct texture **textures;
         unsigned int texture_count;
 };

@@ -16,12 +16,13 @@ struct model {
         mat4s view;
         mat4s projection;
 
-        /** Texture file paths in model files are local to the model
-         * object, i.e. in the same directory as the model itself. So
-         * we need `path` to find the absolute path of the texture
-         * files.
+        /** 'basepath' points to the model's directory. Paths to textures are stored relative
+         * to the model's location like 'emissive.jpg', so we need the directory path to
+         * get the absolute path for these assets. 'basepath' has a slash '/' at the end.
          */
-        char *path;
+        char *basepath;
+
+        /* model has materials */
 };
 
 struct model *model_create();
