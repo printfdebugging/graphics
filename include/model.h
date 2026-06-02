@@ -8,13 +8,17 @@
 #include "primitive.h"
 #include "core/defines.h"
 
+struct transform {
+        mat4s model;
+        mat4s view;
+        mat4s projection;
+};
+
 struct model {
         struct primitive **primitives;
         u64 primitive_count;
 
-        mat4s model;
-        mat4s view;
-        mat4s projection;
+        struct transform transform;
 
         /** 'basepath' points to the model's directory. Paths to textures are stored relative
          * to the model's location like 'emissive.jpg', so we need the directory path to
