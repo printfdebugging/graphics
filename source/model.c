@@ -22,6 +22,7 @@ static char *get_basepath(const char *filepath);
 static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type);
 static i8 gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type);
 
+/* todo: get the mesh <-> primitive names right */
 static i8 gltf_load_meshes(struct model *model, cgltf_data *data);
 static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath);
 static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive);
@@ -39,11 +40,11 @@ struct model *model_create() {
 }
 
 void model_destroy(struct model *model) {
-        for (u64 i = 0; i < model->mesh_count; ++i) {
-                primitive_destroy(*(model->mesh + i));
+        for (u64 i = 0; i < model->primitive_count; ++i) {
+                primitive_destroy(*(model->primitives + i));
         }
 
-        free(model->mesh);
+        free(model->primitives);
         free(model->basepath);
         free(model);
 }
@@ -171,9 +172,9 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
 }
 
 static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
-        model->mesh = malloc(sizeof(struct primitive *) * data->meshes_count);
-        model->mesh_count = (u32) data->meshes_count;
-        if (!model->mesh) {
+        model->primitives = malloc(sizeof(struct primitive *) * data->meshes_count);
+        model->primitive_count = (u32) data->meshes_count;
+        if (!model->primitives) {
                 fprintf(stderr, "failed to allocate mesh pointers in model\n");
                 return 1;
         }
@@ -187,10 +188,10 @@ static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
                 if (status) {
                         /* handle error properly */
                         fprintf(stderr, "failed to load gltf mesh primitives\n");
-                        *(model->mesh + i) = NULL;
+                        *(model->primitives + i) = NULL;
                 }
 
-                *(model->mesh + i) = mesh;
+                *(model->primitives + i) = mesh;
         }
         return 0;
 }

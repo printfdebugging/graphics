@@ -17,7 +17,7 @@ void process_input(struct window *window, f64 delta_time);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
-struct primitive *create_axes_mesh();
+struct primitive *create_axes_primitive();
 struct shader *create_axes_shader();
 
 /* todo: deprecate this in favour of renderModel */
@@ -51,9 +51,9 @@ int main() {
         glfwSetWindowUserPointer(game.window->window, &game);
         window_scale_to_monitor_dpi(game.window->window);
 
-        struct primitive *axes_mesh = create_axes_mesh();
+        struct primitive *axes = create_axes_primitive();
         struct shader *axes_shader = create_axes_shader();
-        if (!axes_mesh || !axes_shader)
+        if (!axes || !axes_shader)
                 return EXIT_FAILURE;
 
         struct model *cylinder_engine;
@@ -87,14 +87,14 @@ int main() {
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
 
-                draw_axes(axes_mesh, axes_shader, (mat4s) {}, view, projection);
+                draw_axes(axes, axes_shader, (mat4s) {}, view, projection);
                 render_model(cylinder_engine, cylinder_shader);
                 window_swap_buffers(game.window);
         }
 
         /* move to a separate cleanup function, or rather make the subsystems init/cleanup themselves */
 
-        primitive_destroy(axes_mesh);
+        primitive_destroy(axes);
         shader_destroy(axes_shader);
         shader_destroy(cylinder_shader);
         model_destroy(cylinder_engine);
@@ -146,7 +146,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
         camera_process_mouse_scroll(data->camera, (float) yoffset);
 }
 
-struct primitive *create_axes_mesh() {
+struct primitive *create_axes_primitive() {
         const i32 AXES = 2;
         const i32 LINES_PER_AXIS = 11;
         const i32 LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
@@ -176,12 +176,12 @@ struct primitive *create_axes_mesh() {
                 vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (f32) LINES_ON_EACH_SIDE;
         }
 
-        struct primitive *axes_mesh = primitive_create();
-        if (!axes_mesh)
+        struct primitive *axes = primitive_create();
+        if (!axes)
                 return NULL;
 
-        primitive_load_vertices(axes_mesh, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
-        return axes_mesh;
+        primitive_load_vertices(axes, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
+        return axes;
 }
 
 struct shader *create_axes_shader() {

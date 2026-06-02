@@ -5,6 +5,6 @@
 #include "shader.h"
 
 void render_model(struct model *model, struct shader *shader);
-void render_mesh(struct primitive *mesh, struct shader *shader);
+void render_primitive(struct primitive *primitive, struct shader *shader);
 
 #endif

@@ -9,8 +9,8 @@
 #include "core/defines.h"
 
 struct model {
-        struct primitive **mesh;
-        u32 mesh_count;
+        struct primitive **primitives;
+        u64 primitive_count;
 
         mat4s model;
         mat4s view;

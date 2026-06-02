@@ -12,8 +12,8 @@ void render_model(struct model *model, struct shader *shader) {
         shader_set_uniform(shader, "view", Matrix4fv, 1, GL_FALSE, &model->view.col[0].raw[0]);
         shader_set_uniform(shader, "projection", Matrix4fv, 1, GL_FALSE, &model->projection.col[0].raw[0]);
 
-        for (u32 i = 0; i < model->mesh_count; ++i) {
-                const struct primitive *mesh = model->mesh[i];
+        for (u32 i = 0; i < model->primitive_count; ++i) {
+                const struct primitive *mesh = model->primitives[i];
                 glBindVertexArray(mesh->vao);
                 if (mesh->index_count) {
                         glDrawElements(mesh->draw_mode, (i32) mesh->index_count, mesh->index_type, NULL);
@@ -23,5 +23,5 @@ void render_model(struct model *model, struct shader *shader) {
         }
 }
 
-void render_mesh(struct primitive *mesh, struct shader *shader) {
+void render_primitive(struct primitive *primitive, struct shader *shader) {
 }
