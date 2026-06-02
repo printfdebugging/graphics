@@ -56,19 +56,17 @@ int main() {
         if (!axes || !axes_shader)
                 return EXIT_FAILURE;
 
-        struct model *cylinder_engine;
-        struct shader *cylinder_shader;
-        const char *cylinder_engine_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
+        const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
         i8 status;
 
-        cylinder_engine = model_create();
-        if ((status = model_load_from_file(cylinder_engine, cylinder_engine_path)) != 0) {
-                fprintf(stderr, "failed to load model: %s\n", cylinder_engine_path);
+        struct model *engine = model_create();
+        if ((status = model_load_from_file(engine, engine_asset_path)) != 0) {
+                fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
                 return EXIT_FAILURE;
         }
 
-        cylinder_shader = shader_create();
-        if ((status = shader_load_from_file(cylinder_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) != 0) {
+        struct shader *engine_shader = shader_create();
+        if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) != 0) {
                 fprintf(stderr, "failed to load shader\n");
                 return EXIT_FAILURE;
         }
@@ -84,11 +82,14 @@ int main() {
                 window_clear_color(game.window);
                 process_input(game.window, game.delta_time);
 
+                mat4s model = { GLM_MAT4_IDENTITY_INIT };
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
 
+                /* todo: set trs on model */
+
                 draw_axes(axes, axes_shader, (mat4s) {}, view, projection);
-                render_model(cylinder_engine, cylinder_shader);
+                render_model(engine, engine_shader);
                 window_swap_buffers(game.window);
         }
 
@@ -96,8 +97,8 @@ int main() {
 
         primitive_destroy(axes);
         shader_destroy(axes_shader);
-        shader_destroy(cylinder_shader);
-        model_destroy(cylinder_engine);
+        shader_destroy(engine_shader);
+        model_destroy(engine);
 
         camera_destroy(game.camera);
         window_destroy(game.window);
