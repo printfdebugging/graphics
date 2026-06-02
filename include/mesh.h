@@ -15,12 +15,6 @@ enum mesh_attribute {
         MESH_ATTRIBUTE_COUNT,
 };
 
-struct vertex {
-        vec3s position;
-        vec3s normal;
-        vec3s uv;
-};
-
 /* do i also need to store the mesh vertex data? */
 /* we need to compile shaders per mesh? or do we create meshes such that a shader which provides a few options can handle that. */
 struct mesh {
