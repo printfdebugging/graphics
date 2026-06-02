@@ -4,15 +4,15 @@
 #include "glad/glad.h"
 
 #include "shader.h"
-#include "mesh.h"
+#include "primitive.h"
 #include "core/defines.h"
 #include "core/string.h"
 
 static const char *shader_variable_names[] = {
-        [MESH_ATTRIBUTE_POSITION] = "in_position",
-        [MESH_ATTRIBUTE_COLOR] = "in_color",
-        [MESH_ATTRIBUTE_UV] = "in_uv",
-        [MESH_ATTRIBUTE_NORMAL] = "in_normal",
+        [PRIMITIVE_ATTRIBUTE_POSITION] = "in_position",
+        [PRIMITIVE_ATTRIBUTE_COLOR] = "in_color",
+        [PRIMITIVE_ATTRIBUTE_UV] = "in_uv",
+        [PRIMITIVE_ATTRIBUTE_NORMAL] = "in_normal",
 };
 
 #if defined(EMSCRIPTEN)
@@ -57,7 +57,7 @@ static i8 shader_linked_successfully(u32 program) {
 }
 
 static void shader_bind_variable_names(u32 program) {
-        for (enum mesh_attribute i = MESH_ATTRIBUTE_POSITION; i < MESH_ATTRIBUTE_COUNT; ++i) {
+        for (enum primitive_attribute i = PRIMITIVE_ATTRIBUTE_POSITION; i < PRIMITIVE_ATTRIBUTE_COUNT; ++i) {
                 glBindAttribLocation(program, i, shader_variable_names[i]);
         }
 }

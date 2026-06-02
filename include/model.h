@@ -5,11 +5,11 @@
 
 #include "cglm/struct.h"
 
-#include "mesh.h"
+#include "primitive.h"
 #include "core/defines.h"
 
 struct model {
-        struct mesh **mesh;
+        struct primitive **mesh;
         u32 mesh_count;
 
         mat4s model;

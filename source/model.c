@@ -5,7 +5,7 @@
 #include "cgltf.h"
 
 #include "model.h"
-#include "mesh.h"
+#include "primitive.h"
 #include "texture.h"
 #include "core/defines.h"
 
@@ -23,10 +23,10 @@ static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf
 static i8 gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type);
 
 static i8 gltf_load_meshes(struct model *model, cgltf_data *data);
-static i8 gltf_load_mesh_primitives(struct mesh *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath);
-static i8 gltf_load_primitive_attributes(struct mesh *mesh, const struct cgltf_primitive *primitive);
-static i8 gltf_load_primitive_material(struct mesh *mesh, const cgltf_primitive *primitive, const char *basepath);
-static i8 gltf_load_primitive_indices(struct mesh *mesh, const cgltf_primitive *primitive);
+static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath);
+static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive);
+static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath);
+static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive);
 
 struct model *model_create() {
         struct model *model = malloc(sizeof(struct model));
@@ -40,7 +40,7 @@ struct model *model_create() {
 
 void model_destroy(struct model *model) {
         for (u64 i = 0; i < model->mesh_count; ++i) {
-                mesh_destroy(*(model->mesh + i));
+                primitive_destroy(*(model->mesh + i));
         }
 
         free(model->mesh);
@@ -171,7 +171,7 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
 }
 
 static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
-        model->mesh = malloc(sizeof(struct mesh *) * data->meshes_count);
+        model->mesh = malloc(sizeof(struct primitive *) * data->meshes_count);
         model->mesh_count = (u32) data->meshes_count;
         if (!model->mesh) {
                 fprintf(stderr, "failed to allocate mesh pointers in model\n");
@@ -181,7 +181,7 @@ static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
         /* iterate over all the meshes - meshes have primitives */
         for (u64 i = 0; i < data->meshes_count; ++i) {
                 const cgltf_mesh *gltf_mesh = &data->meshes[i];
-                struct mesh *mesh = mesh_create();
+                struct primitive *mesh = primitive_create();
 
                 i8 status = gltf_load_mesh_primitives(mesh, gltf_mesh, data, model->basepath);
                 if (status) {
@@ -225,7 +225,7 @@ todo: handle the case where one mesh has multiple primitives -> 2CylinderEngine.
 
 */
 
-static i8 gltf_load_mesh_primitives(struct mesh *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath) {
+static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath) {
         for (u64 i = 0; i < gltf_mesh->primitives_count; ++i) {
                 const cgltf_primitive *primitive = &gltf_mesh->primitives[i];
                 i8 status;
@@ -279,7 +279,7 @@ static char *get_basepath(const char *filepath) {
 }
 
 /* separate the definition and the declaration */
-static i8 gltf_load_primitive_attributes(struct mesh *mesh, const struct cgltf_primitive *primitive) {
+static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive) {
         const u64 attribute_count = primitive->attributes_count;
         for (u64 k = 0; k < attribute_count; ++k) {
                 const cgltf_attribute *attribute = &primitive->attributes[k];
@@ -289,7 +289,7 @@ static i8 gltf_load_primitive_attributes(struct mesh *mesh, const struct cgltf_p
                 switch (attribute->type) {
                         case cgltf_attribute_type_position: {
                                 accessor_point_to_data(attribute->data, &attr_data, &count, &stride);
-                                mesh_load_vertices(mesh, attr_data, (u32) count, (i32) stride);
+                                primitive_load_vertices(mesh, attr_data, (u32) count, (i32) stride);
                         } break;
                         case cgltf_attribute_type_normal: {
                         } break;
@@ -298,7 +298,7 @@ static i8 gltf_load_primitive_attributes(struct mesh *mesh, const struct cgltf_p
                                  * is an index in the textures array i.e. pointing to the texture
                                  * these texture coordinates are for. */
                                 accessor_point_to_data(attribute->data, &attr_data, &count, &stride);
-                                mesh_load_uv(mesh, attr_data, (u32) count, (i32) stride);
+                                primitive_load_uv(mesh, attr_data, (u32) count, (i32) stride);
                                 /* where to load the texture? surely a texture is a part of the
                                  * "mesh", so it probably should be loaded here since we are
                                  * loading texture coordinates. */
@@ -319,7 +319,7 @@ static i8 gltf_load_primitive_attributes(struct mesh *mesh, const struct cgltf_p
         return 0;
 }
 
-static i8 gltf_load_primitive_material(struct mesh *mesh, const cgltf_primitive *primitive, const char *basepath) {
+static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath) {
         cgltf_material *material = primitive->material;
         i8 status = 0;
         if (material->pbr_metallic_roughness.base_color_texture.texture) {
@@ -354,7 +354,7 @@ static i8 gltf_load_primitive_material(struct mesh *mesh, const cgltf_primitive 
         return status;
 }
 
-static i8 gltf_load_primitive_indices(struct mesh *mesh, const cgltf_primitive *primitive) {
+static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive) {
         void *index_data = NULL;
         u64 count = 0, stride = 0;
         GLenum type;
@@ -366,6 +366,6 @@ static i8 gltf_load_primitive_indices(struct mesh *mesh, const cgltf_primitive *
         }
 
         accessor_point_to_data(primitive->indices, &index_data, &count, &stride);
-        mesh_load_indices(mesh, index_data, (u32) count, type, (i32) stride);
+        primitive_load_indices(mesh, index_data, (u32) count, type, (i32) stride);
         return 0;
 }

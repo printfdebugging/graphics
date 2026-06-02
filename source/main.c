@@ -6,7 +6,7 @@
 
 #include "camera.h"
 #include "game.h"
-#include "mesh.h"
+#include "primitive.h"
 #include "model.h"
 #include "renderer.h"
 #include "shader.h"
@@ -17,11 +17,11 @@ void process_input(struct window *window, f64 delta_time);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
-struct mesh *create_axes_mesh();
+struct primitive *create_axes_mesh();
 struct shader *create_axes_shader();
 
 /* todo: deprecate this in favour of renderModel */
-void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
+void draw_axes(struct primitive *primitive, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
 
 #define ensure_not_null(x)           \
         if ((x) == NULL) {           \
@@ -51,7 +51,7 @@ int main() {
         glfwSetWindowUserPointer(game.window->window, &game);
         window_scale_to_monitor_dpi(game.window->window);
 
-        struct mesh *axes_mesh = create_axes_mesh();
+        struct primitive *axes_mesh = create_axes_mesh();
         struct shader *axes_shader = create_axes_shader();
         if (!axes_mesh || !axes_shader)
                 return EXIT_FAILURE;
@@ -94,7 +94,7 @@ int main() {
 
         /* move to a separate cleanup function, or rather make the subsystems init/cleanup themselves */
 
-        mesh_destroy(axes_mesh);
+        primitive_destroy(axes_mesh);
         shader_destroy(axes_shader);
         shader_destroy(cylinder_shader);
         model_destroy(cylinder_engine);
@@ -146,7 +146,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
         camera_process_mouse_scroll(data->camera, (float) yoffset);
 }
 
-struct mesh *create_axes_mesh() {
+struct primitive *create_axes_mesh() {
         const i32 AXES = 2;
         const i32 LINES_PER_AXIS = 11;
         const i32 LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
@@ -176,11 +176,11 @@ struct mesh *create_axes_mesh() {
                 vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (f32) LINES_ON_EACH_SIDE;
         }
 
-        struct mesh *axes_mesh = mesh_create();
+        struct primitive *axes_mesh = primitive_create();
         if (!axes_mesh)
                 return NULL;
 
-        mesh_load_vertices(axes_mesh, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
+        primitive_load_vertices(axes_mesh, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
         return axes_mesh;
 }
 
@@ -195,12 +195,12 @@ struct shader *create_axes_shader() {
         return axes_shader;
 }
 
-void draw_axes(struct mesh *axes_mesh, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection) {
+void draw_axes(struct primitive *primitive, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection) {
         (void) model;
         glUseProgram(axes_shader->program);
         shader_set_uniform(axes_shader, "view", Matrix4fv, 1, GL_FALSE, &view.col[0].raw[0]);
         shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
 
-        glBindVertexArray(axes_mesh->vao);
-        glDrawArrays(GL_LINES, 0, (i32) axes_mesh->vertex_count);
+        glBindVertexArray(primitive->vao);
+        glDrawArrays(GL_LINES, 0, (i32) primitive->vertex_count);
 }

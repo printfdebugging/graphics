@@ -49,7 +49,7 @@ add_executable(${APPLICATION}
         source/logger.c
         source/main.c
         source/game.c
-        source/mesh.c
+        source/primitive.c
         source/model.c
         source/renderer.c
         source/shader.c
