@@ -37,6 +37,19 @@
 
 <!-- mtoc-end -->
 
+> [!NOTE]
+> Such notes are hardly helpful (after you are done writing them) as it's
+> always better to check the spec as that has the complete information, though
+> taking short notes helps you know that you really understood what you read,
+> so it's more of a reading-assist than notes for reference, unless you are
+> experimenting with what you read. But in this case, the spec is pretty specific
+> about things, so there isn't much room for experiemntation there.
+> 
+> See lighting notes, they have many pictures and implementation details which
+> are useful for reference later on, that saves the context and various paths
+> explored, helps stay organized as you see the whole context, how i reached here
+> what was i trying to do in the first place etc..
+
 # models
 ## why use models
 - cube is boring
