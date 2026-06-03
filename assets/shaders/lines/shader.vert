@@ -1,3 +1,4 @@
+uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -24,7 +25,7 @@ bool is_grid_edge() {
 }
 
 void main() {
-        gl_Position = projection * view * vec4(in_position.xyz, 1.0);
+        gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
         if (is_xaxis()) {
                 color = vec3(0.69f, 0.22f, 0.29f);
         } else if (is_yaxis()) {

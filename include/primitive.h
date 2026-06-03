@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 
 #include "texture.h"
+#include "shader.h"
 #include "core/defines.h"
 
 enum primitive_attribute {
@@ -40,6 +41,8 @@ struct primitive {
         GLenum index_type;
         GLenum draw_mode;
 
+        struct shader *shader;
+
         /* todo: mesh has materials a shader */
         struct texture **textures;
         u64 texture_count;
@@ -53,4 +56,19 @@ void primitive_load_colors(struct primitive *primitive, void *data, u32 count, i
 void primitive_load_uv(struct primitive *primitive, void *data, u32 count, i32 stride);
 void primitive_load_normals(struct primitive *primitive, void *data, u32 count, i32 stride);
 
+// void primitive_load_shader(struct primitive *primitive, struct shader_options options);
+// this will allow us to use one shader for multiple primitives.
+
+// void primitive_use_shader(struct primitive *primitive);
+// shader switching happens through this function, so that if it's a shader
+// with similar options we can skip the glUseProgram call
+
+/* the shader will be ref-counted, so the shader_destroy function has to
+ * be changed to factor that in. the shaders will be stored in a global
+ * in the shader.c file (or maybe somewhere else?). */
+
+/* todo: do these once we are close to pbr, as then we will have an idea of what
+ * we need in the shader_options struct and the one big shader, we would need to enable
+ * and disable code out of that shader using some preprocessor macros which we append to the
+ * shader using string operations. */
 #endif

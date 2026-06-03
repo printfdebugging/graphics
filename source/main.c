@@ -20,9 +20,6 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 struct primitive *create_axes_primitive();
 struct shader *create_axes_shader();
 
-/* todo: deprecate this in favour of renderModel */
-void draw_axes(struct primitive *primitive, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection);
-
 #define ensure_not_null(x)           \
         if ((x) == NULL) {           \
                 return EXIT_FAILURE; \
@@ -56,6 +53,8 @@ int main() {
         if (!axes || !axes_shader)
                 return EXIT_FAILURE;
 
+        axes->shader = axes_shader;
+
         const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
         i8 status;
 
@@ -69,6 +68,11 @@ int main() {
         if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) != 0) {
                 fprintf(stderr, "failed to load shader\n");
                 return EXIT_FAILURE;
+        }
+
+        /* todo: we should have a shader_manager and create shaders based on shader options and reuse shaders */
+        for (u64 i = 0; i < engine->primitive_count; ++i) {
+                engine->primitives[i]->shader = engine_shader;
         }
 
         // return game_run();
@@ -85,11 +89,14 @@ int main() {
                 mat4s model = { GLM_MAT4_IDENTITY_INIT };
                 mat4s view = camera_get_view_matrix(game.camera);
                 mat4s projection = glms_perspective(glm_rad(game.camera->fov), (float) game.window->width / (float) game.window->height, 0.1f, 100.0f);
+                struct transform transform = { .model = model, .view = view, .projection = projection };
 
                 /* todo: set trs on model */
 
-                draw_axes(axes, axes_shader, (mat4s) {}, view, projection);
-                render_model(engine, engine_shader);
+                /* todo: continue from here, we transforming the transforms. also worth taking logs as you go, but i am on low energy, probably last day's coffee is coming out now */
+                render_primitive(axes, transform);
+                engine->transform = transform;
+                render_model(engine);
                 window_swap_buffers(game.window);
         }
 
@@ -182,6 +189,7 @@ struct primitive *create_axes_primitive() {
                 return NULL;
 
         primitive_load_vertices(axes, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
+        axes->draw_mode = GL_LINES;
         return axes;
 }
 
@@ -194,14 +202,4 @@ struct shader *create_axes_shader() {
                 return NULL;
         }
         return axes_shader;
-}
-
-void draw_axes(struct primitive *primitive, struct shader *axes_shader, mat4s model, mat4s view, mat4s projection) {
-        (void) model;
-        glUseProgram(axes_shader->program);
-        shader_set_uniform(axes_shader, "view", Matrix4fv, 1, GL_FALSE, &view.col[0].raw[0]);
-        shader_set_uniform(axes_shader, "projection", Matrix4fv, 1, GL_FALSE, &projection.col[0].raw[0]);
-
-        glBindVertexArray(primitive->vao);
-        glDrawArrays(GL_LINES, 0, (i32) primitive->vertex_count);
 }
