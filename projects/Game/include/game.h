@@ -16,7 +16,7 @@
 struct game_state {
         /* todo: rename engine_state to engine_interface or something like that where all that contains is funciton pointers to callbacks */
         /* engine here is just to get us the events  in the game code, we handle them here */
-        struct app_bridge bridge;
+        struct bridge bridge;
         struct camera *camera;
         struct window *window;
 

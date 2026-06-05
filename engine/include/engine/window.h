@@ -28,7 +28,7 @@ struct window {
         i32 cursor_size;
         GLFWwindow *window;
         vec4s color;
-        struct app_bridge *bridge;
+        struct bridge *bridge;
 };
 
 i8 window_create(struct window **window, struct window window_options);

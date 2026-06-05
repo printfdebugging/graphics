@@ -31,7 +31,7 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
         (void) argc;
         (void) argv;
 
-        game->bridge = (struct app_bridge) {
+        game->bridge = (struct bridge) {
                 .mouse_move = mouse_move,
                 .mouse_scroll = mouse_scroll,
                 .window_resize = window_resize,

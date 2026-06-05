@@ -24,7 +24,7 @@ struct window;
 /* todo: this will just be callbacks, no winodw * here. */
 /* todo:  but each emitter of events will have a pointer to engine_interface or engine_bridge
  * (not state) so that it can pass events there... */
-struct app_bridge {
+struct bridge {
         /**
          */
         void (*mouse_move)(void *userdata, struct window *window, f64 x, f64 y);
