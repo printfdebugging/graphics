@@ -1,21 +1,21 @@
 [submodule "subprojects/glfw"]
-	path = subprojects/glfw
+	path = external/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "subprojects/cglm"]
-	path = subprojects/cglm
+	path = external/cglm
 	url = https://github.com/recp/cglm.git
 [submodule "subprojects/stb"]
-	path = subprojects/stb
+	path = external/stb
 	url = https://github.com/nothings/stb.git
 [submodule "subprojects/freetype"]
-	path = subprojects/freetype
+	path = external/freetype
 	url = https://github.com/freetype/freetype
 [submodule "subprojects/cgltf"]
-	path = subprojects/cgltf
+	path = external/cgltf
 	url = https://github.com/jkuhlmann/cgltf
 [submodule "subprojects/miniaudio"]
-	path = subprojects/miniaudio
+	path = external/miniaudio
 	url = https://github.com/mackron/miniaudio
 [submodule "subprojects/harfbuzz"]
-	path = subprojects/harfbuzz
+	path = external/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz

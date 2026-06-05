@@ -15,7 +15,7 @@ add_library(stb
 )
 
 target_include_directories(stb
-        PUBLIC ../../subprojects/stb
+        PUBLIC ../../external/stb
 )
 
 target_compile_options(stb
@@ -23,7 +23,7 @@ target_compile_options(stb
 )
 
 install(
-        DIRECTORY ../../subprojects/stb
+        DIRECTORY ../../external/stb
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 

@@ -15,7 +15,7 @@ add_library(cgltf
 )
 
 target_include_directories(cgltf
-        PUBLIC ../../subprojects/cgltf
+        PUBLIC ../../external/cgltf
 )
 
 configure_file(
@@ -29,7 +29,7 @@ install(
 )
 
 install(
-        DIRECTORY ../../subprojects/cgltf
+        DIRECTORY ../../external/cgltf
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
