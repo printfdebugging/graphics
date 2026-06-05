@@ -1,0 +1,194 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "GLFW/glfw3.h"
+#include "cglm/struct.h"
+#include "glad/glad.h"
+#include "stb_image.h"
+
+#include "engine/engine.h"
+#include "engine/window.h"
+#include "engine/core/defines.h"
+
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <dwmapi.h>
+#include "GLFW/glfw3native.h"
+#endif
+
+#ifdef _WIN32
+static bool
+__msw_is_dark_mode() {
+        HINSTANCE uxthemelib = LoadLibraryExW(L"uxtheme.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
+        if (!uxthemelib) {
+                fprintf(stderr, "failed to open uxtheme.dll\n");
+                return true; /* default to dark mode */
+        }
+
+        bool use_dark_mode = GetProcAddress(uxthemelib, MAKEINTRESOURCEA(132))();
+        FreeLibrary(uxthemelib);
+        return use_dark_mode;
+}
+#endif
+
+static void __window_frame_buffer_resize_callback(GLFWwindow *window, i32 width, i32 height) {
+        struct engine_state *state = glfwGetWindowUserPointer(window);
+        state->window->width = width;
+        state->window->height = height;
+
+        glViewport(0, 0, width, height);
+}
+
+struct window *window_create(struct window window) {
+        if (window.window) {
+                /* after this, who will own the window.window if it exists? */
+                /* for now we don't do anything and don't allow that */
+                return NULL;
+        }
+
+        if (!glfwInit()) {
+                fprintf(stderr, "failed to initialize glfw");
+                return NULL;
+        }
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+        glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
+#ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#endif
+
+        window.window = glfwCreateWindow(window.width, window.height, window.title, NULL, NULL);
+        if (!window.window) {
+                fprintf(stderr, "failed to create glfw winodw\n");
+                glfwTerminate();
+                return NULL;
+        }
+
+        glfwMakeContextCurrent(window.window);
+        if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+                fprintf(stderr, "failed to initialize glad\n");
+                glfwTerminate();
+                return NULL;
+        }
+
+        /* use a dark titlebar on windows in dark mode. */
+#ifdef _WIN32
+        HWND hwnd = glfwGetWin32Window(window.window);
+        DWORD value = __msw_is_dark_mode();
+        DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+#endif
+
+        if (window_set_icon(&window, window.icon) || window_set_cursor_icon(&window, window.cursor, window.cursor_size)) {
+                fprintf(stderr, "failed to set window icon or cursor icon\n");
+                glfwTerminate();
+                return NULL;
+        }
+
+        glfwSetFramebufferSizeCallback(window.window, __window_frame_buffer_resize_callback);
+        glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSwapInterval(1);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
+        glLineWidth(2);
+
+        // TODO: this is explained in the blending section
+        // TODO: enable them i know what they do
+        // https://learnopengl.com/Advanced-OpenGL/Blending.
+        // glEnable(GL_CULL_FACE);
+        // glEnable(GL_BLEND);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        struct window *window_obj = malloc(sizeof(struct window));
+        if (!window_obj) {
+                fprintf(stderr, "failed to initialize glad\n");
+                glfwTerminate();
+                return NULL;
+        }
+
+        *window_obj = window;
+        return window_obj;
+}
+
+void window_set_clear_color(struct window *window, vec4s color) {
+        window->color = color;
+}
+
+void window_process_input(struct window *window) {
+        if (glfwGetKey(window->window, GLFW_KEY_CAPS_LOCK) == GLFW_PRESS)
+                glfwSetWindowShouldClose(window->window, GLFW_TRUE);
+}
+
+void window_poll_events(struct window *window) {
+        (void) window;
+        glfwPollEvents();
+}
+
+void window_clear_color(struct window *window) {
+        (void) window;
+        glClearColor(window->color.r, window->color.g, window->color.b, window->color.a);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void window_swap_buffers(struct window *window) {
+        glfwSwapBuffers(window->window);
+}
+
+void window_destroy(struct window *window) {
+        glfwDestroyWindow(window->window);
+        glfwTerminate();
+        free(window);
+}
+
+bool window_close(struct window *window) {
+        if (!window->window)
+                return GL_TRUE;
+        return glfwWindowShouldClose(window->window);
+}
+
+i8 window_set_icon(struct window *window, const char *path) {
+        GLFWimage image;
+        int image_channel_count;
+        image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
+        if (!image.pixels) {
+                fprintf(stderr, "failed to read window icon: %s", path);
+                return 1;
+        }
+
+        glfwSetWindowIcon(window->window, 1, &image);
+        window->icon = path;
+
+        stbi_image_free(image.pixels);
+        return 0;
+}
+
+i8 window_set_cursor_icon(struct window *window, const char *path, i32 size) {
+        GLFWimage image;
+        int image_channel_count;
+        image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
+        if (!image.pixels) {
+                fprintf(stderr, "failed to read window icon: %s", path);
+                return 1;
+        }
+
+        GLFWcursor *cursor = glfwCreateCursor(&image, size, size);
+        glfwSetCursor(window->window, cursor);
+
+        stbi_image_free(image.pixels);
+        return 0;
+}
+
+/* this shoould be moved to user code */
+void window_scale_to_monitor_dpi(GLFWwindow *window) {
+        f32 xscale = 1, yscale = 1;
+        glfwGetWindowContentScale(window, &xscale, &yscale);
+        struct engine_state *state = (struct engine_state *) glfwGetWindowUserPointer(window);
+        if (state) {
+                i32 width = (i32) ((f32) state->window->width * xscale);
+                i32 height = (i32) ((f32) state->window->height * yscale);
+                __window_frame_buffer_resize_callback(window, width, height);
+        }
+}

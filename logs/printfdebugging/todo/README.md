@@ -20,6 +20,9 @@
 ## declarative widget toolkit
 - [ ] to-imagine-later
 
+## cmake
+- [ ] cleanup list files
+
 # shaders
 - [ ] use include guards in shaders and organize the code, use one shader, don't create one for each model, unless necessary
 - [ ] cache the uniform locations in the shader object, it's wasteful to call glGetUniformLocation more than once

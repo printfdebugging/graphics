@@ -1,5 +1,0 @@
-#include "logger.h"
-
-DEFINE_PRINT_MATRIX(4)
-
-DEFINE_PRINT_VECTOR(4)
