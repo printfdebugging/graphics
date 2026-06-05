@@ -42,7 +42,7 @@ struct camera {
         f32 mouse_sensitivity;
 };
 
-struct camera *camera_create(struct camera camera);
+i8 camera_create(struct camera **camera, struct camera opts);
 void camera_process_keyboard(struct camera *camera, enum camera_direction direction, f64 delta_time);
 void camera_process_mouse_movement(struct camera *camera, f32 x, f32 y, b8 left_button_pressed);
 void camera_process_mouse_scroll(struct camera *camera, f32 yoffset);

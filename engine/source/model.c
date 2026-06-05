@@ -41,6 +41,14 @@ struct model *model_create() {
 
 void model_destroy(struct model *model) {
         for (u64 i = 0; i < model->primitive_count; ++i) {
+                /* todo: models don't manage the lifetime of a shader as if they do then the won't know
+                 * if this is shared between multiple primitives or not. let this task be something
+                 * for the shader manager etc to do */
+
+                /* todo: this thorws an error at the moment as all the primitives in the model share the same shader. */
+                /* todo: whenever we add a shader manger and if it has to manage some state, all that state will be managed
+                 * by the client, we just provide a nice api for it to do things conveniently, but we don't manage anything
+                 * in the engine, it's just bundles of code like stb, provides structs and functions  */
                 primitive_destroy(*(model->primitives + i));
         }
 

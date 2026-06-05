@@ -32,23 +32,33 @@ __msw_is_dark_mode() {
 #endif
 
 static void __window_frame_buffer_resize_callback(GLFWwindow *window, i32 width, i32 height) {
-        struct engine_state *state = glfwGetWindowUserPointer(window);
-        state->window->width = width;
-        state->window->height = height;
-
+        struct window *_window = glfwGetWindowUserPointer(window);
+        _window->bridge->window_resize(_window->bridge, _window, width, height);
+        /* maybe this should be moved to the client side code? */
         glViewport(0, 0, width, height);
 }
 
-struct window *window_create(struct window window) {
-        if (window.window) {
+static void __window_mouse_scroll_callback(GLFWwindow *window, f64 x, f64 y) {
+        struct window *_window = glfwGetWindowUserPointer(window);
+        _window->bridge->mouse_scroll(_window->bridge, _window, x, y);
+}
+
+static void __window_mouse_move_callback(GLFWwindow *window, f64 x, f64 y) {
+        struct window *_window = glfwGetWindowUserPointer(window);
+        _window->bridge->mouse_move(_window->bridge, _window, x, y);
+}
+
+i8 window_create(struct window **window, struct window opts) {
+        if (opts.window) {
                 /* after this, who will own the window.window if it exists? */
                 /* for now we don't do anything and don't allow that */
-                return NULL;
+                return 1;
         }
 
         if (!glfwInit()) {
                 fprintf(stderr, "failed to initialize glfw");
-                return NULL;
+                /* todo: another type of error, failed to initialize internal library, we need an enum for that */
+                return 2;
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -61,18 +71,18 @@ struct window *window_create(struct window window) {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 #endif
 
-        window.window = glfwCreateWindow(window.width, window.height, window.title, NULL, NULL);
-        if (!window.window) {
+        opts.window = glfwCreateWindow(opts.width, opts.height, opts.title, NULL, NULL);
+        if (!opts.window) {
                 fprintf(stderr, "failed to create glfw winodw\n");
                 glfwTerminate();
-                return NULL;
+                return 3;
         }
 
-        glfwMakeContextCurrent(window.window);
+        glfwMakeContextCurrent(opts.window);
         if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
                 fprintf(stderr, "failed to initialize glad\n");
                 glfwTerminate();
-                return NULL;
+                return 4;
         }
 
         /* use a dark titlebar on windows in dark mode. */
@@ -82,14 +92,13 @@ struct window *window_create(struct window window) {
         DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 #endif
 
-        if (window_set_icon(&window, window.icon) || window_set_cursor_icon(&window, window.cursor, window.cursor_size)) {
+        if (window_set_icon(&opts, opts.icon) || window_set_cursor_icon(&opts, opts.cursor, opts.cursor_size)) {
                 fprintf(stderr, "failed to set window icon or cursor icon\n");
                 glfwTerminate();
-                return NULL;
+                return 5;
         }
 
-        glfwSetFramebufferSizeCallback(window.window, __window_frame_buffer_resize_callback);
-        glfwSetInputMode(window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(opts.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         glfwSwapInterval(1);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
@@ -102,15 +111,15 @@ struct window *window_create(struct window window) {
         // glEnable(GL_BLEND);
         // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        struct window *window_obj = malloc(sizeof(struct window));
-        if (!window_obj) {
+        *window = malloc(sizeof(struct window));
+        if (!*window) {
                 fprintf(stderr, "failed to initialize glad\n");
                 glfwTerminate();
-                return NULL;
+                return 6;
         }
 
-        *window_obj = window;
-        return window_obj;
+        **window = opts;
+        return 0;
 }
 
 void window_set_clear_color(struct window *window, vec4s color) {
@@ -181,14 +190,26 @@ i8 window_set_cursor_icon(struct window *window, const char *path, i32 size) {
         return 0;
 }
 
+/* todo: i wonder if we need a status herre */
+i8 window_set_userdata(struct window *window, void *userdata) {
+        /* we get the window and through that we get the bridge pointer */
+        window->bridge = userdata;
+        glfwSetWindowUserPointer(window->window, window);
+
+        glfwSetCursorPosCallback(window->window, __window_mouse_move_callback);
+        glfwSetScrollCallback(window->window, __window_mouse_scroll_callback);
+        glfwSetFramebufferSizeCallback(window->window, __window_frame_buffer_resize_callback);
+        return 0;
+}
+
 /* this shoould be moved to user code */
 void window_scale_to_monitor_dpi(GLFWwindow *window) {
-        f32 xscale = 1, yscale = 1;
-        glfwGetWindowContentScale(window, &xscale, &yscale);
-        struct engine_state *state = (struct engine_state *) glfwGetWindowUserPointer(window);
-        if (state) {
-                i32 width = (i32) ((f32) state->window->width * xscale);
-                i32 height = (i32) ((f32) state->window->height * yscale);
-                __window_frame_buffer_resize_callback(window, width, height);
-        }
+        // f32 xscale = 1, yscale = 1;
+        // glfwGetWindowContentScale(window, &xscale, &yscale);
+        // struct engine_state *state = (struct engine_state *) glfwGetWindowUserPointer(window);
+        // if (state) {
+        //         i32 width = (i32) ((f32) state->window->width * xscale);
+        //         i32 height = (i32) ((f32) state->window->height * yscale);
+        //         __window_frame_buffer_resize_callback(window, width, height);
+        // }
 }

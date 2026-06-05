@@ -5,6 +5,7 @@
 #include "cglm/struct.h"
 
 #include "engine/core/defines.h"
+#include "engine/engine.h"
 
 #define WINDOW_DEFAULTS                                 \
         .width = 3100.0f,                               \
@@ -27,9 +28,10 @@ struct window {
         i32 cursor_size;
         GLFWwindow *window;
         vec4s color;
+        struct app_bridge *bridge;
 };
 
-struct window *window_create(struct window window);
+i8 window_create(struct window **window, struct window window_options);
 void window_set_clear_color(struct window *window, vec4s color);
 void window_process_input(struct window *window);
 void window_poll_events(struct window *window);
@@ -39,6 +41,7 @@ void window_destroy(struct window *window);
 bool window_close(struct window *window);
 i8 window_set_icon(struct window *window, const char *path);
 i8 window_set_cursor_icon(struct window *window, const char *path, i32 size);
+i8 window_set_userdata(struct window *window, void *userdata);
 void window_scale_to_monitor_dpi(GLFWwindow *window);
 
 /* ideally we would set game_state pointer to the window user pointer on the game side when
