@@ -47,7 +47,8 @@ void primitive_destroy(struct primitive *primitive) {
         if (primitive->ebo)
                 glDeleteBuffers(1, &primitive->ebo);
         glDeleteVertexArrays(1, &primitive->vao);
-        shader_destroy(primitive->shader);
+        /* not this, we might do double free since primitives in a model often share a shader*/
+        // shader_destroy(primitive->shader);
         free(primitive);
 }
 

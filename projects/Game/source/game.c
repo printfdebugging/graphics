@@ -145,6 +145,8 @@ i8 game_shutdown(struct game_state *game) {
         i8 status = 0;
 
         primitive_destroy(game->axes);
+        /* do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
+        shader_destroy((*game->cengine->primitives)->shader);
         model_destroy(game->cengine);
 
         camera_destroy(game->camera);
