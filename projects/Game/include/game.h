@@ -9,14 +9,8 @@
 #include "engine/model.h"
 #include "engine/core/defines.h"
 
-/* this is the game data which is passed around in the callbacks. this is  not
- * a place to store textures etc, they live separately, though they should be
- * accessible from all other subsystems wherever they are needed, or maybe in
- * the game code, who knows we might do some cool things with them. */
-
-/* */
 struct game_state {
-        /**  */
+        /**The bridge connects the engine subsystems with the game's event handlers. */
         struct bridge bridge;
 
         struct camera *camera;
@@ -26,7 +20,7 @@ struct game_state {
         f64 delta_time;
         vec3s light_position;
 
-        /* todo: putting them here for now, will remove them later as i have some resource containers */
+        /* todo: use systems/resource-managers instead of these. */
         struct primitive *axes;
         struct model *cengine;
 };
