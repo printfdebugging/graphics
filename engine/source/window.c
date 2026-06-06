@@ -55,6 +55,11 @@ i8 window_create(struct window **window, struct window opts) {
                 return 1;
         }
 
+        if (!opts.bridge) {
+                fprintf(stderr, "opts.bridge is required to create a window");
+                return 1;
+        }
+
         if (!glfwInit()) {
                 fprintf(stderr, "failed to initialize glfw");
                 /* todo: another type of error, failed to initialize internal library, we need an enum for that */
@@ -118,6 +123,12 @@ i8 window_create(struct window **window, struct window opts) {
                 return 6;
         }
 
+        /* todo: clean this up a bit, it's confusing/complicated */
+        glfwSetWindowUserPointer(opts.window, *window);
+        glfwSetCursorPosCallback(opts.window, __window_mouse_move_callback);
+        glfwSetScrollCallback(opts.window, __window_mouse_scroll_callback);
+        glfwSetFramebufferSizeCallback(opts.window, __window_frame_buffer_resize_callback);
+
         **window = opts;
         return 0;
 }
@@ -152,10 +163,10 @@ void window_destroy(struct window *window) {
         free(window);
 }
 
-bool window_close(struct window *window) {
+i8 window_close(struct window *window) {
         if (!window->window)
                 return GL_TRUE;
-        return glfwWindowShouldClose(window->window);
+        return (i8) glfwWindowShouldClose(window->window);
 }
 
 i8 window_set_icon(struct window *window, const char *path) {
@@ -188,28 +199,4 @@ i8 window_set_cursor_icon(struct window *window, const char *path, i32 size) {
 
         stbi_image_free(image.pixels);
         return 0;
-}
-
-/* todo: i wonder if we need a status herre */
-i8 window_set_userdata(struct window *window, void *userdata) {
-        /* we get the window and through that we get the bridge pointer */
-        window->bridge = userdata;
-        glfwSetWindowUserPointer(window->window, window);
-
-        glfwSetCursorPosCallback(window->window, __window_mouse_move_callback);
-        glfwSetScrollCallback(window->window, __window_mouse_scroll_callback);
-        glfwSetFramebufferSizeCallback(window->window, __window_frame_buffer_resize_callback);
-        return 0;
-}
-
-/* this shoould be moved to user code */
-void window_scale_to_monitor_dpi(GLFWwindow *window) {
-        // f32 xscale = 1, yscale = 1;
-        // glfwGetWindowContentScale(window, &xscale, &yscale);
-        // struct engine_state *state = (struct engine_state *) glfwGetWindowUserPointer(window);
-        // if (state) {
-        //         i32 width = (i32) ((f32) state->window->width * xscale);
-        //         i32 height = (i32) ((f32) state->window->height * yscale);
-        //         __window_frame_buffer_resize_callback(window, width, height);
-        // }
 }

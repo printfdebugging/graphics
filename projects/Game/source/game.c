@@ -39,6 +39,7 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
         struct window window_options = {
                 WINDOW_DEFAULTS,
+                .bridge = &game->bridge,
         };
 
         if ((status = window_create(&game->window, window_options)) != 0) {
@@ -46,13 +47,6 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
                 /* note: only the endpoints print error messages, rest all log them */
                 return status;
         }
-
-        /*
-         * create game->engine
-         * fill it up with a bunch of function pointers to callbacks
-         * create a window function to set that interface pointer to the window
-         * set the game_state pointer there (typecasting would allow it to get the interface as that's the first member)
-         */
 
         struct camera camera_options = {
                 CAMERA_DEFAULTS,
@@ -67,16 +61,6 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
         game->light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
         camera_adjust_direction(game->camera);
-
-        /* todo: set  widnow user pointer through an engine api, currently we call glfw directly from application */
-        /* todo: also think of how we would mange the lifetime of the object that we
-         * share with the engine. the engine fixes that, so we should make it flexible.
-         * also maybe we can use preprocessors and compile parts of it and not compile
-         * the rest.. that way applications can use only subset of the functionality. */
-
-        /* todo: think if setting userdata here is a good idea */
-        window_set_userdata(game->window, &game->bridge);
-        window_scale_to_monitor_dpi(game->window->window); /* this needs a better api */
 
         /* todo: add primitves etc to the game, or atleast some resource arenas */
         /* todo: the shaders etc live in the model struct, nested deep to the level of primitives. so we never create them manually. */
@@ -129,9 +113,6 @@ i8 game_run(struct game_state *game) {
                 mat4s projection = glms_perspective(glm_rad(game->camera->fov), (float) game->window->width / (float) game->window->height, 0.1f, 100.0f);
                 struct transform transform = { .model = model, .view = view, .projection = projection };
 
-                /* todo: set trs on model */
-
-                /* todo: continue from here, we transforming the transforms. also worth taking logs as you go, but i am on low energy, probably last day's coffee is coming out now */
                 render_primitive(game->axes, transform);
                 game->cengine->transform = transform;
                 render_model(game->cengine);
@@ -145,7 +126,7 @@ i8 game_shutdown(struct game_state *game) {
         i8 status = 0;
 
         primitive_destroy(game->axes);
-        /* do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
+        /* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
         shader_destroy((*game->cengine->primitives)->shader);
         model_destroy(game->cengine);
 

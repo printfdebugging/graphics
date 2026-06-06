@@ -57,11 +57,12 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #define I64_MIN (-I64_MAX - 1)
 
 enum status_code {
-        /* success */
+        /* success and failure */
         status_success = 0,
+        status_failure = 1,
 
-        /* caller / programmer errors (1-99) */
-        status_invalid_argument = 1,
+        /* caller / programmer errors (2-99) */
+        status_invalid_argument = 2,
         status_invalid_state,
         status_unexpected_null_found,
         status_out_of_range,

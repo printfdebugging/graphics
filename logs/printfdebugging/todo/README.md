@@ -31,3 +31,6 @@
 # ci
 - [ ] setup github pages ci for testing changes, mostly compilation on various platforms
 - [ ] write some tests, integrate a testing framework, or create your own
+
+# questions
+- what is a framebuffer and how's that different from a window (size)
