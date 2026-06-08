@@ -9,18 +9,18 @@
 #include "engine/texture.h"
 #include "engine/core/defines.h"
 
-static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, u64 *count, u64 *stride);
+static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type);
+static i8 gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type);
 
 /* simplify this that now we have get_basepath */
 static char *get_image_path_from_uri(const char *model_file_path, const char *image_uri);
+
+static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, u64 *count, u64 *stride);
 
 /** Returns the 'basepath' of the model directory with a slash '/' at the end.
  * The lifetime of the returned string is managed by the callee of this function.
  */
 static char *get_basepath(const char *filepath);
-
-static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type);
-static i8 gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type);
 
 /* todo: get the mesh <-> primitive names right */
 static i8 gltf_load_meshes(struct model *model, cgltf_data *data);
@@ -116,6 +116,24 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
         *stride = buffer_view->stride;
 }
 
+static char *get_basepath(const char *filepath) {
+        const char *s0 = strrchr(filepath, '/');
+        const char *s1 = strrchr(filepath, '\\');
+        const char *slash = s0 ? (s1 && s1 > s0 ? s1 : s0) : s1;
+        u64 prefix_index = (u64) (slash - filepath);
+        u64 basepathsize = prefix_index + 2;
+
+        char *basepath = malloc(basepathsize);
+        if (!basepath) {
+                fprintf(stderr, "failed to allocate memory for string\n");
+                return NULL;
+        }
+
+        strncpy(basepath, filepath, (u64) prefix_index + 1);
+        basepath[basepathsize - 1] = '\0';
+        return basepath;
+}
+
 static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
         model->primitives = malloc(sizeof(struct primitive *) * data->meshes_count);
         model->primitive_count = (u32) data->meshes_count;
@@ -204,24 +222,6 @@ static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gl
                 }
         }
         return 0;
-}
-
-static char *get_basepath(const char *filepath) {
-        const char *s0 = strrchr(filepath, '/');
-        const char *s1 = strrchr(filepath, '\\');
-        const char *slash = s0 ? (s1 && s1 > s0 ? s1 : s0) : s1;
-        u64 prefix_index = (u64) (slash - filepath);
-        u64 basepathsize = prefix_index + 2;
-
-        char *basepath = malloc(basepathsize);
-        if (!basepath) {
-                fprintf(stderr, "failed to allocate memory for string\n");
-                return NULL;
-        }
-
-        strncpy(basepath, filepath, (u64) prefix_index + 1);
-        basepath[basepathsize - 1] = '\0';
-        return basepath;
 }
 
 /* separate the definition and the declaration */
