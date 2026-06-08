@@ -76,7 +76,10 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
         const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
 
-        game->cengine = model_create();
+        if ((status = model_create(&game->cengine)) != 0) {
+                return status;
+        }
+
         if ((status = model_load_from_file(game->cengine, engine_asset_path)) != 0) {
                 fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
                 return EXIT_FAILURE;

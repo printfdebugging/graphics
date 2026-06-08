@@ -316,17 +316,17 @@ static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primit
         return 0;
 }
 
-struct model *model_create() {
-        struct model *model = malloc(sizeof(struct model));
-        if (!model) {
+i8 model_create(struct model **model) {
+        *model = malloc(sizeof(struct model));
+        if (!*model) {
                 fprintf(stderr, "failed to allocate model\n");
-                return NULL;
+                return 1;
         }
-        *model = (struct model) { 0 };
-        return model;
+        **model = (struct model) { 0 };
+        return 0;
 }
 
-void model_destroy(struct model *model) {
+i8 model_destroy(struct model *model) {
         for (u64 i = 0; i < model->primitive_count; ++i) {
                 /* todo: models don't manage the lifetime of a shader as if they do then the won't know
                  * if this is shared between multiple primitives or not. let this task be something
@@ -342,6 +342,7 @@ void model_destroy(struct model *model) {
         free(model->primitives);
         free(model->basepath);
         free(model);
+        return 0;
 }
 
 /* todo: move it to a separate function in mesh.. */

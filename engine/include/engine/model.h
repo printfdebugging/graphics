@@ -29,16 +29,13 @@ struct model {
         /* model has materials */
 };
 
-struct model *model_create();
+i8 model_create(struct model **model);
+i8 model_destroy(struct model *model);
 
 /** Loads model located in the `filepath` ?directory?. At the moment
  * only 'gltf' models are supported, the api is file format agnostic.
  * Returns a non-zero integer on failure to load the model.
  */
 i8 model_load_from_file(struct model *model, const char *filepath);
-
-/* todo: create helpers to load various primitives, textures (and apparently other components related to animation etc) */
-
-void model_destroy(struct model *model);
 
 #endif
