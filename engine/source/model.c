@@ -29,69 +29,6 @@ static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cg
 static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath);
 static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive);
 
-struct model *model_create() {
-        struct model *model = malloc(sizeof(struct model));
-        if (!model) {
-                fprintf(stderr, "failed to allocate model\n");
-                return NULL;
-        }
-        *model = (struct model) { 0 };
-        return model;
-}
-
-void model_destroy(struct model *model) {
-        for (u64 i = 0; i < model->primitive_count; ++i) {
-                /* todo: models don't manage the lifetime of a shader as if they do then the won't know
-                 * if this is shared between multiple primitives or not. let this task be something
-                 * for the shader manager etc to do */
-
-                /* todo: this thorws an error at the moment as all the primitives in the model share the same shader. */
-                /* todo: whenever we add a shader manger and if it has to manage some state, all that state will be managed
-                 * by the client, we just provide a nice api for it to do things conveniently, but we don't manage anything
-                 * in the engine, it's just bundles of code like stb, provides structs and functions  */
-                primitive_destroy(*(model->primitives + i));
-        }
-
-        free(model->primitives);
-        free(model->basepath);
-        free(model);
-}
-
-/* todo: move it to a separate function in mesh.. */
-/* todo: try out multiple models from the assets and see what works. */
-/* note: assuming only one primitive in the primitives array for now */
-/* todo: split into several helper functions */
-
-i8 model_load_from_file(struct model *model, const char *filepath) {
-        cgltf_data *data = NULL;
-        const cgltf_options options = { 0 };
-        cgltf_result result;
-        i8 status;
-
-        result = cgltf_parse_file(&options, filepath, &data);
-        if (result != cgltf_result_success) {
-                fprintf(stderr, "failed to parse gltf file: %s\n", filepath);
-                return 1;
-        }
-
-        result = cgltf_load_buffers(&options, data, filepath);
-        if (result != cgltf_result_success) {
-                fprintf(stderr, "failed to load gltf buffers for file: %s\n", filepath);
-                return 1;
-        }
-
-        model->basepath = get_basepath(filepath);
-        /* for now, the node only has meshes, we can generalize it later */
-        status = gltf_load_meshes(model, data);
-        if (status) {
-                fprintf(stderr, "failed to load meshes\n");
-                return status;
-        }
-
-        cgltf_free(data);
-        return 0;
-}
-
 static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type) {
         switch (gltf_type) {
                 case cgltf_component_type_r_8:
@@ -376,5 +313,68 @@ static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primit
 
         accessor_point_to_data(primitive->indices, &index_data, &count, &stride);
         primitive_load_indices(mesh, index_data, (u32) count, type, (i32) stride);
+        return 0;
+}
+
+struct model *model_create() {
+        struct model *model = malloc(sizeof(struct model));
+        if (!model) {
+                fprintf(stderr, "failed to allocate model\n");
+                return NULL;
+        }
+        *model = (struct model) { 0 };
+        return model;
+}
+
+void model_destroy(struct model *model) {
+        for (u64 i = 0; i < model->primitive_count; ++i) {
+                /* todo: models don't manage the lifetime of a shader as if they do then the won't know
+                 * if this is shared between multiple primitives or not. let this task be something
+                 * for the shader manager etc to do */
+
+                /* todo: this thorws an error at the moment as all the primitives in the model share the same shader. */
+                /* todo: whenever we add a shader manger and if it has to manage some state, all that state will be managed
+                 * by the client, we just provide a nice api for it to do things conveniently, but we don't manage anything
+                 * in the engine, it's just bundles of code like stb, provides structs and functions  */
+                primitive_destroy(*(model->primitives + i));
+        }
+
+        free(model->primitives);
+        free(model->basepath);
+        free(model);
+}
+
+/* todo: move it to a separate function in mesh.. */
+/* todo: try out multiple models from the assets and see what works. */
+/* note: assuming only one primitive in the primitives array for now */
+/* todo: split into several helper functions */
+
+i8 model_load_from_file(struct model *model, const char *filepath) {
+        cgltf_data *data = NULL;
+        const cgltf_options options = { 0 };
+        cgltf_result result;
+        i8 status;
+
+        result = cgltf_parse_file(&options, filepath, &data);
+        if (result != cgltf_result_success) {
+                fprintf(stderr, "failed to parse gltf file: %s\n", filepath);
+                return 1;
+        }
+
+        result = cgltf_load_buffers(&options, data, filepath);
+        if (result != cgltf_result_success) {
+                fprintf(stderr, "failed to load gltf buffers for file: %s\n", filepath);
+                return 1;
+        }
+
+        model->basepath = get_basepath(filepath);
+        /* for now, the node only has meshes, we can generalize it later */
+        status = gltf_load_meshes(model, data);
+        if (status) {
+                fprintf(stderr, "failed to load meshes\n");
+                return status;
+        }
+
+        cgltf_free(data);
         return 0;
 }
