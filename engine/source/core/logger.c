@@ -3,6 +3,6 @@
 #include "engine/core/logger.h"
 
 void log_something() {
-        fprintf(stderr, "dummy function\n");
-        return;
+	fprintf(stderr, "dummy function\n");
+	return;
 }

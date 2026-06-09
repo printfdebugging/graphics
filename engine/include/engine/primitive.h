@@ -9,43 +9,43 @@
 #include "engine/core/defines.h"
 
 enum primitive_attribute {
-        PRIMITIVE_ATTRIBUTE_POSITION = 0,
-        PRIMITIVE_ATTRIBUTE_COLOR = 1,
-        PRIMITIVE_ATTRIBUTE_UV = 2,
-        PRIMITIVE_ATTRIBUTE_NORMAL = 3,
-        PRIMITIVE_ATTRIBUTE_COUNT,
+	PRIMITIVE_ATTRIBUTE_POSITION = 0,
+	PRIMITIVE_ATTRIBUTE_COLOR = 1,
+	PRIMITIVE_ATTRIBUTE_UV = 2,
+	PRIMITIVE_ATTRIBUTE_NORMAL = 3,
+	PRIMITIVE_ATTRIBUTE_COUNT,
 };
 
 /* do i also need to store the mesh vertex data? */
 /* we need to compile shaders per mesh? or do we create meshes such that a shader which provides a few options can handle that. */
 struct primitive {
-        u32 vao;
-        u32 ebo;
-        u32 vbo_vertex;
-        u32 vbo_color;
-        u32 vbo_uv;
-        u32 vbo_normal;
+	u32 vao;
+	u32 ebo;
+	u32 vbo_vertex;
+	u32 vbo_color;
+	u32 vbo_uv;
+	u32 vbo_normal;
 
-        u32 index_count;
-        u32 vertex_count;
-        u32 color_count;
-        u32 uv_count;
-        u32 normal_count;
+	u32 index_count;
+	u32 vertex_count;
+	u32 color_count;
+	u32 uv_count;
+	u32 normal_count;
 
-        i32 index_stride;
-        i32 vertex_stride;
-        i32 color_stride;
-        i32 uv_stride;
-        i32 normal_stride;
+	i32 index_stride;
+	i32 vertex_stride;
+	i32 color_stride;
+	i32 uv_stride;
+	i32 normal_stride;
 
-        GLenum index_type;
-        GLenum draw_mode;
+	GLenum index_type;
+	GLenum draw_mode;
 
-        struct shader *shader;
+	struct shader *shader;
 
-        /* todo: mesh has materials a shader */
-        struct texture **textures;
-        u64 texture_count;
+	/* todo: mesh has materials a shader */
+	struct texture **textures;
+	u64 texture_count;
 };
 
 struct primitive *primitive_create();

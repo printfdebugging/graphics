@@ -10,19 +10,19 @@
 #include "engine/core/defines.h"
 
 struct game_state {
-        /**The bridge connects the engine subsystems with the game's event handlers. */
-        struct bridge bridge;
+	/**The bridge connects the engine subsystems with the game's event handlers. */
+	struct bridge bridge;
 
-        struct camera *camera;
-        struct window *window;
+	struct camera *camera;
+	struct window *window;
 
-        f64 last_frame;
-        f64 delta_time;
-        vec3s light_position;
+	f64 last_frame;
+	f64 delta_time;
+	vec3s light_position;
 
-        /* todo: use systems/resource-managers instead of these. */
-        struct primitive *axes;
-        struct model *cengine;
+	/* todo: use systems/resource-managers instead of these. */
+	struct primitive *axes;
+	struct model *cengine;
 };
 
 /* */

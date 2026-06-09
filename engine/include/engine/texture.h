@@ -6,13 +6,13 @@
 #include "engine/core/defines.h"
 
 struct texture {
-        u32 texture;
-        u8 texture_index;
+	u32 texture;
+	u8 texture_index;
 
-        /* todo: create a enum for texture type, surely there can't be many and an enum would be much better than strings. */
-        const char *type;
-        /* todo: use this in the code and also document these properly*/
-        const char *path;
+	/* todo: create a enum for texture type, surely there can't be many and an enum would be much better than strings. */
+	const char *type;
+	/* todo: use this in the code and also document these properly*/
+	const char *path;
 };
 
 struct texture *texture_create();

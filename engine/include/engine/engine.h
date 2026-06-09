@@ -36,25 +36,25 @@ struct window;
  * the original client state type, thus getting access to the whole state.
  */
 struct bridge {
-        /** When the mouse moves over a window, this is the callback to
-         * receive that event on the client side. x and y are the new
-         * positions of the cursor on window with respect to it's top
-         * left corner.
-         */
-        void (*mouse_move)(void *userdata, struct window *window, f64 x, f64 y);
+	/** When the mouse moves over a window, this is the callback to
+	 * receive that event on the client side. x and y are the new
+	 * positions of the cursor on window with respect to it's top
+	 * left corner.
+	 */
+	void (*mouse_move)(void *userdata, struct window *window, f64 x, f64 y);
 
-        /** When the mouse wheel is scrolled, this is the callback to
-         * receive that event on the client side. x and y being the offsets
-         * along x and the y direction. Horizontal scrolling is done when
-         * we scroll the wheel while holding the shift key.
-         */
-        void (*mouse_scroll)(void *userdata, struct window *window, f64 x, f64 y);
+	/** When the mouse wheel is scrolled, this is the callback to
+	 * receive that event on the client side. x and y being the offsets
+	 * along x and the y direction. Horizontal scrolling is done when
+	 * we scroll the wheel while holding the shift key.
+	 */
+	void (*mouse_scroll)(void *userdata, struct window *window, f64 x, f64 y);
 
-        /** When the window is resized, this is the callback to receive that
-         * event on the client side. w and h being the new width and height
-         * of the framebuffer.
-         */
-        void (*window_resize)(void *userdata, struct window *window, i32 w, i32 h);
+	/** When the window is resized, this is the callback to receive that
+	 * event on the client side. w and h being the new width and height
+	 * of the framebuffer.
+	 */
+	void (*window_resize)(void *userdata, struct window *window, i32 w, i32 h);
 };
 
 #endif

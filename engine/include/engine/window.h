@@ -8,30 +8,30 @@
 #include "engine/engine.h"
 
 #define WINDOW_DEFAULTS                                 \
-        .width = 3100.0f,                               \
-        .height = 1400.0f,                              \
-        .title = "floating",                            \
-        .icon = ENGINE_ASSETS_DIR "icons/logo.png",     \
-        .cursor = ENGINE_ASSETS_DIR "icons/cursor.png", \
-        .cursor_size = 32,                              \
-        .window = NULL,                                 \
-        .color = { { 0.0f, 0.0f, 0.0f, 1.0 } },         \
-        .bridge = NULL
+	.width = 3100.0f,                               \
+	.height = 1400.0f,                              \
+	.title = "floating",                            \
+	.icon = ENGINE_ASSETS_DIR "icons/logo.png",     \
+	.cursor = ENGINE_ASSETS_DIR "icons/cursor.png", \
+	.cursor_size = 32,                              \
+	.window = NULL,                                 \
+	.color = { { 0.0f, 0.0f, 0.0f, 1.0 } },         \
+	.bridge = NULL
 
 struct window {
-        i32 width;
-        i32 height;
-        const char *title;
-        const char *icon;
-        const char *cursor;
-        i32 cursor_size;
-        GLFWwindow *window;
-        vec4s color;
+	i32 width;
+	i32 height;
+	const char *title;
+	const char *icon;
+	const char *cursor;
+	i32 cursor_size;
+	GLFWwindow *window;
+	vec4s color;
 
-        /** The bridge connects application code with the engine code. It's a bunch of function
-         * pointers which the window calls to pass on the events to the client code. The lifetime
-         * of bridge is managed by the client code, no engine subsystem calls free on this. */
-        struct bridge *bridge;
+	/** The bridge connects application code with the engine code. It's a bunch of function
+	 * pointers which the window calls to pass on the events to the client code. The lifetime
+	 * of bridge is managed by the client code, no engine subsystem calls free on this. */
+	struct bridge *bridge;
 };
 
 i8 window_create(struct window **window, struct window window_options);

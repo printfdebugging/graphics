@@ -19,7 +19,7 @@ IndentCaseLabels: true
 PointerAlignment: Right
 TabWidth: 8
 IndentWidth: 8
-UseTab: Never
+UseTab: Always
 IndentPPDirectives: None
 AlignArrayOfStructures: None
 AlwaysBreakBeforeMultilineStrings: false

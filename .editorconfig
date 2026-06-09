@@ -2,9 +2,9 @@
 indent_size = 8
 
 [*.{c,h,cpp,hpp}]
-indent_style = space
+indent_style = tab
 indent_size = 8
 
 [*.{lua}]
-indent_style = space
+indent_style = tab
 indent_size = 2

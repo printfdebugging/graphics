@@ -9,24 +9,24 @@
 #include "engine/core/defines.h"
 
 struct transform {
-        mat4s model;
-        mat4s view;
-        mat4s projection;
+	mat4s model;
+	mat4s view;
+	mat4s projection;
 };
 
 struct model {
-        struct primitive **primitives;
-        u64 primitive_count;
+	struct primitive **primitives;
+	u64 primitive_count;
 
-        struct transform transform;
+	struct transform transform;
 
-        /** 'basepath' points to the model's directory. Paths to textures are stored relative
-         * to the model's location like 'emissive.jpg', so we need the directory path to
-         * get the absolute path for these assets. 'basepath' has a slash '/' at the end.
-         */
-        char *basepath;
+	/** 'basepath' points to the model's directory. Paths to textures are stored relative
+	 * to the model's location like 'emissive.jpg', so we need the directory path to
+	 * get the absolute path for these assets. 'basepath' has a slash '/' at the end.
+	 */
+	char *basepath;
 
-        /* model has materials */
+	/* model has materials */
 };
 
 i8 model_create(struct model **model);
