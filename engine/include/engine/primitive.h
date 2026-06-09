@@ -16,8 +16,6 @@ enum primitive_attribute {
 	PRIMITIVE_ATTRIBUTE_COUNT,
 };
 
-/* do i also need to store the mesh vertex data? */
-/* we need to compile shaders per mesh? or do we create meshes such that a shader which provides a few options can handle that. */
 struct primitive {
 	u32 vao;
 	u32 ebo;
@@ -46,9 +44,19 @@ struct primitive {
 	/* todo: mesh has materials a shader */
 	struct texture **textures;
 	u64 texture_count;
+	b8 initialized;
 };
 
-struct primitive *primitive_create();
+/** Initializes the primitive's attributes to 0. It's not necessary to
+ * call this function. */
+void primitive_init(struct primitive *primitive);
+
+/** Creates the 'vao' and marks the 'initialized' to true. Without this,
+ * the 'primitive_load_*' function calls return early and print an error
+ * message, because it doesn't make sense to load vertices or indices without
+ * having a 'vao'. */
+void primitive_create_vertex_array(struct primitive *primitive);
+
 void primitive_destroy(struct primitive *primitive);
 void primitive_load_vertices(struct primitive *primitive, void *data, u32 count, i32 stride);
 void primitive_load_indices(struct primitive *primitive, void *data, u32 count, GLenum type, i32 stride);
@@ -56,12 +64,12 @@ void primitive_load_colors(struct primitive *primitive, void *data, u32 count, i
 void primitive_load_uv(struct primitive *primitive, void *data, u32 count, i32 stride);
 void primitive_load_normals(struct primitive *primitive, void *data, u32 count, i32 stride);
 
-// void primitive_load_shader(struct primitive *primitive, struct shader_options options);
-// this will allow us to use one shader for multiple primitives.
+/* `void primitive_load_shader(struct primitive *primitive, struct shader_options options);`
+ * this will allow us to use one shader for multiple primitives. */
 
-// void primitive_use_shader(struct primitive *primitive);
-// shader switching happens through this function, so that if it's a shader
-// with similar options we can skip the glUseProgram call
+/* `void primitive_use_shader(struct primitive *primitive);`
+ * shader switching happens through this function, so that if it's a shader
+ * with similar options we can skip the glUseProgram call */
 
 /* the shader will be ref-counted, so the shader_destroy function has to
  * be changed to factor that in. the shaders will be stored in a global

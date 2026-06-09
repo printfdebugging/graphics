@@ -25,16 +25,13 @@ static u32 glTypeToSize(GLenum type) {
 	}
 }
 
-struct primitive *primitive_create() {
-	struct primitive *primitive = malloc(sizeof(struct primitive));
-	if (!primitive) {
-		fprintf(stderr, "failed to allocate memory for primitive\n");
-		return NULL;
-	}
-
+void primitive_init(struct primitive *primitive) {
 	*primitive = (struct primitive) { 0 };
+}
+
+void primitive_create_vertex_array(struct primitive *primitive) {
 	glGenVertexArrays(1, &primitive->vao);
-	return primitive;
+	primitive->initialized = true;
 }
 
 void primitive_destroy(struct primitive *primitive) {
@@ -60,6 +57,11 @@ void primitive_destroy(struct primitive *primitive) {
  * entry, not the start of the chunk.
  */
 void primitive_load_vertices(struct primitive *primitive, void *data, u32 count, i32 stride) {
+	if (!primitive->initialized) {
+		fprintf(stderr, "primitive not initialized, call primitive_create_vertex_array to fix\n");
+		return;
+	}
+
 	glBindVertexArray(primitive->vao);
 	glGenBuffers(1, &primitive->vbo_vertex);
 	glBindBuffer(GL_ARRAY_BUFFER, primitive->vbo_vertex);
@@ -71,6 +73,11 @@ void primitive_load_vertices(struct primitive *primitive, void *data, u32 count,
 }
 
 void primitive_load_indices(struct primitive *primitive, void *data, u32 count, GLenum type, i32 stride) {
+	if (!primitive->initialized) {
+		fprintf(stderr, "primitive not initialized, call primitive_create_vertex_array to fix\n");
+		return;
+	}
+
 	glBindVertexArray(primitive->vao);
 	glGenBuffers(1, &primitive->ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, primitive->ebo);
@@ -81,6 +88,11 @@ void primitive_load_indices(struct primitive *primitive, void *data, u32 count, 
 }
 
 void primitive_load_colors(struct primitive *primitive, void *data, u32 count, i32 stride) {
+	if (!primitive->initialized) {
+		fprintf(stderr, "primitive not initialized, call primitive_create_vertex_array to fix\n");
+		return;
+	}
+
 	glBindVertexArray(primitive->vao);
 	glGenBuffers(1, &primitive->vbo_color);
 	glBindBuffer(GL_ARRAY_BUFFER, primitive->vbo_color);
@@ -92,6 +104,11 @@ void primitive_load_colors(struct primitive *primitive, void *data, u32 count, i
 }
 
 void primitive_load_uv(struct primitive *primitive, void *data, u32 count, i32 stride) {
+	if (!primitive->initialized) {
+		fprintf(stderr, "primitive not initialized, call primitive_create_vertex_array to fix\n");
+		return;
+	}
+
 	glBindVertexArray(primitive->vao);
 	glGenBuffers(1, &primitive->vbo_uv);
 	glBindBuffer(GL_ARRAY_BUFFER, primitive->vbo_uv);
@@ -103,6 +120,11 @@ void primitive_load_uv(struct primitive *primitive, void *data, u32 count, i32 s
 }
 
 void primitive_load_normals(struct primitive *primitive, void *data, u32 count, i32 stride) {
+	if (!primitive->initialized) {
+		fprintf(stderr, "primitive not initialized, call primitive_create_vertex_array to fix\n");
+		return;
+	}
+
 	glBindVertexArray(primitive->vao);
 	glGenBuffers(1, &primitive->vbo_normal);
 	glBindBuffer(GL_ARRAY_BUFFER, primitive->vbo_normal);

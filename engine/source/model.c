@@ -147,7 +147,9 @@ static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
 	/* iterate over all the meshes - meshes have primitives */
 	for (u64 i = 0; i < data->meshes_count; ++i) {
 		const cgltf_mesh *gltf_mesh = &data->meshes[i];
-		struct primitive *mesh = primitive_create();
+		struct primitive *mesh = malloc(sizeof(struct primitive));
+		primitive_init(mesh);
+		primitive_create_vertex_array(mesh);
 
 		i8 status = gltf_load_mesh_primitives(mesh, gltf_mesh, data, model->basepath);
 		if (status) {
