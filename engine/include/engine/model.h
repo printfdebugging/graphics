@@ -29,7 +29,7 @@ struct model {
 	/* model has materials */
 };
 
-i8 model_create(struct model **model);
+void model_init(struct model *model);
 i8 model_destroy(struct model *model);
 
 /** Loads model located in the `filepath` ?directory?. At the moment

@@ -290,14 +290,19 @@ static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primit
 	return 0;
 }
 
-i8 model_create(struct model **model) {
-	*model = malloc(sizeof(struct model));
-	if (!*model) {
-		fprintf(stderr, "failed to allocate model\n");
-		return 1;
-	}
-	**model = (struct model) { 0 };
-	return 0;
+void model_init(struct model *model) {
+	model->primitives = NULL;
+	model->basepath = NULL;
+	model->nodes = NULL;
+	model->meshes = NULL;
+	model->primitive_count = 0;
+	model->node_count = 0;
+	model->mesh_count = 0;
+
+	model->transform = (struct transform) {
+		.model = { GLM_MAT4_IDENTITY_INIT },
+		/* todo: view and the project matrix defaults */
+	};
 }
 
 i8 model_destroy(struct model *model) {

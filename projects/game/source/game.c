@@ -75,11 +75,13 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 	game->axes->shader = axes_shader;
 
 	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
-
-	if ((status = model_create(&game->cengine)) != 0) {
-		return status;
+	game->cengine = malloc(sizeof(struct model));
+	if (!game->cengine) {
+		fprintf(stderr, "failed to allocate model\n");
+		return EXIT_FAILURE;
 	}
 
+	model_init(game->cengine);
 	if ((status = model_load_from_file(game->cengine, engine_asset_path)) != 0) {
 		fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
 		return EXIT_FAILURE;
