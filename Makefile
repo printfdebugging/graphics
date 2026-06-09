@@ -7,6 +7,8 @@ debug:
 # release:
 # package: clean release
 
+reformat:
+	find engine/* projects/* -iname '*.h' -o -iname '*.c' | xargs clang-format -i
 
 clean:
 	rm -rf build
