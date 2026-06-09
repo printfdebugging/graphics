@@ -74,27 +74,25 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
 	game->axes->shader = axes_shader;
 
-	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
+	const char *engine_asset_path = ASSETS_DIR "models/DamagedHelmet/glTF/DamagedHelmet.gltf";
 
 	if ((status = model_create(&game->cengine)) != 0) {
 		return status;
 	}
 
+	/* why does loading the model affect the render_primitive call there? */
 	if ((status = model_load_from_file(game->cengine, engine_asset_path)) != 0) {
 		fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
 		return EXIT_FAILURE;
 	}
 
+	/* set it at the model root for now */
 	struct shader *engine_shader = shader_create();
-	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) != 0) {
+	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/gltf/shader.vert", ASSETS_DIR "shaders/gltf/shader.frag")) != 0) {
 		fprintf(stderr, "failed to load shader\n");
 		return EXIT_FAILURE;
 	}
-
-	/* todo: we should have a shader_manager and create shaders based on shader options and reuse shaders */
-	for (u64 i = 0; i < game->cengine->primitive_count; ++i) {
-		game->cengine->primitives[i]->shader = engine_shader;
-	}
+	game->cengine->shader = engine_shader;
 
 	return status;
 }
@@ -129,8 +127,9 @@ i8 game_shutdown(struct game_state *game) {
 	i8 status = 0;
 
 	primitive_destroy(game->axes);
+	shader_destroy(game->axes->shader);
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
-	shader_destroy((*game->cengine->primitives)->shader);
+	shader_destroy(game->cengine->shader);
 	model_destroy(game->cengine);
 
 	camera_destroy(game->camera);

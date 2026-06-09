@@ -17,10 +17,10 @@ out vec2 uv;
 out vec3 normal;
 
 void main() {
-        gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
-        /* we need the fragment position in the world space coordinates */
-        position = vec3(model * vec4(in_position, 1.0));
-        color = vec3(0.5, 0.5, 0.5);
-        uv = in_uv;
-        normal = mat3(transpose(inverse(model))) * in_normal;
+	gl_Position = projection * view * model * vec4(in_position.xyz, 1.0);
+	/* we need the fragment position in the world space coordinates */
+	position = vec3(vec4(in_position, 1.0));
+	color = vec3(0.5, 0.5, 0.5);
+	// uv = in_uv;
+	// normal = mat3(transpose(inverse(model))) * in_normal;
 }

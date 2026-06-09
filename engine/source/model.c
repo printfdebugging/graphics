@@ -23,8 +23,8 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
 static char *get_basepath(const char *filepath);
 
 /* todo: get the mesh <-> primitive names right */
-static i8 gltf_load_meshes(struct model *model, cgltf_data *data);
-static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath);
+static i8 gltf_load_nodes(struct model *model, cgltf_data *data);
+static i8 gltf_load_mesh(struct mesh **mesh, cgltf_mesh *gltf_mesh, const char *basepath);
 static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive);
 static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath);
 static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive);
@@ -134,63 +134,105 @@ static char *get_basepath(const char *filepath) {
 	return basepath;
 }
 
-static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
-	model->primitives = malloc(sizeof(struct primitive *) * data->meshes_count);
-	model->primitive_count = (u32) data->meshes_count;
-	if (!model->primitives) {
-		fprintf(stderr, "failed to allocate mesh pointers in model\n");
+static i8 gltf_load_nodes(struct model *model, cgltf_data *data) {
+	u64 node_count = data->nodes_count;
+	struct node *nodes = malloc(sizeof(struct node) * node_count);
+	if (!nodes) {
+		fprintf(stderr, "failed to allocate memory for nodes\n");
 		return 1;
 	}
 
-	/* iterate over all the meshes - meshes have primitives */
-	for (u64 i = 0; i < data->meshes_count; ++i) {
-		const cgltf_mesh *gltf_mesh = &data->meshes[i];
-		struct primitive *mesh = primitive_create();
+	for (u64 i = 0; i < node_count; ++i) {
+		struct node *node = &nodes[i];
+		cgltf_node *gltf_node = &data->nodes[i];
 
-		i8 status = gltf_load_mesh_primitives(mesh, gltf_mesh, data, model->basepath);
-		if (status) {
-			/* handle error properly */
-			fprintf(stderr, "failed to load gltf mesh primitives\n");
-			*(model->primitives + i) = NULL;
+		/* this is for later as this refers to nodes which might not be loaded by now */
+		/*
+		if ((node->has_children = (gltf_node->children_count != 0)) == true) {
+			u64 child_count = gltf_node->children_count;
+			struct node **children = malloc(sizeof(struct node *) * child_count);
+			if (!children) {
+				fprintf(stderr, "failed to allocate memory for node->children\n");
+				return 1;
+			}
 		}
+		*/
 
-		*(model->primitives + i) = mesh;
+		// if ((node->has_translation = gltf_node->has_translation) == true) glm_vec3_copy(gltf_node->translation, node->translation.raw);
+		// if ((node->has_rotation = gltf_node->has_rotation) == true) glm_vec4_copy(gltf_node->rotation, node->rotation.raw);
+		// if ((node->has_scale = gltf_node->has_scale) == true) glm_vec3_copy(gltf_node->scale, node->scale.raw);
+		// if ((node->has_matrix = gltf_node->has_matrix) == true) glm_mat4_copy(glms_mat4_make(gltf_node->matrix).raw, node->matrix.raw);
+
+		struct mesh *mesh = NULL;
+		if (gltf_node->mesh) {
+			i8 status = 0;
+			if ((status = gltf_load_mesh(&mesh, gltf_node->mesh, model->basepath)) != 0) {
+				return status;
+			}
+		}
+		/* hacky for now, clean it up later */
+		if (mesh) {
+			node->has_mesh = true;
+			node->mesh = mesh;
+		} else {
+			node->has_mesh = false;
+		}
 	}
+
+	model->nodes = nodes;
+	model->node_count = node_count;
 	return 0;
 }
 
-static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath) {
-	for (u64 i = 0; i < gltf_mesh->primitives_count; ++i) {
-		const cgltf_primitive *primitive = &gltf_mesh->primitives[i];
+static i8 gltf_load_mesh(struct mesh **mesh_out, cgltf_mesh *gltf_mesh, const char *basepath) {
+	struct mesh *mesh = malloc(sizeof(struct mesh));
+	if (!mesh) {
+		fprintf(stderr, "failed to allocate memory for mesh\n");
+		return 1;
+	}
+
+	mesh->primitive_count = gltf_mesh->primitives_count;
+	mesh->primitives = malloc(sizeof(struct primitive) * mesh->primitive_count);
+	if (!mesh->primitives) {
+		fprintf(stderr, "failed to allocate memory for mesh->primitives\n");
+		return 1;
+	}
+
+	for (u64 i = 0; i < mesh->primitive_count; ++i) {
+		const cgltf_primitive *gltf_primitive = &gltf_mesh->primitives[i];
+		struct primitive *primitive = &mesh->primitives[i];
+
 		i8 status;
 
-		if (primitive->type) {
-			if ((status = gltf_primitive_type_to_gl_type(&mesh->draw_mode, primitive->type))) {
+		if (gltf_primitive->type) {
+			if ((status = gltf_primitive_type_to_gl_type(&primitive->draw_mode, gltf_primitive->type))) {
 				/* handle error */
 				return status;
 			}
 		}
 
-		if (primitive->indices) {
-			if ((status = gltf_load_primitive_indices(mesh, primitive))) {
+		if (gltf_primitive->indices) {
+			if ((status = gltf_load_primitive_indices(primitive, gltf_primitive))) {
 				/* handle error */
 				return status;
 			}
 		}
 
 		/* todo: to a separate material loader function */
-		if (primitive->material) {
-			if ((status = gltf_load_primitive_material(mesh, primitive, basepath))) {
+		if (gltf_primitive->material) {
+			if ((status = gltf_load_primitive_material(primitive, gltf_primitive, basepath))) {
 				/* handle error */
 				return status;
 			}
 		}
 
-		if ((status = gltf_load_primitive_attributes(mesh, primitive))) {
+		if ((status = gltf_load_primitive_attributes(primitive, gltf_primitive))) {
 			/* handle error */
 			return status;
 		}
 	}
+
+	*mesh_out = mesh;
 	return 0;
 }
 
@@ -297,11 +339,10 @@ i8 model_create(struct model **model) {
 }
 
 i8 model_destroy(struct model *model) {
-	for (u64 i = 0; i < model->primitive_count; ++i) {
-		primitive_destroy(*(model->primitives + i));
+	for (u64 i = 0; i < model->node_count; ++i) {
+		node_destroy(&model->nodes[i]);
 	}
-
-	free(model->primitives);
+	free(model->nodes);
 	free(model->basepath);
 	free(model);
 	return 0;
@@ -326,13 +367,58 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
 	}
 
 	model->basepath = get_basepath(filepath);
-	/* for now, the node only has meshes, we can generalize it later */
-	status = gltf_load_meshes(model, data);
-	if (status) {
+
+	if ((status = gltf_load_nodes(model, data)) != 0) {
 		fprintf(stderr, "failed to load meshes\n");
 		return status;
 	}
 
 	cgltf_free(data);
+	return 0;
+}
+
+i8 node_create(struct node **node) {
+	struct node *node_ = malloc(sizeof(struct node));
+	if (!node_) {
+		fprintf(stderr, "failed to allocate memory for node\n");
+		return 1;
+	}
+
+	*node_ = (struct node) { 0 };
+	*node = node_;
+	return 0;
+}
+
+i8 node_destroy(struct node *node) {
+	if (node->has_mesh)
+		// mesh destroy here
+		free(node->mesh);
+	/* not handled now */
+	// if (node->children)
+	// 	free(node->children);
+
+	// free((void *) node->name);
+	// free(node);
+	return 0;
+}
+
+i8 mesh_create(struct mesh **mesh) {
+	struct mesh *mesh_ = malloc(sizeof(struct mesh));
+	if (!mesh_) {
+		fprintf(stderr, "failed to allocate memory for mesh\n");
+		return 1;
+	}
+
+	*mesh_ = (struct mesh) { 0 };
+	*mesh = mesh_;
+	return 0;
+}
+
+i8 mesh_destroy(struct mesh *mesh) {
+	for (u64 i = 0; i < mesh->primitive_count; ++i) {
+		primitive_destroy(&mesh->primitives[i]);
+	}
+
+	free(mesh);
 	return 0;
 }
