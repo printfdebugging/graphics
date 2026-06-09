@@ -29,3 +29,8 @@ void render_primitive(struct primitive *primitive, struct transform transform) {
 		glDrawArrays(primitive->draw_mode, 0, (i32) primitive->vertex_count);
 	}
 }
+
+/* todo: look into wireframe rendering
+ * - it would be nice to render just the lines to see the boundaries of the objects
+ * - glPolygonMode(GL_FRONT_AND_BACK, renderer->wireframe ? GL_LINE : GL_FILL);
+ */
