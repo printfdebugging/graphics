@@ -15,6 +15,8 @@ struct texture {
 	const char *path;
 };
 
+/* todo: texture_create is unnecessary, hides malloc behind it. instead the consumer of
+ * this api should explicitly do that. we remove this soon... */
 struct texture *texture_create();
 struct texture *texture_create_from_file(const char *path);
 i8 texture_load(struct texture *texture, void *data, i32 width, i32 height, GLenum format, GLenum data_type, i32 internal_format, b8 generate_mipmaps);
