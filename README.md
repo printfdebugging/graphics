@@ -21,14 +21,14 @@
 
 ```bash
 # pull in the git submodules
-git submodule update --init --recursive 
+git submodule update --init --recursive
 
 # build with cmake
 cmake -B build
 cmake --build build
 
 # run the executable
-./build/executable
+./build/projects/game/game
 ```
 
 ## Style
