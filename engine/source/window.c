@@ -92,7 +92,7 @@ i8 window_create(struct window **window, struct window opts) {
 
 	/* use a dark titlebar on windows in dark mode. */
 #ifdef _WIN32
-	HWND hwnd = glfwGetWin32Window(window.window);
+	HWND hwnd = glfwGetWin32Window(opts.window);
 	DWORD value = __msw_is_dark_mode();
 	DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 #endif
