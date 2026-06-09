@@ -25,6 +25,8 @@ set(ENGINE_PROJECT_NAME ${PROJECT_NAME} PARENT_SCOPE)
 add_library(${PROJECT_NAME}
 	source/core/string.c
 	source/core/logger.c
+	source/core/memory.c
+	source/core/context.c
 
 	source/primitive.c
 	source/model.c
