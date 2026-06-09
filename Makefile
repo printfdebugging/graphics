@@ -1,5 +1,5 @@
 run: debug
-	./build/projects/Game/game
+	./build/projects/game/game
 
 debug:
 	cmake -DCMAKE_BUILD_TYPE=Debug -B build && cmake --build build

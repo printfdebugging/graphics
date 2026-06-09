@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 4.0)
 
-project(LearnOpenGL
-        VERSION        "0.0.1.1"
-        DESCRIPTION    "Cross Platform LearnOpenGL Implementaion"
-        HOMEPAGE_URL   "https://codeberg.org/printfdebugging/learnopengl"
-        LANGUAGES      "C"
+project(graphics
+	VERSION "0.0.1.1"
+	DESCRIPTION "Cross Platform LearnOpenGL Implementaion"
+	HOMEPAGE_URL "https://codeberg.org/printfdebugging/learnopengl"
+	LANGUAGES "C"
 )
 
 include(GNUInstallDirs)
@@ -31,7 +31,7 @@ add_subdirectory(external/harfbuzz)
 add_subdirectory(external/miniaudio)
 
 add_subdirectory(engine)
-add_subdirectory(projects/Game)
+add_subdirectory(projects/game)
 
 # set(CMAKE_C_STANDARD 23)
 # add_compile_options(-std=gnu23)
