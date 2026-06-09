@@ -110,8 +110,10 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
 	const u64 data_size = accessor->count * cgltf_calc_size(accessor->type, accessor->component_type);
 	(void) data_size;
 
-	/* todo: i heard that offset was in bytes, but data is a void * which is 64 bits = 8 bytes */
-	*data = ((u64 *) buffer_view->buffer->data + offset);
+	/* note: gltf's offset is 'byteOffset' meaning that the pointer should be
+	 * of u8 type and then adding the offset to it, pointer arithmetic will do
+	 * it's magic. */
+	*data = ((u8 *) buffer_view->buffer->data + offset);
 	*count = accessor->count;
 	*stride = buffer_view->stride;
 }
