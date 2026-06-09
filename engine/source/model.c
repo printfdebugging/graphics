@@ -159,36 +159,6 @@ static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
 	return 0;
 }
 
-/*
-
-todo: handle the case where one mesh has multiple primitives -> 2CylinderEngine.gltf
-1736 ⋅⋅⋅⋅"meshes":⋅[
-1737 ⋅⋅⋅⋅⋅⋅⋅⋅{
-1738 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"primitives":⋅[
-1739 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅{
-1740 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"attributes":⋅{
-1741 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"NORMAL":⋅1,
-1742 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"POSITION":⋅2
-1743 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅},
-1744 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"indices":⋅0,
-1745 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"mode":⋅4,
-1746 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"material":⋅0
-1747 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅},
-1748 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅{
-1749 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"attributes":⋅{
-1750 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"NORMAL":⋅4,
-1751 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"POSITION":⋅5
-1752 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅},
-1753 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"indices":⋅3,
-1754 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"mode":⋅4,
-1755 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"material":⋅1
-1756 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅}
-1757 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅],
-1758 ⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"name":⋅"Piston_123-844_0_Parts_1"
-1759 ⋅⋅⋅⋅⋅⋅⋅⋅},
-
-*/
-
 static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath) {
 	for (u64 i = 0; i < gltf_mesh->primitives_count; ++i) {
 		const cgltf_primitive *primitive = &gltf_mesh->primitives[i];
@@ -328,14 +298,6 @@ i8 model_create(struct model **model) {
 
 i8 model_destroy(struct model *model) {
 	for (u64 i = 0; i < model->primitive_count; ++i) {
-		/* todo: models don't manage the lifetime of a shader as if they do then the won't know
-		 * if this is shared between multiple primitives or not. let this task be something
-		 * for the shader manager etc to do */
-
-		/* todo: this thorws an error at the moment as all the primitives in the model share the same shader. */
-		/* todo: whenever we add a shader manger and if it has to manage some state, all that state will be managed
-		 * by the client, we just provide a nice api for it to do things conveniently, but we don't manage anything
-		 * in the engine, it's just bundles of code like stb, provides structs and functions  */
 		primitive_destroy(*(model->primitives + i));
 	}
 
@@ -344,11 +306,6 @@ i8 model_destroy(struct model *model) {
 	free(model);
 	return 0;
 }
-
-/* todo: move it to a separate function in mesh.. */
-/* todo: try out multiple models from the assets and see what works. */
-/* note: assuming only one primitive in the primitives array for now */
-/* todo: split into several helper functions */
 
 i8 model_load_from_file(struct model *model, const char *filepath) {
 	cgltf_data *data = NULL;
