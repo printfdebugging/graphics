@@ -19,6 +19,7 @@ IndentCaseLabels: true
 PointerAlignment: Right
 TabWidth: 8
 IndentWidth: 8
+BracedInitializerIndentWidth: 8
 UseTab: Always
 IndentPPDirectives: None
 AlignArrayOfStructures: None
