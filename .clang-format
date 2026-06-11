@@ -34,6 +34,7 @@ SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements 
 AccessModifierOffset: -4
 Cpp11BracedListStyle: false
+# Cpp11BracedListStyle: FunctionCall
 BreakConstructorInitializersBeforeComma: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 WhitespaceSensitiveMacros: [
