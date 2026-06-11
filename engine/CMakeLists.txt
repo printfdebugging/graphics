@@ -29,6 +29,8 @@ add_library(${PROJECT_NAME}
 	source/core/context.c
 
 	source/primitive.c
+	source/mesh.c
+	source/node.c
 	source/model.c
 	source/renderer.c
 	source/shader.c

@@ -74,6 +74,13 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
 	game->axes->shader = axes_shader;
 
+	/* todo: create a proper shader for gltf models with a lot of optional features (inside include guards) */
+	struct shader *engine_shader = shader_create();
+	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/gltf/shader.vert", ASSETS_DIR "shaders/gltf/shader.frag")) != 0) {
+		fprintf(stderr, "failed to load shader\n");
+		return EXIT_FAILURE;
+	}
+
 	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
 	game->cengine = malloc(sizeof(struct model));
 	if (!game->cengine) {
@@ -82,20 +89,10 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 	}
 
 	model_init(game->cengine);
-	if ((status = model_load_from_file(game->cengine, engine_asset_path)) != 0) {
+	/* todo: decouple this, passing this here for now, for testing purposes */
+	if ((status = model_load_from_file(game->cengine, engine_asset_path, engine_shader)) != 0) {
 		fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
 		return EXIT_FAILURE;
-	}
-
-	struct shader *engine_shader = shader_create();
-	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/model/shader.vert", ASSETS_DIR "shaders/model/shader.frag")) != 0) {
-		fprintf(stderr, "failed to load shader\n");
-		return EXIT_FAILURE;
-	}
-
-	/* todo: we should have a shader_manager and create shaders based on shader options and reuse shaders */
-	for (u64 i = 0; i < game->cengine->primitive_count; ++i) {
-		game->cengine->primitives[i]->shader = engine_shader;
 	}
 
 	return status;
@@ -117,6 +114,7 @@ i8 game_run(struct game_state *game) {
 		mat4s view = camera_get_view_matrix(game->camera);
 		mat4s projection = glms_perspective(glm_rad(game->camera->fov), (float) game->window->width / (float) game->window->height, 0.1f, 100.0f);
 		struct transform transform = { .model = model, .view = view, .projection = projection };
+		transform.model = glms_scale(transform.model, (vec3s) { { 0.05, 0.05, 0.05 } });
 
 		render_primitive(game->axes, transform);
 		game->cengine->transform = transform;

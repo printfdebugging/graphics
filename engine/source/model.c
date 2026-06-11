@@ -5,6 +5,7 @@
 #include "cgltf.h"
 
 #include "engine/model.h"
+#include "engine/node.h"
 #include "engine/primitive.h"
 #include "engine/texture.h"
 #include "engine/core/defines.h"
@@ -23,8 +24,6 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
 static char *get_basepath(const char *filepath);
 
 /* todo: get the mesh <-> primitive names right */
-static i8 gltf_load_meshes(struct model *model, cgltf_data *data);
-static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath);
 static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive);
 static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath);
 static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive);
@@ -136,68 +135,6 @@ static char *get_basepath(const char *filepath) {
 	return basepath;
 }
 
-static i8 gltf_load_meshes(struct model *model, cgltf_data *data) {
-	model->primitives = malloc(sizeof(struct primitive *) * data->meshes_count);
-	model->primitive_count = (u32) data->meshes_count;
-	if (!model->primitives) {
-		fprintf(stderr, "failed to allocate mesh pointers in model\n");
-		return 1;
-	}
-
-	/* iterate over all the meshes - meshes have primitives */
-	for (u64 i = 0; i < data->meshes_count; ++i) {
-		const cgltf_mesh *gltf_mesh = &data->meshes[i];
-		struct primitive *mesh = malloc(sizeof(struct primitive));
-		primitive_init(mesh);
-		primitive_create_vertex_array(mesh);
-
-		i8 status = gltf_load_mesh_primitives(mesh, gltf_mesh, data, model->basepath);
-		if (status) {
-			/* handle error properly */
-			fprintf(stderr, "failed to load gltf mesh primitives\n");
-			*(model->primitives + i) = NULL;
-		}
-
-		*(model->primitives + i) = mesh;
-	}
-	return 0;
-}
-
-static i8 gltf_load_mesh_primitives(struct primitive *mesh, const cgltf_mesh *gltf_mesh, cgltf_data *data, const char *basepath) {
-	for (u64 i = 0; i < gltf_mesh->primitives_count; ++i) {
-		const cgltf_primitive *primitive = &gltf_mesh->primitives[i];
-		i8 status;
-
-		if (primitive->type) {
-			if ((status = gltf_primitive_type_to_gl_type(&mesh->draw_mode, primitive->type))) {
-				/* handle error */
-				return status;
-			}
-		}
-
-		if (primitive->indices) {
-			if ((status = gltf_load_primitive_indices(mesh, primitive))) {
-				/* handle error */
-				return status;
-			}
-		}
-
-		/* todo: to a separate material loader function */
-		if (primitive->material) {
-			if ((status = gltf_load_primitive_material(mesh, primitive, basepath))) {
-				/* handle error */
-				return status;
-			}
-		}
-
-		if ((status = gltf_load_primitive_attributes(mesh, primitive))) {
-			/* handle error */
-			return status;
-		}
-	}
-	return 0;
-}
-
 /* separate the definition and the declaration */
 static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive) {
 	const u64 attribute_count = primitive->attributes_count;
@@ -281,7 +218,6 @@ static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primit
 	i8 status;
 
 	if ((status = gltf_component_type_to_gl_type(&type, primitive->indices->component_type)) != 0) {
-		/* handle error */
 		return status;
 	}
 
@@ -296,8 +232,8 @@ void model_init(struct model *model) {
 	model->nodes = NULL;
 	model->meshes = NULL;
 	model->primitive_count = 0;
-	model->node_count = 0;
-	model->mesh_count = 0;
+	model->nodes_count = 0;
+	model->meshes_count = 0;
 
 	model->transform = (struct transform) {
 		.model = { GLM_MAT4_IDENTITY_INIT },
@@ -305,22 +241,22 @@ void model_init(struct model *model) {
 	};
 }
 
-i8 model_destroy(struct model *model) {
-	for (u64 i = 0; i < model->primitive_count; ++i) {
-		primitive_destroy(*(model->primitives + i));
+/* todo: destroy nodes and meshes */
+void model_destroy(struct model *model) {
+	for (u64 primitive_index = 0; primitive_index < model->primitive_count; ++primitive_index) {
+		primitive_destroy(*(model->primitives + primitive_index));
 	}
 
 	free(model->primitives);
 	free(model->basepath);
 	free(model);
-	return 0;
 }
 
-i8 model_load_from_file(struct model *model, const char *filepath) {
+i8 model_load_from_file(struct model *model, const char *filepath, struct shader *shader) {
 	cgltf_data *data = NULL;
 	const cgltf_options options = { 0 };
 	cgltf_result result;
-	i8 status;
+	i8 status = 0;
 
 	result = cgltf_parse_file(&options, filepath, &data);
 	if (result != cgltf_result_success) {
@@ -334,12 +270,172 @@ i8 model_load_from_file(struct model *model, const char *filepath) {
 		return 1;
 	}
 
-	model->basepath = get_basepath(filepath);
-	/* for now, the node only has meshes, we can generalize it later */
-	status = gltf_load_meshes(model, data);
-	if (status) {
-		fprintf(stderr, "failed to load meshes\n");
-		return status;
+	/* keep in local variables, assign to the model at the end  */
+	char *basepath = get_basepath(filepath);
+
+	u64 nodes_count = data->nodes_count;
+	struct node *nodes = malloc(sizeof(struct node) * nodes_count);
+	if (!nodes) {
+		fprintf(stderr, "failed to allocate nodes\n");
+		free(basepath);
+		cgltf_free(data);
+		return 1;
+	}
+
+	for (u64 node_index = 0; node_index < nodes_count; ++node_index) {
+		cgltf_node *gltf_node = &data->nodes[node_index];
+		struct node *node = &nodes[node_index];
+		node_init(node);
+
+		if (gltf_node->name) {
+			node->name = strdup(gltf_node->name);
+		}
+
+		/* allocate an array for the child node pointers */
+		if (gltf_node->children_count != 0) {
+			u64 children_count = gltf_node->children_count;
+			node->children_count = children_count;
+			node->children = malloc(sizeof(struct node *) * children_count);
+			if (!node->children) {
+				fprintf(stderr, "failed to allocate memory for node->children\n");
+				return 1;
+			}
+
+			for (u64 child_index = 0; child_index < children_count; ++child_index) {
+				node->children[child_index] = NULL;
+			}
+		}
+
+		/* if none of these are specified, 'node_init' sets the default values. */
+		if (gltf_node->has_matrix) {
+			vec4s _translate;
+			mat4s _rotate;
+			vec3s _scale;
+			glms_decompose(glms_mat4_make(gltf_node->matrix), &_translate, &_rotate, &_scale);
+			node->translation = glms_vec4_copy3(_translate);
+			node->rotation = glms_mat4_quat(_rotate);
+			node->scale = _scale;
+		} else {
+			if (gltf_node->has_translation)
+				glm_vec3_copy(gltf_node->translation, node->translation.raw);
+			if (gltf_node->has_rotation)
+				glm_vec4_copy(gltf_node->rotation, node->rotation.raw);
+			if (gltf_node->has_scale)
+				glm_vec3_copy(gltf_node->scale, node->scale.raw);
+		}
+	}
+
+	u64 mesh_count = data->meshes_count;
+	struct mesh *meshes = malloc(sizeof(struct mesh) * mesh_count);
+	if (!meshes) { /* todo: call node destructor here node & node->children to be freed */
+		fprintf(stderr, "failed to allocate meshes\n");
+		free(basepath);
+		return 1;
+	}
+
+	for (u64 mesh_index = 0; mesh_index < mesh_count; ++mesh_index) {
+		cgltf_mesh *gltf_mesh = &data->meshes[mesh_index];
+		struct mesh *mesh = &meshes[mesh_index];
+		mesh_init(mesh);
+
+		u64 primitive_count = gltf_mesh->primitives_count;
+		mesh->primitives_count = primitive_count;
+		mesh->primitives = malloc(sizeof(struct primitive) * primitive_count);
+		if (!meshes) { /* todo: cleanup properly */
+			fprintf(stderr, "failed to allocate mesh->primitives\n");
+			return 1;
+		}
+
+		for (u64 primitive_index = 0; primitive_index < primitive_count; ++primitive_index) {
+			cgltf_primitive *gltf_primitive = &gltf_mesh->primitives[primitive_index];
+			struct primitive *primitive = &mesh->primitives[primitive_index];
+			primitive_init(primitive);
+			primitive_create_vertex_array(primitive);
+			/* todo: do this properly with some shader manager */
+			primitive->shader = shader;
+
+			if (gltf_primitive->type) {
+				if ((status = gltf_primitive_type_to_gl_type(&primitive->draw_mode, gltf_primitive->type))) {
+					/* todo: with arena, freeing up this memory would be easy */
+					return status;
+				}
+			}
+
+			if (gltf_primitive->indices) {
+				if ((status = gltf_load_primitive_indices(primitive, gltf_primitive))) {
+					/* todo: with arena, freeing up this memory would be easy */
+					return status;
+				}
+			}
+
+			/* todo: to a separate material loader function */
+			if (gltf_primitive->material) {
+				if ((status = gltf_load_primitive_material(primitive, gltf_primitive, basepath))) {
+					return status;
+				}
+			}
+
+			if ((status = gltf_load_primitive_attributes(primitive, gltf_primitive))) {
+				return status;
+			}
+		}
+	}
+
+	model->nodes = nodes;
+	model->nodes_count = nodes_count;
+	model->meshes = meshes;
+	model->meshes_count = mesh_count;
+	model->basepath = basepath;
+
+	/* create the parent-child node hierarchy */
+	for (u64 node_index = 0; node_index < nodes_count; ++node_index) {
+		cgltf_node *gltf_node = &data->nodes[node_index];
+		struct node *node = &model->nodes[node_index];
+
+		if (gltf_node->children_count != 0) {
+			for (u64 child_index = 0; child_index < gltf_node->children_count; ++child_index) {
+				i64 index_in_nodes_array = gltf_node->children[child_index] - data->nodes;
+				node->children[child_index] = &model->nodes[index_in_nodes_array];
+				node->children[child_index]->parent = node;
+			}
+		}
+	}
+
+	/* load the root nodes from the scene*/
+	if (data->scene && data->scene->nodes_count != 0) {
+		u64 root_nodes_count = data->scene->nodes_count;
+		struct node **root_nodes = malloc(sizeof(struct node *) * root_nodes_count);
+		if (!root_nodes) {
+			fprintf(stderr, "failed to allocate memory for root nodes\n");
+			/* todo: handle error properly, free allocated memory, an arena would make things massively simple. */
+			return 1;
+		}
+
+		/* clear the garbage values */
+		for (u64 node_index = 0; node_index < root_nodes_count; ++node_index) {
+			root_nodes[node_index] = NULL;
+		}
+
+		/* setup root node pointers */
+		for (u64 node_index = 0; node_index < root_nodes_count; ++node_index) {
+			cgltf_node *gltf_node = data->scene->nodes[node_index];
+			i64 index_in_nodes_array = gltf_node - data->nodes;
+			root_nodes[node_index] = &model->nodes[index_in_nodes_array];
+			root_nodes[node_index]->parent = NULL; /* set it explicitly, already done in node_init though. */
+		}
+
+		model->root_nodes = root_nodes;
+		model->root_nodes_count = root_nodes_count;
+	}
+
+	/* setup meshes for all the nodes */
+	for (u64 node_index = 0; node_index < nodes_count; ++node_index) {
+		cgltf_node *gltf_node = &data->nodes[node_index];
+		struct node *node = &nodes[node_index];
+		if (gltf_node->mesh) {
+			i64 mesh_index_in_array = gltf_node->mesh - data->meshes;
+			node->mesh = &model->meshes[mesh_index_in_array];
+		}
 	}
 
 	cgltf_free(data);

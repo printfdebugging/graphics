@@ -1,14 +1,41 @@
+#include "cglm/struct.h"
 #include "glad/glad.h"
 
 #include "engine/renderer.h"
 #include "engine/primitive.h"
+#include "engine/node.h"
 #include "engine/model.h"
 #include "engine/shader.h"
 #include "engine/core/defines.h"
 
 void render_model(struct model *model) {
-	for (u64 i = 0; i < model->primitive_count; ++i) {
-		render_primitive(model->primitives[i], model->transform);
+	for (u64 root_node_index = 0; root_node_index < model->root_nodes_count; ++root_node_index) {
+		struct node *root_node = model->root_nodes[root_node_index];
+
+		struct transform transform = model->transform;
+		// transform.model = glms_mat4_mul(transform.model, node_get_mat4s_transform(root_node));
+		render_node(root_node, transform);
+	}
+}
+
+void render_node(struct node *node, struct transform transform) {
+	/* todo: check if this is required here or not */
+	transform.model = glms_mat4_mul(transform.model, node_get_mat4s_transform(node));
+	if (node->mesh) {
+		/* todo: figure out why this is never hit */
+		render_mesh(node->mesh, transform);
+	}
+
+	for (u64 child_index = 0; child_index < node->children_count; ++child_index) {
+		struct node *child_node = node->children[child_index];
+		render_node(child_node, transform);
+	}
+}
+
+void render_mesh(struct mesh *mesh, struct transform transform) {
+	for (u64 primitive_index = 0; primitive_index < mesh->primitives_count; ++primitive_index) {
+		struct primitive *primitive = &mesh->primitives[primitive_index];
+		render_primitive(primitive, transform);
 	}
 }
 
@@ -29,8 +56,3 @@ void render_primitive(struct primitive *primitive, struct transform transform) {
 		glDrawArrays(primitive->draw_mode, 0, (i32) primitive->vertex_count);
 	}
 }
-
-/* todo: look into wireframe rendering
- * - it would be nice to render just the lines to see the boundaries of the objects
- * - glPolygonMode(GL_FRONT_AND_BACK, renderer->wireframe ? GL_LINE : GL_FILL);
- */
