@@ -22,10 +22,6 @@ struct transform {
  * thing all at once once we are done, so no nested destroy calls :) */
 
 struct model {
-	/* note: these have to go in favor of node hierarchy */
-	struct primitive **primitives;
-	u64 primitive_count;
-
 	struct transform transform;
 
 	/** 'basepath' points to the model's directory. Paths to textures are

@@ -10,5 +10,7 @@ void mesh_destroy(struct mesh *mesh) {
 		primitive_destroy(&mesh->primitives[primitive_index]);
 	}
 
-	free(mesh);
+	/* we don't free mesh here since it was allocated manually in
+	 * model, so model would free it. */
+	// free(mesh);
 }

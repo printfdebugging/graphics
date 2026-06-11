@@ -18,7 +18,12 @@ void node_init(struct node *node) {
 void node_destroy(struct node *node) {
 	free((void *) node->name);
 	free(node->children);
+	/* todo: do it properly, and document who manages the lifetime of what between mesh, model, node and primitives. */
 	mesh_destroy(node->mesh);
+
+	/* we don't free node here because it was allocated
+	 * in the model and the model destructor would free
+	 * it. here we just clean the internals. */
 }
 
 mat4s node_get_mat4s_transform(struct node *node) {

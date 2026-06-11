@@ -114,7 +114,7 @@ i8 game_run(struct game_state *game) {
 		mat4s view = camera_get_view_matrix(game->camera);
 		mat4s projection = glms_perspective(glm_rad(game->camera->fov), (float) game->window->width / (float) game->window->height, 0.1f, 100.0f);
 		struct transform transform = { .model = model, .view = view, .projection = projection };
-		transform.model = glms_scale(transform.model, (vec3s) { { 0.05, 0.05, 0.05 } });
+		transform.model = glms_scale(transform.model, (vec3s) { { 0.05f, 0.05f, 0.05f } });
 
 		render_primitive(game->axes, transform);
 		game->cengine->transform = transform;
@@ -130,7 +130,7 @@ i8 game_shutdown(struct game_state *game) {
 
 	primitive_destroy(game->axes);
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
-	shader_destroy((*game->cengine->primitives)->shader);
+	// shader_destroy((*game->cengine->primitives)->shader);
 	model_destroy(game->cengine);
 
 	camera_destroy(game->camera);

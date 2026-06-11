@@ -227,11 +227,9 @@ static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primit
 }
 
 void model_init(struct model *model) {
-	model->primitives = NULL;
 	model->basepath = NULL;
 	model->nodes = NULL;
 	model->meshes = NULL;
-	model->primitive_count = 0;
 	model->nodes_count = 0;
 	model->meshes_count = 0;
 
@@ -243,11 +241,11 @@ void model_init(struct model *model) {
 
 /* todo: destroy nodes and meshes */
 void model_destroy(struct model *model) {
-	for (u64 primitive_index = 0; primitive_index < model->primitive_count; ++primitive_index) {
-		primitive_destroy(*(model->primitives + primitive_index));
-	}
+	for (u64 node_index = 0; node_index < model->nodes_count; ++node_index)
+		node_destroy(&model->nodes[node_index]);
+	for (u64 mesh_index = 0; mesh_index < model->meshes_count; ++mesh_index)
+		mesh_destroy(&model->meshes[mesh_index]);
 
-	free(model->primitives);
 	free(model->basepath);
 	free(model);
 }
