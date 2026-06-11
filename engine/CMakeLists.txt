@@ -37,6 +37,7 @@ add_library(${PROJECT_NAME}
 	source/texture.c
 	source/window.c
 	source/camera.c
+	source/font.c
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
