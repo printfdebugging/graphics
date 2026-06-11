@@ -8,6 +8,7 @@
 #include "engine/camera.h"
 #include "engine/primitive.h"
 #include "engine/model.h"
+#include "engine/font.h"
 #include "engine/renderer.h"
 #include "engine/shader.h"
 #include "engine/window.h"
@@ -114,11 +115,12 @@ i8 game_run(struct game_state *game) {
 		mat4s view = camera_get_view_matrix(game->camera);
 		mat4s projection = glms_perspective(glm_rad(game->camera->fov), (float) game->window->width / (float) game->window->height, 0.1f, 100.0f);
 		struct transform transform = { .model = model, .view = view, .projection = projection };
-		transform.model = glms_scale(transform.model, (vec3s) { { 0.05f, 0.05f, 0.05f } });
+		// transform.model = glms_scale(transform.model, (vec3s) { { 0.05f, 0.05f, 0.05f } });
 
 		render_primitive(game->axes, transform);
-		game->cengine->transform = transform;
-		render_model(game->cengine);
+		render_some_font();
+		// game->cengine->transform = transform;
+		// render_model(game->cengine);
 		window_swap_buffers(game->window);
 	}
 
