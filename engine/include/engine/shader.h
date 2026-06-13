@@ -37,6 +37,14 @@ struct shader {
 };
 
 i8 shader_init_with_options(struct shader *shader, struct shader_options options, enum shader_category category);
+
+/** This might seem unnecessary at first, but this helps us avoid
+ * the costly shader program switches by comparing the current shader
+ * program `shader->program`. If they are same, then it skips the
+ * `glUseProgram` call.
+ */
+void shader_use(struct shader *shader);
+
 void shader_destroy(struct shader *shader);
 i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
 

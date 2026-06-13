@@ -26,6 +26,10 @@ static const char *shader_float_precision_declaration =
     "    precision mediump float;\n"
     "#endif\n";
 
+/** Cache for the current shader program. used in `shader_use` to
+ * avoid unnecessary `glUseProgram` calls. */
+static u32 current_program = 0;
+
 static i8 shader_compiled_successfully(u32 shader, const char *filepath) {
 	i32 success;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -150,6 +154,13 @@ i8 shader_init_with_options(struct shader *shader, struct shader_options options
 	shader->category = category;
 	shader->initialized = false;
 	return 0;
+}
+
+void shader_use(struct shader *shader) {
+	if (shader->program != current_program) {
+		glUseProgram(shader->program);
+		current_program = shader->program;
+	}
 }
 
 void shader_destroy(struct shader *shader) {
