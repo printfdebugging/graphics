@@ -63,7 +63,7 @@ i8 shader_init_with_options(struct shader *shader, struct shader_options options
 void shader_use(struct shader *shader);
 
 void shader_destroy(struct shader *shader);
-i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
+i8 shader_load_from_sources(struct shader *shader, const char **vertex_sources, i32 vertex_sources_count, const char **fragment_sources, i32 fragment_sources_count);
 
 #define shader_set_uniform(shader, name, type, ...)                                                         \
 	{                                                                                                   \

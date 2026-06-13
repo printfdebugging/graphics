@@ -113,4 +113,7 @@ enum status_code {
 
 typedef enum status_code status_code;
 
+/* Some useful macros */
+#define array_size(t) (sizeof(t) / sizeof(*t))
+
 #endif

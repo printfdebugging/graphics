@@ -12,9 +12,12 @@
 #include "engine/renderer.h"
 #include "engine/shader.h"
 #include "engine/window.h"
+#include "engine/core/string.h"
 #include "engine/core/defines.h"
 
 #include "game.h"
+
+static const char *shader_version = "#version 330 core\n";
 
 void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
 void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);
@@ -93,10 +96,38 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/gltf/shader.vert", ASSETS_DIR "shaders/gltf/shader.frag")) != 0) {
-		fprintf(stderr, "failed to load shader\n");
+	struct string *engine_vertex_shader_main;
+	struct string *engine_fragment_shader_main;
+
+	if ((engine_vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.vert")) == NULL) {
 		return EXIT_FAILURE;
 	}
+
+	if ((engine_fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.frag")) == NULL) {
+		return EXIT_FAILURE;
+	}
+
+	const char *vertex_sources[] = {
+		shader_version,
+		/* todo: preprocessor declarations */
+		engine_vertex_shader_main->data,
+
+	};
+
+	const char *fragment_sources[] = {
+		shader_version,
+		/* todo: preprocessor declarations */
+		engine_fragment_shader_main->data,
+	};
+
+	if ((status = shader_load_from_sources(engine_shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources))) != 0) {
+		fprintf(stderr, "failed to load shader\n");
+		/* todo: free up resources */
+		return EXIT_FAILURE;
+	}
+
+	string_destroy(engine_vertex_shader_main);
+	string_destroy(engine_fragment_shader_main);
 
 	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
 	game->cengine = malloc(sizeof(struct model));
@@ -268,9 +299,38 @@ struct shader *create_axes_shader() {
 		return NULL;
 	}
 
-	if (shader_load_from_file(shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
-		shader_destroy(shader);
+	struct string *vertex_shader_main;
+	struct string *fragment_shader_main;
+
+	if ((vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/lines/shader.vert")) == NULL) {
 		return NULL;
 	}
+
+	if ((fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/lines/shader.frag")) == NULL) {
+		return NULL;
+	}
+
+	const char *vertex_sources[] = {
+		shader_version,
+		/* todo: preprocessor declarations */
+		vertex_shader_main->data,
+
+	};
+
+	const char *fragment_sources[] = {
+		shader_version,
+		/* todo: preprocessor declarations */
+		fragment_shader_main->data,
+	};
+
+	if ((status = shader_load_from_sources(shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources))) != 0) {
+		fprintf(stderr, "failed to load shader\n");
+		/* todo: free up resources */
+		return NULL;
+	}
+
+	string_destroy(vertex_shader_main);
+	string_destroy(fragment_shader_main);
+
 	return shader;
 }
