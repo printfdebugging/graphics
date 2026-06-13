@@ -76,7 +76,14 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 	game->axes->shader = axes_shader;
 
 	/* todo: create a proper shader for gltf models with a lot of optional features (inside include guards) */
-	struct shader *engine_shader = shader_create();
+	struct shader *engine_shader = malloc(sizeof(struct shader));
+	if (!engine_shader) {
+		/* todo: cleanup the resources created above. an arena would be much helpful for that. */
+		/* todo: or maybe we can just destroy the game object which would check for allocated objects.. yes that sounds better here. */
+		fprintf(stderr, "failed to allocate struct shader\n");
+		return EXIT_FAILURE;
+	}
+
 	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/gltf/shader.vert", ASSETS_DIR "shaders/gltf/shader.frag")) != 0) {
 		fprintf(stderr, "failed to load shader\n");
 		return EXIT_FAILURE;
@@ -235,12 +242,26 @@ struct primitive *create_axes_primitive() {
 }
 
 struct shader *create_axes_shader() {
-	struct shader *axes_shader = shader_create();
-	if (!axes_shader)
-		return NULL;
-	if (shader_load_from_file(axes_shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
-		shader_destroy(axes_shader);
+	struct shader_options opts = {
+		DEFAULT_SHADER_OPTIONS,
+		.has_normals = false,
+	};
+
+	struct shader *shader = malloc(sizeof(struct shader));
+	if (!shader) {
+		fprintf(stderr, "failed to allocate struct shader\n");
 		return NULL;
 	}
-	return axes_shader;
+
+	i8 status = 0;
+	if ((status = shader_init_with_options(shader, opts)) == true) {
+		fprintf(stderr, "failed to initialize shader with opts\n");
+		return NULL;
+	}
+
+	if (shader_load_from_file(shader, ASSETS_DIR "shaders/lines/shader.vert", ASSETS_DIR "shaders/lines/shader.frag")) {
+		shader_destroy(shader);
+		return NULL;
+	}
+	return shader;
 }

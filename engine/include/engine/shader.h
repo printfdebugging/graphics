@@ -5,10 +5,19 @@
 
 #include "engine/core/defines.h"
 
-struct shader {
-	u32 program;
+#define DEFAULT_SHADER_OPTIONS \
+	.has_normals = true
+
+struct shader_options {
+	b8 has_normals;
 };
 
+struct shader {
+	u32 program;
+	struct shader_options options;
+};
+
+i8 shader_init_with_options(struct shader *shader, struct shader_options options);
 void shader_destroy(struct shader *shader);
 i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
 

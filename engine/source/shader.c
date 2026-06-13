@@ -144,6 +144,11 @@ i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *f
 	return 0;
 }
 
+i8 shader_init_with_options(struct shader *shader, struct shader_options options) {
+	shader->options = options;
+	return 0;
+}
+
 void shader_destroy(struct shader *shader) {
 	glDeleteProgram(shader->program);
 	free(shader);
