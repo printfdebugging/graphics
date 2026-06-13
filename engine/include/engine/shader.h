@@ -9,9 +9,6 @@ struct shader {
 	u32 program;
 };
 
-/* todo: don't create shader yourself instead have a shader_init function, and also a shader manager
- * which shares shaders among primitives based on shader_options */
-struct shader *shader_create();
 void shader_destroy(struct shader *shader);
 i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
 

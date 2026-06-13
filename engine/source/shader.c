@@ -62,17 +62,6 @@ static void shader_bind_variable_names(u32 program) {
 	}
 }
 
-struct shader *shader_create() {
-	struct shader *shader = malloc(sizeof(struct shader));
-	if (!shader) {
-		fprintf(stderr, "failed to allocate memory for shader\n");
-		return NULL;
-	}
-
-	*shader = (struct shader) { 0 };
-	return shader;
-}
-
 i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath) {
 	/* read and compile vertex shader */
 
