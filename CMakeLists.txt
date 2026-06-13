@@ -22,7 +22,6 @@ add_subdirectory(cmake/cgltf)
 add_subdirectory(external/cglm SYSTEM)
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
-add_subdirectory(external/freetype)
 add_subdirectory(external/harfbuzz)
 add_subdirectory(external/miniaudio)
 

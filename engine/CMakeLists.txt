@@ -79,7 +79,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	cgltf
 	glad
 	glfw
-	freetype
 	harfbuzz
 	miniaudio
 	cglm
