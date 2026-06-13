@@ -16,6 +16,7 @@ include(GNUInstallDirs)
 ]]
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install")
 set(CMAKE_COLOR_DIAGNOSTICS ON)
+set(BUILD_SHARED_LIBS ON)
 
 add_subdirectory(cmake/stb)
 add_subdirectory(cmake/cgltf)
