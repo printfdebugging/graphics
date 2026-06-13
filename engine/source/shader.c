@@ -153,6 +153,10 @@ i8 shader_init_with_options(struct shader *shader, struct shader_options options
 	shader->options = options;
 	shader->category = category;
 	shader->initialized = false;
+
+	shader->uniform_model = -1;
+	shader->uniform_view = -1;
+	shader->uniform_projection = -1;
 	return 0;
 }
 

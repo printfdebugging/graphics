@@ -22,6 +22,11 @@ struct shader {
 	u32 program;
 
 	struct shader_options options;
+
+	/** An identifier for the type of shader. Helps allocate separate chunks/arenas
+	 * for separate kinds of shaders, makes it fast to iterate over and compare the
+	 * shader options to check if we already have a shader with these optinos.
+	 */
 	enum shader_category category;
 
 	/** This helps avoid using the shader too early. It is marked as `false` in
@@ -34,6 +39,18 @@ struct shader {
 	 * to `true`.
 	 */
 	b8 initialized;
+
+	/** Shader uniforms. Set to `-1` in `shader_init_with_options` and set
+	 * through `shader_set_uniform` which checks for `-1` and caches the valid
+	 * `glGetUniformLocation` return values.
+	 *
+	 * These names are same as the variable names in the shaders, just prefixed
+	 * with `uniform_` to make their purpose explicit. `shader_set_uniform`
+	 * generates code assuming this prefixed relationship.
+	 */
+	i32 uniform_model;
+	i32 uniform_view;
+	i32 uniform_projection;
 };
 
 i8 shader_init_with_options(struct shader *shader, struct shader_options options, enum shader_category category);
@@ -48,15 +65,18 @@ void shader_use(struct shader *shader);
 void shader_destroy(struct shader *shader);
 i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *fpath);
 
-#define shader_set_uniform(shader, name, type, ...)                                                \
-	{                                                                                          \
-		int var_##location = glGetUniformLocation(shader->program, name);                  \
-		if (var_##location == -1) {                                                        \
-			fprintf(stderr, "no uniform named '%s' found in shader->program\n", name); \
-		} else {                                                                           \
-			if (var_##location != -1)                                                  \
-				glUniform##type(var_##location, __VA_ARGS__);                      \
-		}                                                                                  \
+#define shader_set_uniform(shader, name, type, ...)                                                         \
+	{                                                                                                   \
+		if (shader->uniform_##name != -1) {                                                         \
+			glUniform##type(shader->uniform_##name, __VA_ARGS__);                               \
+		} else {                                                                                    \
+			shader->uniform_##name = glGetUniformLocation(shader->program, #name);              \
+			if (shader->uniform_##name != -1) {                                                 \
+				glUniform##type(shader->uniform_##name, __VA_ARGS__);                       \
+			} else {                                                                            \
+				fprintf(stderr, "no uniform named '%s' found in shader->program\n", #name); \
+			}                                                                                   \
+		}                                                                                           \
 	}
 
 #endif

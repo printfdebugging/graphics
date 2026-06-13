@@ -43,9 +43,9 @@ void render_primitive(struct primitive *primitive, struct transform transform) {
 	struct shader *shader = primitive->shader;
 
 	shader_use(shader);
-	shader_set_uniform(shader, "model", Matrix4fv, 1, GL_FALSE, &transform.model.col[0].raw[0]);
-	shader_set_uniform(shader, "view", Matrix4fv, 1, GL_FALSE, &transform.view.col[0].raw[0]);
-	shader_set_uniform(shader, "projection", Matrix4fv, 1, GL_FALSE, &transform.projection.col[0].raw[0]);
+	shader_set_uniform(shader, model, Matrix4fv, 1, GL_FALSE, &transform.model.col[0].raw[0]);
+	shader_set_uniform(shader, view, Matrix4fv, 1, GL_FALSE, &transform.view.col[0].raw[0]);
+	shader_set_uniform(shader, projection, Matrix4fv, 1, GL_FALSE, &transform.projection.col[0].raw[0]);
 
 	glBindVertexArray(primitive->vao);
 	if (primitive->index_count) {
