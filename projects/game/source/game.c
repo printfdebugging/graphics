@@ -84,6 +84,15 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	struct shader_options engine_shader_opts = {
+		DEFAULT_SHADER_OPTIONS,
+	};
+
+	if ((status = shader_init_with_options(engine_shader, engine_shader_opts, shader_category_model)) != 0) {
+		fprintf(stderr, "failed to initialize shader with opts\n");
+		return EXIT_FAILURE;
+	}
+
 	if ((status = shader_load_from_file(engine_shader, ASSETS_DIR "shaders/gltf/shader.vert", ASSETS_DIR "shaders/gltf/shader.frag")) != 0) {
 		fprintf(stderr, "failed to load shader\n");
 		return EXIT_FAILURE;
@@ -254,7 +263,7 @@ struct shader *create_axes_shader() {
 	}
 
 	i8 status = 0;
-	if ((status = shader_init_with_options(shader, opts)) == true) {
+	if ((status = shader_init_with_options(shader, opts, shader_category_model)) != 0) {
 		fprintf(stderr, "failed to initialize shader with opts\n");
 		return NULL;
 	}

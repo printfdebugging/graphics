@@ -141,11 +141,14 @@ i8 shader_load_from_file(struct shader *shader, const char *vpath, const char *f
 	glUseProgram(sprogram);
 
 	shader->program = sprogram;
+	shader->initialized = true;
 	return 0;
 }
 
-i8 shader_init_with_options(struct shader *shader, struct shader_options options) {
+i8 shader_init_with_options(struct shader *shader, struct shader_options options, enum shader_category category) {
 	shader->options = options;
+	shader->category = category;
+	shader->initialized = false;
 	return 0;
 }
 
