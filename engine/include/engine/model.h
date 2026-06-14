@@ -7,7 +7,6 @@
 
 #include "engine/mesh.h"
 #include "engine/node.h"
-#include "engine/primitive.h"
 #include "engine/core/defines.h"
 
 struct transform {
