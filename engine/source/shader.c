@@ -6,7 +6,6 @@
 #include "engine/shader.h"
 #include "engine/model/primitive.h"
 #include "engine/core/defines.h"
-#include "engine/core/string.h"
 
 static const char *shader_variable_names[] = {
 	[PRIMITIVE_ATTRIBUTE_POSITION] = "in_position",

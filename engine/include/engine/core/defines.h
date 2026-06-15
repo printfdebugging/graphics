@@ -56,59 +56,16 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #define I32_MIN (-I32_MAX - 1)
 #define I64_MIN (-I64_MAX - 1)
 
+/* size macros */
+#define KB (1024)
+#define MB (1024 * 1024)
+#define GB (1024 * 1024 * 1024)
+
 enum status_code {
-	/* success and failure */
 	status_success = 0,
 	status_failure = 1,
-
-	/* caller / programmer errors (2-99) */
-	status_invalid_argument = 2,
-	status_invalid_state,
-	status_unexpected_null_found,
-	status_out_of_range,
-	status_not_supported,
-	status_not_implemented,
-	status_already_initialized,
-	status_not_initialized,
-	status_buffer_too_small,
-
-	/* system / runtime failures (100-199) */
-	status_io_failure = 100,
-	status_file_not_found,
-	status_permission_denied,
-	status_path_not_found,
-	status_allocation_failed,
-	status_timeout,
-	status_resource_busy,
-	status_resource_exhausted,
-	status_system_failure,
-
-	/* external library failures (200-299) */
-	status_library_init_failure = 200,
-	status_library_call_failure,
-	status_library_version_mismatch,
-
-	/* data / serialization failures (300-399) */
-	status_parse_failure = 300,
-	status_invalid_format,
-	status_corrupted_data,
-	status_checksum_failure,
-	status_end_of_file,
-
-	/* graphics / rendering failures (400-499) */
-	status_shader_compile_failure = 400,
-	status_shader_link_failure,
-	status_asset_load_failure,
-	status_texture_load_failure,
-
-	/* networking failures (500-599) */
-	status_connection_failed = 500,
-	status_connection_lost,
-	status_host_unreachable,
-	status_protocol_error,
-
-	/* generic catch-all */
-	status_unknown_failure = 1000,
+	status_recoverable_failure,
+	status_unrecoverable_failure,
 };
 
 typedef enum status_code status_code;
