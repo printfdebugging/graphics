@@ -2,7 +2,7 @@ run: debug
 	./build/projects/game/game
 
 debug:
-	cmake -DCMAKE_BUILD_TYPE=Debug -B build && cmake --build build
+	CC="ccache gcc" CXX="ccache g++" cmake -DCMAKE_BUILD_TYPE=Debug -B build && cmake --build build
 
 # release:
 # package: clean release
