@@ -1,7 +1,7 @@
 #include "cglm/struct.h"
 #include "glad/glad.h"
 
-#include "engine/renderer.h"
+#include "engine/model/renderer.h"
 #include "engine/model/primitive.h"
 #include "engine/model/node.h"
 #include "engine/model/model.h"

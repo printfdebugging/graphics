@@ -35,8 +35,8 @@ add_library(${PROJECT_NAME}
 	source/model/mesh.c
 	source/model/node.c
 	source/model/model.c
+	source/model/renderer.c
 
-	source/renderer.c
 	source/shader.c
 	source/texture.c
 	source/window.c
