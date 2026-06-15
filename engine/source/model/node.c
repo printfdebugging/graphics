@@ -1,7 +1,7 @@
 #include "cglm/struct.h"
 
-#include "engine/node.h"
-#include "engine/mesh.h"
+#include "engine/model/node.h"
+#include "engine/model/mesh.h"
 
 void node_init(struct node *node) {
 	node->mesh = NULL;

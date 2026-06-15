@@ -5,8 +5,8 @@
 
 #include "cglm/struct.h"
 
-#include "engine/mesh.h"
-#include "engine/node.h"
+#include "engine/model/mesh.h"
+#include "engine/model/node.h"
 #include "engine/core/defines.h"
 
 struct transform {

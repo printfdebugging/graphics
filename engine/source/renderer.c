@@ -2,9 +2,9 @@
 #include "glad/glad.h"
 
 #include "engine/renderer.h"
-#include "engine/primitive.h"
-#include "engine/node.h"
-#include "engine/model.h"
+#include "engine/model/primitive.h"
+#include "engine/model/node.h"
+#include "engine/model/model.h"
 #include "engine/shader.h"
 #include "engine/core/defines.h"
 

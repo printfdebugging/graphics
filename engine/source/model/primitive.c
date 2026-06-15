@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "engine/primitive.h"
+#include "engine/model/primitive.h"
 #include "engine/core/defines.h"
 #include "engine/shader.h"
 

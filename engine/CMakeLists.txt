@@ -28,16 +28,19 @@ add_library(${PROJECT_NAME}
 	source/core/memory.c
 	source/core/context.c
 
-	source/primitive.c
-	source/mesh.c
-	source/node.c
-	source/model.c
+	source/font/atlas.c
+	source/font/font.c
+
+	source/model/primitive.c
+	source/model/mesh.c
+	source/model/node.c
+	source/model/model.c
+
 	source/renderer.c
 	source/shader.c
 	source/texture.c
 	source/window.c
 	source/camera.c
-	source/font.c
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

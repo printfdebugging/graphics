@@ -1,4 +1,4 @@
-#include "engine/mesh.h"
+#include "engine/model/mesh.h"
 
 void mesh_init(struct mesh *mesh) {
 	mesh->primitives_count = 0;

@@ -6,8 +6,8 @@
 
 #include "engine/engine.h"
 #include "engine/camera.h"
-#include "engine/primitive.h"
-#include "engine/model.h"
+#include "engine/model/primitive.h"
+#include "engine/model/model.h"
 #include "engine/font.h"
 #include "engine/renderer.h"
 #include "engine/shader.h"

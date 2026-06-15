@@ -8,7 +8,7 @@
  */
 #include "cglm/struct.h"
 
-#include "engine/mesh.h"
+#include "engine/model/mesh.h"
 #include "engine/core/defines.h"
 
 struct node {

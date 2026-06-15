@@ -4,7 +4,7 @@
 #include "glad/glad.h"
 
 #include "engine/shader.h"
-#include "engine/primitive.h"
+#include "engine/model/primitive.h"
 #include "engine/core/defines.h"
 #include "engine/core/string.h"
 

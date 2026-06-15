@@ -6,7 +6,7 @@
 #include "engine/engine.h"
 #include "engine/camera.h"
 #include "engine/window.h"
-#include "engine/model.h"
+#include "engine/model/model.h"
 #include "engine/core/defines.h"
 
 struct game_state {

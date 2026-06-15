@@ -1,7 +1,7 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "engine/model.h"
+#include "engine/model/model.h"
 
 void render_model(struct model *model);
 

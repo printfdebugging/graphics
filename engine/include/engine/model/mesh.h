@@ -1,7 +1,7 @@
 #ifndef ENGINE_MESH_H
 #define ENGINE_MESH_H
 
-#include "engine/primitive.h"
+#include "engine/model/primitive.h"
 #include "engine/core/defines.h"
 
 struct mesh {
