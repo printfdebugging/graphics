@@ -28,9 +28,6 @@ add_library(${PROJECT_NAME}
 	source/core/memory.c
 	source/core/context.c
 
-	source/font/atlas.c
-	source/font/font.c
-
 	source/model/primitive.c
 	source/model/mesh.c
 	source/model/node.c
