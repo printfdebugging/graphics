@@ -36,3 +36,9 @@ cmake --build build
 - Everything :snake: `snake_case`
 - Avoid unnecessary `typedef`ing
 - Format as per `.clang-format`
+
+## Error Handling
+
+- Error should be propogated up the function call stack.
+- On error, every function should cleanup it's allocations and let the parent handle their allocations
+- Error message should be printed/logged at the site it happened and very bottom of the stack, rest all should just cleanup and propogate
