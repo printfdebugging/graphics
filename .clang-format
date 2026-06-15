@@ -40,3 +40,5 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: false
 WhitespaceSensitiveMacros: [
         "ensure_not_null"
 ]
+
+# DisableFormat: true
