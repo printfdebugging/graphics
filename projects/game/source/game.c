@@ -164,7 +164,6 @@ i8 game_run(struct game_state *game) {
 		// transform.model = glms_scale(transform.model, (vec3s) { { 0.05f, 0.05f, 0.05f } });
 
 		render_primitive(game->axes, transform);
-		render_some_font();
 		// game->cengine->transform = transform;
 		// render_model(game->cengine);
 		window_swap_buffers(game->window);
