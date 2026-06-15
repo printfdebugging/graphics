@@ -42,3 +42,8 @@ cmake --build build
 - Error should be propogated up the function call stack.
 - On error, every function should cleanup it's allocations and let the parent handle their allocations
 - Error message should be printed/logged at the site it happened and very bottom of the stack, rest all should just cleanup and propogate
+
+## Memory Management
+
+- Never use `malloc`, use `calloc` as that sets the memory to `0` and we can use that to set some default flags to 0, like `initialized`.
+- Always call `foo_init` after allocation.
