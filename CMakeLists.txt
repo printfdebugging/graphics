@@ -21,6 +21,7 @@ include(GNUInstallDirs)
 	directory.
 ]]
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(BUILD_SHARED_LIBS ON)
 
@@ -30,7 +31,6 @@ add_subdirectory(external/cglm SYSTEM)
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
 add_subdirectory(external/harfbuzz)
-add_subdirectory(external/miniaudio)
 
 add_subdirectory(engine)
 add_subdirectory(projects/game)

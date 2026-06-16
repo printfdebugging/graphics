@@ -81,7 +81,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	glfw
 	harfbuzz
 	harfbuzz-gpu
-	miniaudio
 	cglm
 	pthread
 	m

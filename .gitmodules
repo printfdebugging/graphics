@@ -13,9 +13,6 @@
 [submodule "subprojects/cgltf"]
 	path = external/cgltf
 	url = https://github.com/jkuhlmann/cgltf
-[submodule "subprojects/miniaudio"]
-	path = external/miniaudio
-	url = https://github.com/mackron/miniaudio
 [submodule "subprojects/harfbuzz"]
 	path = external/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz
