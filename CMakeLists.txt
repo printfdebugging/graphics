@@ -34,3 +34,4 @@ add_subdirectory(external/harfbuzz)
 
 add_subdirectory(engine)
 add_subdirectory(projects/game)
+add_subdirectory(projects/editor)
