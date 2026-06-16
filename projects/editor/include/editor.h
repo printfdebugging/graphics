@@ -6,6 +6,8 @@
 #include "engine/engine.h"
 #include "engine/window.h"
 #include "engine/shader.h"
+#include "engine/font/font.h"
+#include "engine/font/renderer.h"
 #include "engine/core/defines.h"
 
 struct editor_state {
@@ -13,6 +15,8 @@ struct editor_state {
 	struct bridge bridge;
 
 	struct window *window;
+	struct font *font;
+	struct font_renderer *font_renderer;
 	struct shader *font_shader;
 
 	f64 last_frame;

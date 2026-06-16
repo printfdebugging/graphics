@@ -53,6 +53,8 @@ struct shader {
 	i32 uniform_projection;
 };
 
+/* todo: cache it here, or return with initialized=true if there's already some shader with these properties */
+/* todo: no, think about it later */
 i8 shader_init_with_options(struct shader *shader, struct shader_options options, enum shader_category category);
 
 /** This might seem unnecessary at first, but this helps us avoid

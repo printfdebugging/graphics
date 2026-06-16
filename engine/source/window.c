@@ -71,6 +71,7 @@ i8 window_create(struct window **window, struct window opts) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
@@ -107,6 +108,8 @@ i8 window_create(struct window **window, struct window opts) {
 	glfwSwapInterval(1);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glLineWidth(2);
 
 	// TODO: this is explained in the blending section

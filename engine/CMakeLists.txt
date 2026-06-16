@@ -35,6 +35,10 @@ add_library(${PROJECT_NAME}
 	source/model/model.c
 	source/model/renderer.c
 
+	source/font/font.c
+	source/font/atlas.c
+	source/font/renderer.c
+
 	source/shader.c
 	source/texture.c
 	source/window.c

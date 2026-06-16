@@ -89,7 +89,8 @@ i8 shader_load_from_sources(struct shader *shader, const char **vertex_sources, 
 	program = glCreateProgram();
 	glAttachShader(program, vertex_shader_object);
 	glAttachShader(program, fragment_shader_object);
-	shader_bind_variable_names(program);
+	// note: this shouldn't be done here, it is something which varies per shader.
+	// shader_bind_variable_names(program);
 	glLinkProgram(program);
 
 	glDeleteShader(vertex_shader_object);

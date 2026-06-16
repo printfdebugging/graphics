@@ -8,12 +8,11 @@
 #include "engine/engine.h"
 #include "engine/shader.h"
 #include "engine/window.h"
+#include "engine/font/renderer.h"
 #include "engine/core/string.h"
 #include "engine/core/defines.h"
 
 #include "editor.h"
-
-static const char *shader_version = "#version 330 core\n";
 
 void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
 void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);
@@ -52,11 +51,46 @@ i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		return 1;
 	}
 
+	editor->font = calloc(1, sizeof(struct font));
+	if (!editor->font) {
+		fprintf(stderr, "failed to allocate struct font\n");
+		return EXIT_FAILURE;
+	}
+
+	const char *path = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
+	if ((status = font_init_from_file(editor->font, path)) != 0) {
+		fprintf(stderr, "failed to initialize font\n");
+		return EXIT_FAILURE;
+	}
+
+	editor->font_renderer = calloc(1, sizeof(struct font_renderer));
+	if (!editor->font_renderer) {
+		fprintf(stderr, "failed to allocate struct font_renderer\n");
+		return EXIT_FAILURE;
+	}
+
+	if ((status = font_renderer_init(editor->font_renderer)) != 0) {
+		fprintf(stderr, "failed to initialize font renderer\n");
+		return EXIT_FAILURE;
+	}
+
+	if ((status = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz")) != 0) {
+		fprintf(stderr, "failed to load text in font renderer\n");
+		return EXIT_FAILURE;
+	}
+
+	shader_use(editor->font_shader);
+
+	__font_renderer_upload_to_gpu(editor->font_renderer);
+	__font_renderer_setup_vbo_attributes(editor->font_renderer, editor->font_shader);
+
 	return status;
 }
 
 i8 editor_run(struct editor_state *editor) {
 	i8 status = 0;
+	glfwShowWindow(editor->window->window);
+
 	while (!window_close(editor->window)) {
 		f64 current_frame = glfwGetTime();
 		editor->delta_time = current_frame - editor->last_frame;
@@ -66,6 +100,19 @@ i8 editor_run(struct editor_state *editor) {
 		window_process_input(editor->window);
 		window_clear_color(editor->window);
 		process_input(editor, editor->window, editor->delta_time);
+
+		/* todo: note: i think i don't fully understand the various trs and mvp
+		 * matrices and the significance of the order in which they are applied.
+		 * i need to learn this first. */
+
+		/* todo: go through the coordinate system chapter once again and then
+		 * fix the up-side-down rendering of the text here.*/
+		mat4s vp = { GLM_MAT4_IDENTITY_INIT };
+		vp = glms_rotate(vp, glm_rad(90.0f), (vec3s) { { 1.0f, 0.0f, 0.0f } });
+		vp = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.1f, 100.0f);
+		vp = glms_translate(vp, (vec3s) { { 0.0f, 0.0f, -24.0f } });
+
+		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, vp);
 
 		window_swap_buffers(editor->window);
 	}
@@ -87,7 +134,8 @@ i8 editor_shutdown(struct editor_state *editor) {
 
 void process_input(struct editor_state *editor, struct window *window, f64 delta_time) {
 	// input_move_point_light(window, delta_time);
-	fprintf(stderr, "process_input\n");
+	// fprintf(stderr, "process_input\n");
+	(void) editor;
 }
 
 void mouse_move(void *userdata, struct window *window, f64 x, f64 y) {
@@ -144,7 +192,7 @@ struct shader *__font_renderer_create_default_shader() {
 		fragment_main,
 	};
 
-	struct shader *shader = malloc(sizeof(struct shader));
+	struct shader *shader = calloc(1, sizeof(struct shader));
 	if (!shader) {
 		fprintf(stderr, "failed to allocate shader\n");
 		return NULL;
