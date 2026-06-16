@@ -96,23 +96,21 @@ i8 font_renderer_load_text(struct font_renderer *renderer, struct font *font, co
 			double ex = (1 - cx) * info.extents.min_x + cx * info.extents.max_x;
 			double ey = (1 - cy) * info.extents.min_y + cy * info.extents.max_y;
 
-			corners[corner_index].x = (f32) (position.x + scale * ex);
-			corners[corner_index].y = (f32) (position.y - scale * ey);
-			corners[corner_index].tx = (f32) ex;
-			corners[corner_index].ty = (f32) ey;
-			corners[corner_index].nx = cx ? 1.f : -1.f;
-			corners[corner_index].ny = cy ? -1.f : 1.f;
-			corners[corner_index].emPerPos = (float) (1.0 / scale);
-			corners[corner_index].atlas_offset = info.atlas_offset / TEXEL_SIZE;
-			corners[corner_index].atlas_page = info.atlas_page;
-			// debugging: data seems fine, let's check as we upload it
-			// glyph_vertex_print_info(&corners[corner_index], stderr);
+			corners[corner_index] = (struct glyph_vertex) {
+				.x = (f32) (position.x + scale * ex),
+				.y = (f32) (position.y - scale * ey),
+				.tx = (f32) ex,
+				.ty = (f32) ey,
+				.nx = cx ? 1.f : -1.f,
+				.ny = cy ? -1.f : 1.f,
+				.emPerPos = (float) (1.0 / scale),
+				.atlas_offset = info.atlas_offset / TEXEL_SIZE,
+				.atlas_page = info.atlas_page,
+			};
 		}
 
 		u32 index = glyph_index * 6;
 
-		/* for some reason, the gpu isn't getting proper glyph offsets, it's just getting the position primitives */
-		/* atleast here the data is fine */
 		renderer->vertices[index + 0] = corners[0];
 		renderer->vertices[index + 1] = corners[1];
 		renderer->vertices[index + 2] = corners[2];
