@@ -3,6 +3,7 @@
 #include "cglm/struct.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "hb-gpu.h"
 
 #include "engine/engine.h"
 #include "engine/shader.h"
@@ -21,6 +22,8 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h);
 /* this is for keyboard inputs which we don't get via callbacks, but we check for
  * explicitly in the main loop maybe there's another way, let's ask nitrix later */
 void process_input(struct editor_state *editor, struct window *window, f64 delta_time);
+
+struct shader *__font_renderer_create_default_shader();
 
 i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	i8 status = 0;
@@ -44,62 +47,10 @@ i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		return status;
 	}
 
-	/* todo: add primitves etc to the editor, or atleast some resource arenas */
-	/* todo: the shaders etc live in the model struct, nested deep to the level of primitives. so we never create them manually. */
-	/* todo: have some kind of resource specifier file which links a model to it's respective shaders, ideally a header file in the code, makes things much easier, something like `resource.h` */
-	/* todo: continue here, we were moving old main to this new editor/engine layout */
-
-	/* todo: create a proper shader for gltf models with a lot of optional features (inside include guards) */
-	struct shader *engine_shader = malloc(sizeof(struct shader));
-	if (!engine_shader) {
-		/* todo: cleanup the resources created above. an arena would be much helpful for that. */
-		/* todo: or maybe we can just destroy the editor object which would check for allocated objects.. yes that sounds better here. */
-		fprintf(stderr, "failed to allocate struct shader\n");
-		return EXIT_FAILURE;
+	if ((editor->font_shader = __font_renderer_create_default_shader()) == NULL) {
+		fprintf(stderr, "failed to create font shader\n");
+		return 1;
 	}
-
-	struct shader_options engine_shader_opts = {
-		DEFAULT_SHADER_OPTIONS,
-	};
-
-	if ((status = shader_init_with_options(engine_shader, engine_shader_opts, shader_category_model)) != 0) {
-		fprintf(stderr, "failed to initialize shader with opts\n");
-		return EXIT_FAILURE;
-	}
-
-	/* todo: change this to use harfbuzz engine shaders */
-	struct string *engine_vertex_shader_main;
-	struct string *engine_fragment_shader_main;
-
-	if ((engine_vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.vert")) == NULL) {
-		return EXIT_FAILURE;
-	}
-
-	if ((engine_fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.frag")) == NULL) {
-		return EXIT_FAILURE;
-	}
-
-	const char *vertex_sources[] = {
-		shader_version,
-		/* todo: preprocessor declarations */
-		engine_vertex_shader_main->data,
-
-	};
-
-	const char *fragment_sources[] = {
-		shader_version,
-		/* todo: preprocessor declarations */
-		engine_fragment_shader_main->data,
-	};
-
-	if ((status = shader_load_from_sources(engine_shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources))) != 0) {
-		fprintf(stderr, "failed to load shader\n");
-		/* todo: free up resources */
-		return EXIT_FAILURE;
-	}
-
-	string_destroy(engine_vertex_shader_main);
-	string_destroy(engine_fragment_shader_main);
 
 	return status;
 }
@@ -128,6 +79,7 @@ i8 editor_shutdown(struct editor_state *editor) {
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
 	// shader_destroy((*editor->cengine->primitives)->shader);
 	window_destroy(editor->window);
+	shader_destroy(editor->font_shader);
 	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
 
 	return status;
@@ -157,4 +109,66 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
 	(void) w;
 	(void) h;
 	fprintf(stderr, "window resized!!!\n");
+}
+
+struct shader *__font_renderer_create_default_shader() {
+	const char *vert = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.vert";
+	const char *frag = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.frag";
+
+	struct string *vert_source = string_create_from_file(vert);
+	struct string *frag_source = string_create_from_file(frag);
+	if (!vert_source || !frag_source) {
+		return NULL;
+	}
+
+	const char *vertex_main = vert_source->data;
+	const char *fragment_main = frag_source->data;
+
+	const char *version = "#version 330 core\n";
+	const char *preamble = "#define HB_GPU_DEMO_DRAW\n";
+	i8 status = 0;
+
+	const char *vert_sources[] = {
+		version,
+		preamble,
+		hb_gpu_shader_source(HB_GPU_SHADER_STAGE_VERTEX, HB_GPU_SHADER_LANG_GLSL),
+		hb_gpu_draw_shader_source(HB_GPU_SHADER_STAGE_VERTEX, HB_GPU_SHADER_LANG_GLSL),
+		vertex_main,
+	};
+
+	const char *frag_sources[] = {
+		version,
+		preamble,
+		hb_gpu_shader_source(HB_GPU_SHADER_STAGE_FRAGMENT, HB_GPU_SHADER_LANG_GLSL),
+		hb_gpu_draw_shader_source(HB_GPU_SHADER_STAGE_FRAGMENT, HB_GPU_SHADER_LANG_GLSL),
+		fragment_main,
+	};
+
+	struct shader *shader = malloc(sizeof(struct shader));
+	if (!shader) {
+		fprintf(stderr, "failed to allocate shader\n");
+		return NULL;
+	}
+
+	struct shader_options font_shader_opts = {
+		DEFAULT_SHADER_OPTIONS,
+	};
+
+	if ((status = shader_init_with_options(shader, font_shader_opts, shader_category_font)) != 0) {
+		free(shader);
+		free(vert_source);
+		free(frag_source);
+		return NULL;
+	}
+
+	if ((status = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources))) != 0) {
+		free(shader);
+		free(vert_source);
+		free(frag_source);
+		return NULL;
+	}
+
+	free(vert_source);
+	free(frag_source);
+	return shader;
 }

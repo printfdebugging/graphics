@@ -669,67 +669,6 @@ index 0000000..d050e98
 +	return 0;
 +}
 +
-+struct shader *__font_renderer_create_default_shader() {
-+	const char *vert = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.vert";
-+	const char *frag = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.frag";
-+
-+	struct string *vert_source = string_create_from_file(vert);
-+	struct string *frag_source = string_create_from_file(frag);
-+	if (!vert_source || !frag_source) {
-+		return NULL;
-+	}
-+
-+	const char *vertex_main = vert_source->data;
-+	const char *fragment_main = frag_source->data;
-+
-+	const char *version = "#version 330 core\n";
-+	const char *preamble = "#define HB_GPU_DEMO_DRAW\n";
-+	i8 status = 0;
-+
-+	const char *vert_sources[] = {
-+		version,
-+		preamble,
-+		hb_gpu_shader_source(HB_GPU_SHADER_STAGE_VERTEX, HB_GPU_SHADER_LANG_GLSL),
-+		hb_gpu_draw_shader_source(HB_GPU_SHADER_STAGE_VERTEX, HB_GPU_SHADER_LANG_GLSL),
-+		vertex_main,
-+	};
-+
-+	const char *frag_sources[] = {
-+		version,
-+		preamble,
-+		hb_gpu_shader_source(HB_GPU_SHADER_STAGE_FRAGMENT, HB_GPU_SHADER_LANG_GLSL),
-+		hb_gpu_draw_shader_source(HB_GPU_SHADER_STAGE_FRAGMENT, HB_GPU_SHADER_LANG_GLSL),
-+		fragment_main,
-+	};
-+
-+	struct shader *shader = malloc(sizeof(struct shader));
-+	if (!shader) {
-+		fprintf(stderr, "failed to allocate shader\n");
-+		return NULL;
-+	}
-+
-+	struct shader_options font_shader_opts = {
-+		DEFAULT_SHADER_OPTIONS,
-+	};
-+
-+	if ((status = shader_init_with_options(shader, font_shader_opts, shader_category_font)) != 0) {
-+		free(shader);
-+		free(vert_source);
-+		free(frag_source);
-+		return NULL;
-+	}
-+
-+	if ((status = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources))) != 0) {
-+		free(shader);
-+		free(vert_source);
-+		free(frag_source);
-+		return NULL;
-+	}
-+
-+	free(vert_source);
-+	free(frag_source);
-+	return shader;
-+}
 +
 +void __font_renderer_setup_vbo_attributes(struct font_renderer *renderer, struct shader *shader) {
 +	if (shader == NULL) {
