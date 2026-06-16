@@ -97,8 +97,8 @@ i8 window_create(struct window **window, struct window opts) {
 	DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 #endif
 
-	if (window_set_icon(&opts, opts.icon) || window_set_cursor_icon(&opts, opts.cursor, opts.cursor_size)) {
-		fprintf(stderr, "failed to set window icon or cursor icon\n");
+	if (window_set_icon(&opts, opts.icon)) {
+		fprintf(stderr, "failed to set window icon\n");
 		glfwTerminate();
 		return 5;
 	}

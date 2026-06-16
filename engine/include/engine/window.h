@@ -8,8 +8,8 @@
 #include "engine/engine.h"
 
 #define WINDOW_DEFAULTS                                 \
-	.width = 3100.0f,                               \
-	.height = 1400.0f,                              \
+	.width = 1400.0f,                               \
+	.height = 800.0f,                               \
 	.title = "floating",                            \
 	.icon = ENGINE_ASSETS_DIR "icons/logo.png",     \
 	.cursor = ENGINE_ASSETS_DIR "icons/cursor.png", \
