@@ -87,39 +87,39 @@ vec3 calc_dlt(vec3 lightdir, vec3 amb, vec3 diff, vec3 spec, vec3 _cam_dir, vec3
  * @info variables define with an '_' (underscore) at the front are normalized
  */
 void main() {
-        vec3 _normal = normalize(normal);
-        vec3 _cam_dir = normalize(cam_pos - position);
+	vec3 _normal = normalize(normal);
+	vec3 _cam_dir = normalize(cam_pos - position);
 
-        vec3 color = calc_plt(plt_pos, plt_amb, plt_diff, plt_spec, plt_att_const, plt_att_linear, plt_att_quad, _cam_dir, _normal);
-        color += calc_dlt(dlt_dir, dlt_amb, dlt_diff, dlt_spec, _cam_dir, _normal);
-        out_color = vec4(color, 1.0);
+	vec3 color = calc_plt(plt_pos, plt_amb, plt_diff, plt_spec, plt_att_const, plt_att_linear, plt_att_quad, _cam_dir, _normal);
+	color += calc_dlt(dlt_dir, dlt_amb, dlt_diff, dlt_spec, _cam_dir, _normal);
+	out_color = vec4(color, 1.0);
 }
 
 vec3 calc_plt(vec3 lightpos, vec3 amb, vec3 diff, vec3 spec, float cons, float linear, float quad, vec3 _cam_dir, vec3 _normal) {
-        vec3 _dir = normalize(lightpos - position); /* unit vector from fragment to light */
-        vec3 _reflected = normalize(reflect(-_dir, _normal));
-        float dist = distance(position, lightpos);
-        float att = 1.0 / ((cons) + (linear * dist) + (quad * (dist * dist)));
+	vec3 _dir = normalize(lightpos - position); /* unit vector from fragment to light */
+	vec3 _reflected = normalize(reflect(-_dir, _normal));
+	float dist = distance(position, lightpos);
+	float att = 1.0 / ((cons) + (linear * dist) + (quad * (dist * dist)));
 
-        float fdiff = max(dot(_dir, _normal), 0.0);
-        float fspec = pow(max(dot(_reflected, _cam_dir), 0.0f), mat_shininess);
+	float fdiff = max(dot(_dir, _normal), 0.0);
+	float fspec = pow(max(dot(_reflected, _cam_dir), 0.0f), mat_shininess);
 
-        vec3 light_amb = amb * texture(mat_diff_map, uv).rgb;
-        vec3 light_diff = diff * fdiff * texture(mat_diff_map, uv).rgb;
-        vec3 light_spec = spec * fspec * texture(mat_spec_map, uv).rgb;
+	vec3 light_amb = amb * texture(mat_diff_map, uv).rgb;
+	vec3 light_diff = diff * fdiff * texture(mat_diff_map, uv).rgb;
+	vec3 light_spec = spec * fspec * texture(mat_spec_map, uv).rgb;
 
-        return (light_amb + light_diff + light_spec) * att;
+	return (light_amb + light_diff + light_spec) * att;
 }
 
 vec3 calc_dlt(vec3 lightdir, vec3 amb, vec3 diff, vec3 spec, vec3 _cam_dir, vec3 _normal) {
-        vec3 _dir = normalize(-lightdir); /* unit vector from fragment towards light source */
-        vec3 _reflected = normalize(reflect(-_dir, _normal));
+	vec3 _dir = normalize(-lightdir); /* unit vector from fragment towards light source */
+	vec3 _reflected = normalize(reflect(-_dir, _normal));
 
-        float fdiff = max(dot(_dir, _normal), 0.0f);
-        float fspec = pow(max(dot(_reflected, _cam_dir), 0.0f), mat_shininess);
+	float fdiff = max(dot(_dir, _normal), 0.0f);
+	float fspec = pow(max(dot(_reflected, _cam_dir), 0.0f), mat_shininess);
 
-        vec3 light_amb = amb * texture(mat_diff_map, uv).rgb;
-        vec3 light_diff = diff * fdiff * texture(mat_diff_map, uv).rgb;
-        vec3 light_spec = spec * fspec * texture(mat_spec_map, uv).rgb;
-        return (light_amb + light_diff + light_spec);
+	vec3 light_amb = amb * texture(mat_diff_map, uv).rgb;
+	vec3 light_diff = diff * fdiff * texture(mat_diff_map, uv).rgb;
+	vec3 light_spec = spec * fspec * texture(mat_spec_map, uv).rgb;
+	return (light_amb + light_diff + light_spec);
 }

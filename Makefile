@@ -1,5 +1,5 @@
 run: debug
-	./build/bin/editor
+	./build/bin/game
 
 debug:
 	cmake -DCMAKE_BUILD_TYPE=Debug -B build && cmake --build build
@@ -13,7 +13,7 @@ install: clean
 
 
 reformat:
-	find engine/* projects/* -iname '*.h' -o -iname '*.c' | xargs clang-format -i
+	find engine/* projects/* -iname '*.h' -o -iname '*.c' -o -iname '*.vert' -o -iname '*.frag' | xargs clang-format -i
 
 clean:
 	rm -rf build
