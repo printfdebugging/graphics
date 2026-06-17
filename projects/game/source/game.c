@@ -147,6 +147,8 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
 i8 game_run(struct game_state *game) {
 	i8 status = 0;
+	glfwShowWindow(game->window->window);
+
 	while (!window_close(game->window)) {
 		f64 current_frame = glfwGetTime();
 		game->delta_time = current_frame - game->last_frame;
