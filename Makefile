@@ -1,5 +1,5 @@
 run: debug
-	./build/bin/game
+	./build/bin/editor
 
 debug:
 	cmake -DCMAKE_BUILD_TYPE=Debug -B build && cmake --build build
@@ -16,6 +16,13 @@ dependencies:
 
 reformat:
 	find engine/* projects/* -iname '*.h' -o -iname '*.c' -o -iname '*.vert' -o -iname '*.frag' | xargs clang-format -i
+
+windows:
+	$(if $(shell which docker),docker build .,echo "docker not found")
+
+mac:
+	# todo: spin up a docker macos container and build the application there, just to check that everything compiles atleast
+	echo "todo: test run in various docker containers"
 
 clean:
 	rm -rf build
