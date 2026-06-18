@@ -37,7 +37,7 @@ status font_init_from_file(struct font *font, const char *filepath) {
 		return status_failure;
 	}
 
-	font->atlas = malloc(sizeof(struct atlas));
+	font->atlas = calloc(1, sizeof(struct atlas));
 	if (!font->atlas) {
 		fprintf(stderr, "failed to allocate struct atlas\n");
 		font_destroy(font);

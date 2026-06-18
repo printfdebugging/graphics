@@ -19,7 +19,7 @@ static u64 string_calculate_new_capacity_for_length(u64 length) {
 }
 
 struct string *string_create(const char *data) {
-	struct string *string = malloc(sizeof(struct string));
+	struct string *string = calloc(1, sizeof(struct string));
 	if (!string) {
 		fprintf(stderr, "failed to allocate memory for struct String");
 		return NULL;
@@ -31,7 +31,7 @@ struct string *string_create(const char *data) {
 
 	string->length = strlen(data);
 	string->capacity = string_calculate_new_capacity_for_length(string->length + 1);
-	string->data = malloc(string->capacity);
+	string->data = calloc(1, string->capacity);
 
 	if (!string->data) {
 		fprintf(stderr, "failed to allocate memory for string->data\n");
@@ -62,7 +62,7 @@ struct string *string_create_from_file(const char *path) {
 	struct string *string = string_create(NULL);
 	string->length = (u64) length;
 	string->capacity = string_calculate_new_capacity_for_length(string->length + 1);
-	string->data = malloc(string->capacity);
+	string->data = calloc(1, string->capacity);
 
 	if (!string->data) {
 		fprintf(stderr, "failed to allocate memory for string->data to store file %s\n", path);
@@ -101,7 +101,7 @@ status string_append(struct string *string, const char *part) {
 	if (not_enough_space) {
 		/* expand in multiples of `DEFAULT_STRING_CAPACITY` */
 		u64 new_capacity = string_calculate_new_capacity_for_length(string->length + 1 + length + 1);
-		char *buffer = malloc(new_capacity);
+		char *buffer = calloc(1, new_capacity);
 		if (!buffer) {
 			fprintf(stderr, "failed to allocate larger buffer for string to append");
 			return status_failure;

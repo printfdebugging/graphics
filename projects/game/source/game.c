@@ -78,7 +78,7 @@ status game_initialize(struct game_state *game, int argc, char *argv[]) {
 	game->axes->shader = axes_shader;
 
 	/* todo: create a proper shader for gltf models with a lot of optional features (inside include guards) */
-	struct shader *engine_shader = malloc(sizeof(struct shader));
+	struct shader *engine_shader = calloc(1, sizeof(struct shader));
 	if (!engine_shader) {
 		/* todo: cleanup the resources created above. an arena would be much helpful for that. */
 		/* todo: or maybe we can just destroy the game object which would check for allocated objects.. yes that sounds better here. */
@@ -129,7 +129,7 @@ status game_initialize(struct game_state *game, int argc, char *argv[]) {
 	string_destroy(engine_fragment_shader_main);
 
 	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
-	game->cengine = malloc(sizeof(struct model));
+	game->cengine = calloc(1, sizeof(struct model));
 	if (!game->cengine) {
 		fprintf(stderr, "failed to allocate model\n");
 		return EXIT_FAILURE;
@@ -271,7 +271,7 @@ struct primitive *create_axes_primitive() {
 		vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (f32) LINES_ON_EACH_SIDE;
 	}
 
-	struct primitive *axes = malloc(sizeof(struct primitive));
+	struct primitive *axes = calloc(1, sizeof(struct primitive));
 	if (!axes)
 		return NULL;
 	primitive_init(axes);
@@ -287,7 +287,7 @@ struct shader *create_axes_shader() {
 		.has_normals = false,
 	};
 
-	struct shader *shader = malloc(sizeof(struct shader));
+	struct shader *shader = calloc(1, sizeof(struct shader));
 	if (!shader) {
 		fprintf(stderr, "failed to allocate struct shader\n");
 		return NULL;

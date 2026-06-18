@@ -119,7 +119,8 @@ status window_create(struct window **window, struct window opts) {
 	// glEnable(GL_BLEND);
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	*window = malloc(sizeof(struct window));
+	/* todo: move this out of this function and convert this function to an _init function */
+	*window = calloc(1, sizeof(struct window));
 	if (!*window) {
 		fprintf(stderr, "failed to initialize glad\n");
 		glfwTerminate();

@@ -37,7 +37,7 @@ status texture_load_from_file(struct texture *texture, const char *path) {
 }
 
 struct texture *texture_create() {
-	struct texture *texture = malloc(sizeof(struct texture));
+	struct texture *texture = calloc(1, sizeof(struct texture));
 	if (!texture) {
 		fprintf(stderr, "Failed to allocate memory for texture\n");
 		return NULL;

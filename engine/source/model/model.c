@@ -95,7 +95,7 @@ static char *get_image_path_from_uri(const char *model_file_path, const char *im
 	const char *last_separator = strrchr(model_file_path, '/');
 	u64 base_path_size = sizeof(char) * (u64) (last_separator - model_file_path + 1);
 	u64 image_path_size = sizeof(char) * strlen(image_uri);
-	char *image_path = malloc(base_path_size + image_path_size + 1);
+	char *image_path = calloc(1, base_path_size + image_path_size + 1);
 
 	snprintf(image_path, base_path_size, "%s", model_file_path);
 	image_path[base_path_size - 1] = '/';
@@ -124,7 +124,7 @@ static char *get_basepath(const char *filepath) {
 	u64 prefix_index = (u64) (slash - filepath);
 	u64 basepathsize = prefix_index + 2;
 
-	char *basepath = malloc(basepathsize);
+	char *basepath = calloc(1, basepathsize);
 	if (!basepath) {
 		fprintf(stderr, "failed to allocate memory for string\n");
 		return NULL;
@@ -274,7 +274,7 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 	char *basepath = get_basepath(filepath);
 
 	u64 nodes_count = data->nodes_count;
-	struct node *nodes = malloc(sizeof(struct node) * nodes_count);
+	struct node *nodes = calloc(nodes_count, sizeof(struct node));
 	if (!nodes) {
 		fprintf(stderr, "failed to allocate nodes\n");
 		free(basepath);
@@ -295,7 +295,7 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 		if (gltf_node->children_count != 0) {
 			u64 children_count = gltf_node->children_count;
 			node->children_count = children_count;
-			node->children = malloc(sizeof(struct node *) * children_count);
+			node->children = calloc(children_count, sizeof(struct node *));
 			if (!node->children) {
 				fprintf(stderr, "failed to allocate memory for node->children\n");
 				return status_failure;
@@ -326,7 +326,7 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 	}
 
 	u64 mesh_count = data->meshes_count;
-	struct mesh *meshes = malloc(sizeof(struct mesh) * mesh_count);
+	struct mesh *meshes = calloc(mesh_count, sizeof(struct mesh));
 	if (!meshes) { /* todo: call node destructor here node & node->children to be freed */
 		fprintf(stderr, "failed to allocate meshes\n");
 		free(basepath);
@@ -340,7 +340,7 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 
 		u64 primitive_count = gltf_mesh->primitives_count;
 		mesh->primitives_count = primitive_count;
-		mesh->primitives = malloc(sizeof(struct primitive) * primitive_count);
+		mesh->primitives = calloc(primitive_count, sizeof(struct primitive));
 		if (!meshes) { /* todo: cleanup properly */
 			fprintf(stderr, "failed to allocate mesh->primitives\n");
 			return status_failure;
@@ -404,7 +404,7 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 	/* load the root nodes from the scene*/
 	if (data->scene && data->scene->nodes_count != 0) {
 		u64 root_nodes_count = data->scene->nodes_count;
-		struct node **root_nodes = malloc(sizeof(struct node *) * root_nodes_count);
+		struct node **root_nodes = calloc(root_nodes_count, sizeof(struct node *));
 		if (!root_nodes) {
 			fprintf(stderr, "failed to allocate memory for root nodes\n");
 			/* todo: handle error properly, free allocated memory, an arena would make things massively simple. */
