@@ -51,7 +51,7 @@ void model_destroy(struct model *model);
  * only 'gltf' models are supported, the api is file format agnostic.
  * Returns a non-zero integer on failure to load the model.
  */
-i8 model_load_from_file(struct model *model, const char *filepath, struct shader *shader);
+status model_load_from_file(struct model *model, const char *filepath, struct shader *shader);
 /* todo: remove the shader parameter from here, it's only for testing purposes. */
 
 #endif

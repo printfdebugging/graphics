@@ -24,8 +24,8 @@ struct font {
 	u32 cached_glyph_bytes;
 };
 
-i8 font_init_from_file(struct font *font, const char *filepath);
-i8 font_lookup_glyph(struct font *font, u16 glyph_index, struct glyph_info *glyph_info);
-i8 font_destroy(struct font *font);
+status font_init_from_file(struct font *font, const char *filepath);
+status font_lookup_glyph(struct font *font, u16 glyph_index, struct glyph_info *glyph_info);
+status font_destroy(struct font *font);
 
 #endif

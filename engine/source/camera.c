@@ -7,15 +7,15 @@
 #include "engine/camera.h"
 #include "engine/core/defines.h"
 
-i8 camera_create(struct camera **camera, struct camera opts) {
+status camera_create(struct camera **camera, struct camera opts) {
 	*camera = malloc(sizeof(struct camera));
 	if (!*camera) {
 		fprintf(stderr, "failed to allocate memory for camera\n");
-		return 1;
+		return status_failure;
 	}
 
 	**camera = opts;
-	return 0;
+	return status_success;
 }
 
 void camera_process_keyboard(struct camera *camera, enum camera_direction direction, f64 delta_time) {

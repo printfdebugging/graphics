@@ -26,14 +26,14 @@ struct atlas {
 };
 
 void atlas_init(struct atlas *atlas);
-i8 atlas_create_page(struct atlas *atlas);
+status atlas_create_page(struct atlas *atlas);
 
 /** Takes in the glyph `data`, uploads it to one of the atlas `pages` and
  * then sets the `atlas_page` and `atlas_offset` values in `info`. It automatically
  * creates a new page internally if the current page doesn't have enough space
  * for the glyph `data`.
  */
-i8 atlas_upload_glyph(struct atlas *atlas, const char *data, u32 lenbytes, struct glyph_info *info);
+status atlas_upload_glyph(struct atlas *atlas, const char *data, u32 lenbytes, struct glyph_info *info);
 
 /** todo: atlas_add_glyph_primitives() */
 void atlas_destroy(struct atlas *atlas);

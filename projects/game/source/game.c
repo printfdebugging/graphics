@@ -29,8 +29,8 @@ void process_input(struct game_state *game, struct window *window, f64 delta_tim
 struct primitive *create_axes_primitive();
 struct shader *create_axes_shader();
 
-i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
-	i8 status = 0;
+status game_initialize(struct game_state *game, int argc, char *argv[]) {
+	status rc = status_success;
 	(void) argc;
 	(void) argv;
 
@@ -45,10 +45,10 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 		.bridge = &game->bridge,
 	};
 
-	if ((status = window_create(&game->window, window_options)) != 0) {
+	if (!(rc = window_create(&game->window, window_options))) {
 		/* note: we expect the error site to print the error message, so we don't do it in between */
 		/* note: only the endpoints print error messages, rest all log them */
-		return status;
+		return rc;
 	}
 
 	struct camera camera_options = {
@@ -58,8 +58,8 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 		.pitch = -30.0f,
 	};
 
-	if ((status = camera_create(&game->camera, camera_options)) != 0) {
-		return status;
+	if (!(rc = camera_create(&game->camera, camera_options))) {
+		return rc;
 	}
 
 	game->light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
@@ -90,7 +90,7 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 		DEFAULT_SHADER_OPTIONS,
 	};
 
-	if ((status = shader_init_with_options(engine_shader, engine_shader_opts, shader_category_model)) != 0) {
+	if (!(rc = shader_init_with_options(engine_shader, engine_shader_opts, shader_category_model))) {
 		fprintf(stderr, "failed to initialize shader with opts\n");
 		return EXIT_FAILURE;
 	}
@@ -119,7 +119,7 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 		engine_fragment_shader_main->data,
 	};
 
-	if ((status = shader_load_from_sources(engine_shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources))) != 0) {
+	if (!(rc = shader_load_from_sources(engine_shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources)))) {
 		fprintf(stderr, "failed to load shader\n");
 		/* todo: free up resources */
 		return EXIT_FAILURE;
@@ -137,16 +137,16 @@ i8 game_initialize(struct game_state *game, int argc, char *argv[]) {
 
 	model_init(game->cengine);
 	/* todo: decouple this, passing this here for now, for testing purposes */
-	if ((status = model_load_from_file(game->cengine, engine_asset_path, engine_shader)) != 0) {
+	if (!(rc = model_load_from_file(game->cengine, engine_asset_path, engine_shader))) {
 		fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
 		return EXIT_FAILURE;
 	}
 
-	return status;
+	return rc;
 }
 
-i8 game_run(struct game_state *game) {
-	i8 status = 0;
+status game_run(struct game_state *game) {
+	status rc = status_success;
 	glfwShowWindow(game->window->window);
 
 	while (!window_close(game->window)) {
@@ -171,11 +171,11 @@ i8 game_run(struct game_state *game) {
 		window_swap_buffers(game->window);
 	}
 
-	return status;
+	return rc;
 }
 
-i8 game_shutdown(struct game_state *game) {
-	i8 status = 0;
+status game_shutdown(struct game_state *game) {
+	status rc = status_success;
 
 	primitive_destroy(game->axes);
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
@@ -186,7 +186,7 @@ i8 game_shutdown(struct game_state *game) {
 	window_destroy(game->window);
 	/* todo: no need to destroy the game state itself, it's allocated on the stack in main */
 
-	return status;
+	return rc;
 }
 
 void input_move_point_light(struct window *window, f64 delta_time) {
@@ -293,8 +293,8 @@ struct shader *create_axes_shader() {
 		return NULL;
 	}
 
-	i8 status = 0;
-	if ((status = shader_init_with_options(shader, opts, shader_category_model)) != 0) {
+	status rc = status_success;
+	if (!(rc = shader_init_with_options(shader, opts, shader_category_model))) {
 		fprintf(stderr, "failed to initialize shader with opts\n");
 		return NULL;
 	}
@@ -323,7 +323,7 @@ struct shader *create_axes_shader() {
 		fragment_shader_main->data,
 	};
 
-	if ((status = shader_load_from_sources(shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources))) != 0) {
+	if (!(rc = shader_load_from_sources(shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources)))) {
 		fprintf(stderr, "failed to load shader\n");
 		/* todo: free up resources */
 		return NULL;

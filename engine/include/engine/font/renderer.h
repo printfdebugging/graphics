@@ -66,10 +66,10 @@ struct font_renderer {
 	b8 uploaded;
 };
 
-i8 font_renderer_init(struct font_renderer *renderer);
-i8 font_renderer_destroy(struct font_renderer *renderer);
-i8 font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text);
-i8 font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans);
+status font_renderer_init(struct font_renderer *renderer);
+status font_renderer_destroy(struct font_renderer *renderer);
+status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text);
+status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans);
 
 void glyph_vertex_print_info(struct glyph_vertex *vertex, FILE *descriptor);
 

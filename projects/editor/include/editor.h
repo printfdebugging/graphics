@@ -24,11 +24,11 @@ struct editor_state {
 };
 
 /* */
-i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]);
+status editor_initialize(struct editor_state *editor, int argc, char *argv[]);
 
 /* */
-i8 editor_run(struct editor_state *editor);
+status editor_run(struct editor_state *editor);
 /*  */
-i8 editor_shutdown(struct editor_state *editor);
+status editor_shutdown(struct editor_state *editor);
 
 #endif

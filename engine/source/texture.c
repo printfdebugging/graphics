@@ -6,7 +6,7 @@
 #include "engine/texture.h"
 #include "engine/core/defines.h"
 
-i8 texture_load_from_file(struct texture *texture, const char *path) {
+status texture_load_from_file(struct texture *texture, const char *path) {
 	i32 image_width;
 	i32 image_height;
 	i32 image_channel_count;
@@ -26,14 +26,14 @@ i8 texture_load_from_file(struct texture *texture, const char *path) {
 		fprintf(stderr, "Failed to load texture %s\n", path);
 		free(texture);
 		stbi_image_free(image_data);
-		return 1;
+		return status_failure;
 	}
 
 	if (texture_load(texture, image_data, image_width, image_height, (GLenum) image_format, GL_UNSIGNED_BYTE, image_format, GL_TRUE))
-		return 1;
+		return status_failure;
 
 	stbi_image_free(image_data);
-	return 0;
+	return status_success;
 }
 
 struct texture *texture_create() {
@@ -59,7 +59,7 @@ struct texture *texture_create_from_file(const char *path) {
 	return texture;
 }
 
-i8 texture_load(struct texture *texture, void *data, i32 width, i32 height, GLenum format, GLenum data_type, i32 internal_format, b8 generate_mipmaps) {
+status texture_load(struct texture *texture, void *data, i32 width, i32 height, GLenum format, GLenum data_type, i32 internal_format, b8 generate_mipmaps) {
 	glGenTextures(1, &texture->texture);
 	glBindTexture(GL_TEXTURE_2D, texture->texture);
 	glTexImage2D(GL_TEXTURE_2D, GL_ZERO, internal_format, width, height, GL_ZERO, format, data_type, data);
@@ -72,7 +72,7 @@ i8 texture_load(struct texture *texture, void *data, i32 width, i32 height, GLen
 	if (generate_mipmaps)
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-	return 0;
+	return status_success;
 }
 
 void texture_destroy(struct texture *texture) {

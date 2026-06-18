@@ -10,8 +10,8 @@
 #include "engine/texture.h"
 #include "engine/core/defines.h"
 
-static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type);
-static i8 gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type);
+static status gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type);
+static status gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type);
 
 /* simplify this that now we have get_basepath */
 static char *get_image_path_from_uri(const char *model_file_path, const char *image_uri);
@@ -24,66 +24,66 @@ static void accessor_point_to_data(const cgltf_accessor *accessor, void **data, 
 static char *get_basepath(const char *filepath);
 
 /* todo: get the mesh <-> primitive names right */
-static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive);
-static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath);
-static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive);
+static status gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive);
+static status gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath);
+static status gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive);
 
-static i8 gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type) {
+static status gltf_component_type_to_gl_type(GLenum *type, cgltf_component_type gltf_type) {
 	switch (gltf_type) {
 		case cgltf_component_type_r_8:
 			*type = GL_BYTE;
-			return 0;
+			return status_success;
 		case cgltf_component_type_r_8u:
 			*type = GL_UNSIGNED_BYTE;
-			return 0;
+			return status_success;
 		case cgltf_component_type_r_16:
 			*type = GL_SHORT;
-			return 0;
+			return status_success;
 		case cgltf_component_type_r_16u:
 			*type = GL_UNSIGNED_SHORT;
-			return 0;
+			return status_success;
 		case cgltf_component_type_r_32u:
 			*type = GL_UNSIGNED_INT;
-			return 0;
+			return status_success;
 		case cgltf_component_type_r_32f:
 			*type = GL_FLOAT;
-			return 0;
+			return status_success;
 		case cgltf_component_type_invalid:
 		case cgltf_component_type_max_enum:
 		default:
 			fprintf(stderr, "error: invalid gltf component type\n");
-			return 1;
+			return status_failure;
 	}
 }
 
-static i8 gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type) {
+static status gltf_primitive_type_to_gl_type(GLenum *type, cgltf_primitive_type gltf_type) {
 	switch (gltf_type) {
 		case cgltf_primitive_type_points:
 			*type = GL_POINTS;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_lines:
 			*type = GL_LINES;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_line_loop:
 			*type = GL_LINE_LOOP;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_line_strip:
 			*type = GL_LINE_STRIP;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_triangles:
 			*type = GL_TRIANGLES;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_triangle_strip:
 			*type = GL_TRIANGLE_STRIP;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_triangle_fan:
 			*type = GL_TRIANGLE_FAN;
-			return 0;
+			return status_success;
 		case cgltf_primitive_type_invalid:
 		case cgltf_primitive_type_max_enum:
 		default:
 			fprintf(stderr, "error: invalid gltf primitive type\n");
-			return 1;
+			return status_failure;
 	}
 }
 
@@ -136,7 +136,7 @@ static char *get_basepath(const char *filepath) {
 }
 
 /* separate the definition and the declaration */
-static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive) {
+static status gltf_load_primitive_attributes(struct primitive *mesh, const struct cgltf_primitive *primitive) {
 	const u64 attribute_count = primitive->attributes_count;
 	for (u64 k = 0; k < attribute_count; ++k) {
 		const cgltf_attribute *attribute = &primitive->attributes[k];
@@ -170,15 +170,15 @@ static i8 gltf_load_primitive_attributes(struct primitive *mesh, const struct cg
 			case cgltf_attribute_type_max_enum:
 			default:
 				fprintf(stderr, "attribute type not handled: %i\n", attribute->type);
-				return 1;
+				return status_failure;
 		}
 	}
-	return 0;
+	return status_success;
 }
 
-static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath) {
+static status gltf_load_primitive_material(struct primitive *mesh, const cgltf_primitive *primitive, const char *basepath) {
 	cgltf_material *material = primitive->material;
-	i8 status = 0;
+	status rc = status_success;
 	if (material->pbr_metallic_roughness.base_color_texture.texture) {
 		// material->pbr_metallic_roughness.base_color_texture
 
@@ -200,30 +200,30 @@ static i8 gltf_load_primitive_material(struct primitive *mesh, const cgltf_primi
 			/* note: textures should be stored globally, indentified by
 			 * their filepath so that we don't create multiple textures
 			 * for the same texture. */
-			if ((status = texture_load_from_file(mesh->textures[mesh->texture_count - 1], image_path))) {
+			if (!(rc = texture_load_from_file(mesh->textures[mesh->texture_count - 1], image_path))) {
 				fprintf(stderr, "failed to load texture from file: %s\n", image_path);
 				/* handle error, free memory etc */
-				return status;
+				return rc;
 			}
 			free((void *) image_path);
 		}
 	}
-	return status;
+	return rc;
 }
 
-static i8 gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive) {
+static status gltf_load_primitive_indices(struct primitive *mesh, const cgltf_primitive *primitive) {
 	void *index_data = NULL;
 	u64 count = 0, stride = 0;
 	GLenum type;
-	i8 status;
+	status rc = status_success;
 
-	if ((status = gltf_component_type_to_gl_type(&type, primitive->indices->component_type)) != 0) {
-		return status;
+	if (!(rc = gltf_component_type_to_gl_type(&type, primitive->indices->component_type))) {
+		return rc;
 	}
 
 	accessor_point_to_data(primitive->indices, &index_data, &count, &stride);
 	primitive_load_indices(mesh, index_data, (u32) count, type, (i32) stride);
-	return 0;
+	return rc;
 }
 
 void model_init(struct model *model) {
@@ -250,11 +250,13 @@ void model_destroy(struct model *model) {
 	free(model);
 }
 
-i8 model_load_from_file(struct model *model, const char *filepath, struct shader *shader) {
+status model_load_from_file(struct model *model, const char *filepath, struct shader *shader) {
 	cgltf_data *data = NULL;
 	const cgltf_options options = { 0 };
 	cgltf_result result;
-	i8 status = 0;
+
+	/* todo: use status value in the following calls and subcalls*/
+	status rc = status_success;
 
 	result = cgltf_parse_file(&options, filepath, &data);
 	if (result != cgltf_result_success) {
@@ -277,7 +279,7 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 		fprintf(stderr, "failed to allocate nodes\n");
 		free(basepath);
 		cgltf_free(data);
-		return 1;
+		return status_failure;
 	}
 
 	for (u64 node_index = 0; node_index < nodes_count; ++node_index) {
@@ -296,7 +298,7 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 			node->children = malloc(sizeof(struct node *) * children_count);
 			if (!node->children) {
 				fprintf(stderr, "failed to allocate memory for node->children\n");
-				return 1;
+				return status_failure;
 			}
 
 			for (u64 child_index = 0; child_index < children_count; ++child_index) {
@@ -328,7 +330,7 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 	if (!meshes) { /* todo: call node destructor here node & node->children to be freed */
 		fprintf(stderr, "failed to allocate meshes\n");
 		free(basepath);
-		return 1;
+		return status_failure;
 	}
 
 	for (u64 mesh_index = 0; mesh_index < mesh_count; ++mesh_index) {
@@ -341,7 +343,7 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 		mesh->primitives = malloc(sizeof(struct primitive) * primitive_count);
 		if (!meshes) { /* todo: cleanup properly */
 			fprintf(stderr, "failed to allocate mesh->primitives\n");
-			return 1;
+			return status_failure;
 		}
 
 		for (u64 primitive_index = 0; primitive_index < primitive_count; ++primitive_index) {
@@ -353,28 +355,28 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 			primitive->shader = shader;
 
 			if (gltf_primitive->type) {
-				if ((status = gltf_primitive_type_to_gl_type(&primitive->draw_mode, gltf_primitive->type))) {
+				if (!(rc = gltf_primitive_type_to_gl_type(&primitive->draw_mode, gltf_primitive->type))) {
 					/* todo: with arena, freeing up this memory would be easy */
-					return status;
+					return rc;
 				}
 			}
 
 			if (gltf_primitive->indices) {
-				if ((status = gltf_load_primitive_indices(primitive, gltf_primitive))) {
+				if (!(rc = gltf_load_primitive_indices(primitive, gltf_primitive))) {
 					/* todo: with arena, freeing up this memory would be easy */
-					return status;
+					return rc;
 				}
 			}
 
 			/* todo: to a separate material loader function */
 			if (gltf_primitive->material) {
-				if ((status = gltf_load_primitive_material(primitive, gltf_primitive, basepath))) {
-					return status;
+				if (!(rc = gltf_load_primitive_material(primitive, gltf_primitive, basepath))) {
+					return rc;
 				}
 			}
 
-			if ((status = gltf_load_primitive_attributes(primitive, gltf_primitive))) {
-				return status;
+			if (!(rc = gltf_load_primitive_attributes(primitive, gltf_primitive))) {
+				return rc;
 			}
 		}
 	}
@@ -406,7 +408,7 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 		if (!root_nodes) {
 			fprintf(stderr, "failed to allocate memory for root nodes\n");
 			/* todo: handle error properly, free allocated memory, an arena would make things massively simple. */
-			return 1;
+			return status_failure;
 		}
 
 		/* clear the garbage values */
@@ -437,5 +439,5 @@ i8 model_load_from_file(struct model *model, const char *filepath, struct shader
 	}
 
 	cgltf_free(data);
-	return 0;
+	return status_success;
 }

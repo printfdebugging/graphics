@@ -19,8 +19,8 @@ struct texture {
  * this api should explicitly do that. we remove this soon... */
 struct texture *texture_create();
 struct texture *texture_create_from_file(const char *path);
-i8 texture_load(struct texture *texture, void *data, i32 width, i32 height, GLenum format, GLenum data_type, i32 internal_format, b8 generate_mipmaps);
-i8 texture_load_from_file(struct texture *texture, const char *path);
+status texture_load(struct texture *texture, void *data, i32 width, i32 height, GLenum format, GLenum data_type, i32 internal_format, b8 generate_mipmaps);
+status texture_load_from_file(struct texture *texture, const char *path);
 void texture_destroy(struct texture *texture);
 
 /* note that we don't have wrappers for binding textures to various texture

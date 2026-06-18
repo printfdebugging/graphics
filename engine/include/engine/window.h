@@ -34,10 +34,10 @@ struct window {
 	struct bridge *bridge;
 };
 
-i8 window_create(struct window **window, struct window window_options);
-i8 window_set_icon(struct window *window, const char *path);
-i8 window_set_cursor_icon(struct window *window, const char *path, i32 size);
-i8 window_close(struct window *window);
+status window_create(struct window **window, struct window window_options);
+status window_set_icon(struct window *window, const char *path);
+status window_set_cursor_icon(struct window *window, const char *path, i32 size);
+status window_close(struct window *window);
 
 void window_set_clear_color(struct window *window, vec4s color);
 void window_process_input(struct window *window);

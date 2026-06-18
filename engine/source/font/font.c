@@ -6,13 +6,13 @@
 #include "engine/font/font.h"
 #include "engine/font/atlas.h"
 
-static i8 __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_info *info);
+static status __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_info *info);
 
-i8 font_init_from_file(struct font *font, const char *filepath) {
+status font_init_from_file(struct font *font, const char *filepath) {
 	hb_blob_t *hb_blob = hb_blob_create_from_file(filepath);
 	if (!hb_blob) {
 		fprintf(stderr, "failed to read font file from path: %s\n", filepath);
-		return 1;
+		return status_failure;
 	}
 
 	font->face = hb_face_create(hb_blob, 0);
@@ -20,70 +20,70 @@ i8 font_init_from_file(struct font *font, const char *filepath) {
 		fprintf(stderr, "failed to create face from font blob\n");
 		hb_blob_destroy(hb_blob);
 		font_destroy(font);
-		return 1;
+		return status_failure;
 	}
 
 	font->font = hb_font_create(font->face);
 	if (!font->font) {
 		fprintf(stderr, "failed to create font from face\n");
 		font_destroy(font);
-		return 1;
+		return status_failure;
 	}
 
 	font->draw = hb_gpu_draw_create_or_fail();
 	if (!font->draw) {
 		fprintf(stderr, "failed to create gpu shape encoder\n");
 		font_destroy(font);
-		return 1;
+		return status_failure;
 	}
 
 	font->atlas = malloc(sizeof(struct atlas));
 	if (!font->atlas) {
 		fprintf(stderr, "failed to allocate struct atlas\n");
 		font_destroy(font);
-		return 1;
+		return status_failure;
 	}
 
 	atlas_init(font->atlas);
 
-	i8 status = 0;
-	if ((status = atlas_create_page(font->atlas)) != 0) {
+	status rc = status_success;
+	if (!(rc = atlas_create_page(font->atlas))) {
 		font_destroy(font);
-		return status;
+		return rc;
 	}
 
 	font->glyph_cache = calloc(U16_MAX, sizeof(struct glyph_info));
 	if (!font->glyph_cache) {
 		fprintf(stderr, "failed to allocate struct glyph_info array\n");
 		font_destroy(font);
-		return 1;
+		return status_failure;
 	}
 
 	font->cached_glyph_bytes = 0;
 	font->cached_glyph_count = 0;
-	return status;
+	return rc;
 }
 
-i8 font_lookup_glyph(struct font *font, u16 glyph_index, struct glyph_info *glyph_info) {
+status font_lookup_glyph(struct font *font, u16 glyph_index, struct glyph_info *glyph_info) {
 	struct glyph_info *info = &font->glyph_cache[glyph_index];
-	i8 status = 0;
+	status rc = status_success;
 
 	if (info->cached == true) {
 		*glyph_info = *info;
-		return status;
+		return rc;
 	}
 
 	/* note: this sets the `cached` flag to true on success. */
-	if ((status = __font_upload_glyph(font, glyph_index, info)) != 0) {
+	if (!(rc = __font_upload_glyph(font, glyph_index, info))) {
 		fprintf(stderr, "failed to upload glyph to cache\n");
-		return status;
+		return rc;
 	}
 
 	*glyph_info = *info;
-	return status;
+	return rc;
 }
 
-static i8 __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_info *info) {
+static status __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_info *info) {
 	i32 xscale, yscale;
 	hb_blob_t *blob;
 	hb_glyph_extents_t extents = {};
@@ -105,13 +105,13 @@ static i8 __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_i
 		.cached = true,
 	};
 
-	i8 status = 0;
+	status rc = status_success;
 	if (!info->empty) {
 		const char *data = hb_blob_get_data(blob, NULL);
-		status = atlas_upload_glyph(font->atlas, data, length, info);
-		if (status != 0) {
+		rc = atlas_upload_glyph(font->atlas, data, length, info);
+		if (rc != status_success) {
 			hb_gpu_draw_recycle_blob(font->draw, blob);
-			return status;
+			return rc;
 		}
 	}
 
@@ -119,10 +119,10 @@ static i8 __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_i
 	font->cached_glyph_bytes += length;
 	hb_gpu_draw_recycle_blob(font->draw, blob);
 
-	return status;
+	return rc;
 }
 
-i8 font_destroy(struct font *font) {
+status font_destroy(struct font *font) {
 	if (font->face)
 		hb_face_destroy(font->face);
 	if (font->font)

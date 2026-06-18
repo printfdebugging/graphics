@@ -48,22 +48,22 @@ static void __window_mouse_move_callback(GLFWwindow *window, f64 x, f64 y) {
 	_window->bridge->mouse_move(_window->bridge, _window, x, y);
 }
 
-i8 window_create(struct window **window, struct window opts) {
+status window_create(struct window **window, struct window opts) {
 	if (opts.window) {
 		/* after this, who will own the window.window if it exists? */
 		/* for now we don't do anything and don't allow that */
-		return 1;
+		return status_failure;
 	}
 
 	if (!opts.bridge) {
 		fprintf(stderr, "opts.bridge is required to create a window");
-		return 1;
+		return status_failure;
 	}
 
 	if (!glfwInit()) {
 		fprintf(stderr, "failed to initialize glfw");
 		/* todo: another type of error, failed to initialize internal library, we need an enum for that */
-		return 2;
+		return status_failure;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -81,14 +81,14 @@ i8 window_create(struct window **window, struct window opts) {
 	if (!opts.window) {
 		fprintf(stderr, "failed to create glfw winodw\n");
 		glfwTerminate();
-		return 3;
+		return status_failure;
 	}
 
 	glfwMakeContextCurrent(opts.window);
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
 		fprintf(stderr, "failed to initialize glad\n");
 		glfwTerminate();
-		return 4;
+		return status_failure;
 	}
 
 	/* use a dark titlebar on windows in dark mode. */
@@ -98,10 +98,10 @@ i8 window_create(struct window **window, struct window opts) {
 	DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
 #endif
 
-	if (window_set_icon(&opts, opts.icon)) {
+	if (!window_set_icon(&opts, opts.icon)) {
 		fprintf(stderr, "failed to set window icon\n");
 		glfwTerminate();
-		return 5;
+		return status_failure;
 	}
 
 	glfwSetInputMode(opts.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -123,7 +123,7 @@ i8 window_create(struct window **window, struct window opts) {
 	if (!*window) {
 		fprintf(stderr, "failed to initialize glad\n");
 		glfwTerminate();
-		return 6;
+		return status_failure;
 	}
 
 	/* todo: clean this up a bit, it's confusing/complicated */
@@ -133,7 +133,7 @@ i8 window_create(struct window **window, struct window opts) {
 	glfwSetFramebufferSizeCallback(opts.window, __window_frame_buffer_resize_callback);
 
 	**window = opts;
-	return 0;
+	return status_success;
 }
 
 void window_set_clear_color(struct window *window, vec4s color) {
@@ -166,40 +166,40 @@ void window_destroy(struct window *window) {
 	free(window);
 }
 
-i8 window_close(struct window *window) {
+status window_close(struct window *window) {
 	if (!window->window)
-		return GL_TRUE;
-	return (i8) glfwWindowShouldClose(window->window);
+		return status_success;
+	return (status) glfwWindowShouldClose(window->window);
 }
 
-i8 window_set_icon(struct window *window, const char *path) {
+status window_set_icon(struct window *window, const char *path) {
 	GLFWimage image;
 	int image_channel_count;
 	image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
 	if (!image.pixels) {
 		fprintf(stderr, "failed to read window icon: %s", path);
-		return 1;
+		return status_failure;
 	}
 
 	glfwSetWindowIcon(window->window, 1, &image);
 	window->icon = path;
 
 	stbi_image_free(image.pixels);
-	return 0;
+	return status_success;
 }
 
-i8 window_set_cursor_icon(struct window *window, const char *path, i32 size) {
+status window_set_cursor_icon(struct window *window, const char *path, i32 size) {
 	GLFWimage image;
 	int image_channel_count;
 	image.pixels = stbi_load(path, &image.width, &image.height, &image_channel_count, 0);
 	if (!image.pixels) {
 		fprintf(stderr, "failed to read window icon: %s", path);
-		return 1;
+		return status_failure;
 	}
 
 	GLFWcursor *cursor = glfwCreateCursor(&image, size, size);
 	glfwSetCursor(window->window, cursor);
 
 	stbi_image_free(image.pixels);
-	return 0;
+	return status_success;
 }

@@ -26,11 +26,11 @@ struct game_state {
 };
 
 /* */
-i8 game_initialize(struct game_state *game, int argc, char *argv[]);
+status game_initialize(struct game_state *game, int argc, char *argv[]);
 
 /* */
-i8 game_run(struct game_state *game);
+status game_run(struct game_state *game);
 /*  */
-i8 game_shutdown(struct game_state *game);
+status game_shutdown(struct game_state *game);
 
 #endif

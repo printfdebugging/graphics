@@ -18,10 +18,10 @@ void atlas_init(struct atlas *atlas) {
 	}
 }
 
-i8 atlas_create_page(struct atlas *atlas) {
+status atlas_create_page(struct atlas *atlas) {
 	if (MAX_TEXTURE_COUNT <= atlas->used_pages_count) {
 		fprintf(stderr, "atlas has already used all it's pages\n");
-		return 1;
+		return status_failure;
 	}
 
 	atlas->used_pages_count++;
@@ -52,18 +52,18 @@ i8 atlas_create_page(struct atlas *atlas) {
 		.initialized = initialized,
 	};
 
-	return 0;
+	return status_success;
 }
 
-i8 atlas_upload_glyph(struct atlas *atlas, const char *data, u32 lenbytes, struct glyph_info *info) {
-	i8 status = 0;
+status atlas_upload_glyph(struct atlas *atlas, const char *data, u32 lenbytes, struct glyph_info *info) {
+	status rc = status_success;
 	u32 current_page_index = atlas->used_pages_count - 1;
 	struct atlas_page *current_page = &atlas->pages[current_page_index];
 
 	b8 page_out_of_capacity = (current_page->capacity - current_page->cursor) < lenbytes;
 	if (page_out_of_capacity) {
-		if ((status = atlas_create_page(atlas)) != 0)
-			return status;
+		if (!(rc = atlas_create_page(atlas)))
+			return rc;
 		current_page_index++;
 		current_page = &atlas->pages[current_page_index];
 	}
@@ -76,7 +76,7 @@ i8 atlas_upload_glyph(struct atlas *atlas, const char *data, u32 lenbytes, struc
 	info->atlas_offset = current_page->cursor;
 	current_page->cursor += lenbytes;
 
-	return 0;
+	return status_success;
 }
 
 void atlas_destroy(struct atlas *atlas) {

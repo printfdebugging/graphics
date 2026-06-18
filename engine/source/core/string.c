@@ -88,10 +88,10 @@ struct string *string_create_from_file(const char *path) {
 	return string;
 }
 
-i8 string_append(struct string *string, const char *part) {
+status string_append(struct string *string, const char *part) {
 	if (!part) {
 		fprintf(stderr, "cannot append NULL to string\n");
-		return 1;
+		return status_failure;
 	}
 
 	u64 length = strlen(part);
@@ -104,7 +104,7 @@ i8 string_append(struct string *string, const char *part) {
 		char *buffer = malloc(new_capacity);
 		if (!buffer) {
 			fprintf(stderr, "failed to allocate larger buffer for string to append");
-			return 1;
+			return status_failure;
 		}
 
 		if (string->data) {
@@ -122,17 +122,17 @@ i8 string_append(struct string *string, const char *part) {
 	string->length = string->length + 1 + length;
 	// todo: see if we need to separate the \0 termination logic
 
-	return 0;
+	return status_success;
 }
 
-i8 string_append_file(struct string *string, const char *path) {
+status string_append_file(struct string *string, const char *path) {
 	struct string *file_contents = string_create_from_file(path);
 	if (!file_contents)
-		return 1;
+		return status_failure;
 
-	i8 status = string_append(string, file_contents->data);
+	status rc = string_append(string, file_contents->data);
 	string_destroy(file_contents);
-	return status;
+	return rc;
 }
 
 void string_destroy(struct string *string) {

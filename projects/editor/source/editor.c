@@ -24,8 +24,8 @@ void process_input(struct editor_state *editor, struct window *window, f64 delta
 
 struct shader *__font_renderer_create_default_shader();
 
-i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
-	i8 status = 0;
+status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
+	status rc = status_success;
 	(void) argc;
 	(void) argv;
 
@@ -40,10 +40,8 @@ i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		.bridge = &editor->bridge,
 	};
 
-	if ((status = window_create(&editor->window, window_options)) != 0) {
-		/* note: we expect the error site to print the error message, so we don't do it in between */
-		/* note: only the endpoints print error messages, rest all log them */
-		return status;
+	if (!(rc = window_create(&editor->window, window_options))) {
+		return rc;
 	}
 
 	if ((editor->font_shader = __font_renderer_create_default_shader()) == NULL) {
@@ -58,7 +56,7 @@ i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	}
 
 	const char *path = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	if ((status = font_init_from_file(editor->font, path)) != 0) {
+	if (!(rc = font_init_from_file(editor->font, path))) {
 		fprintf(stderr, "failed to initialize font\n");
 		return EXIT_FAILURE;
 	}
@@ -69,12 +67,12 @@ i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	if ((status = font_renderer_init(editor->font_renderer)) != 0) {
+	if (!(rc = font_renderer_init(editor->font_renderer))) {
 		fprintf(stderr, "failed to initialize font renderer\n");
 		return EXIT_FAILURE;
 	}
 
-	if ((status = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz")) != 0) {
+	if (!(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
 		fprintf(stderr, "failed to load text in font renderer\n");
 		return EXIT_FAILURE;
 	}
@@ -84,11 +82,11 @@ i8 editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	__font_renderer_upload_to_gpu(editor->font_renderer);
 	__font_renderer_setup_vbo_attributes(editor->font_renderer, editor->font_shader);
 
-	return status;
+	return rc;
 }
 
-i8 editor_run(struct editor_state *editor) {
-	i8 status = 0;
+status editor_run(struct editor_state *editor) {
+	status rc = status_success;
 	glfwShowWindow(editor->window->window);
 
 	while (!window_close(editor->window)) {
@@ -117,11 +115,11 @@ i8 editor_run(struct editor_state *editor) {
 		window_swap_buffers(editor->window);
 	}
 
-	return status;
+	return rc;
 }
 
-i8 editor_shutdown(struct editor_state *editor) {
-	i8 status = 0;
+status editor_shutdown(struct editor_state *editor) {
+	status rc = status_success;
 
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
 	// shader_destroy((*editor->cengine->primitives)->shader);
@@ -129,7 +127,7 @@ i8 editor_shutdown(struct editor_state *editor) {
 	shader_destroy(editor->font_shader);
 	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
 
-	return status;
+	return rc;
 }
 
 void process_input(struct editor_state *editor, struct window *window, f64 delta_time) {
@@ -174,7 +172,7 @@ struct shader *__font_renderer_create_default_shader() {
 
 	const char *version = "#version 330 core\n";
 	const char *preamble = "#define HB_GPU_DEMO_DRAW\n";
-	i8 status = 0;
+	status rc = status_success;
 
 	const char *vert_sources[] = {
 		version,
@@ -202,14 +200,14 @@ struct shader *__font_renderer_create_default_shader() {
 		DEFAULT_SHADER_OPTIONS,
 	};
 
-	if ((status = shader_init_with_options(shader, font_shader_opts, shader_category_font)) != 0) {
+	if (!(rc = shader_init_with_options(shader, font_shader_opts, shader_category_font))) {
 		free(shader);
 		free(vert_source);
 		free(frag_source);
 		return NULL;
 	}
 
-	if ((status = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources))) != 0) {
+	if (!(rc = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources)))) {
 		free(shader);
 		free(vert_source);
 		free(frag_source);

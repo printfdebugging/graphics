@@ -13,7 +13,7 @@
 /* todo: think about the api/organization/malloc/free later,
  * first we need to have some font rendered on the screen, design
  * and organization comes after that. */
-i8 font_renderer_init(struct font_renderer *renderer) {
+status font_renderer_init(struct font_renderer *renderer) {
 	renderer->vertices = NULL;
 	renderer->vertices_count = 0;
 
@@ -30,10 +30,10 @@ i8 font_renderer_init(struct font_renderer *renderer) {
 
 	renderer->initialized = true;
 	renderer->uploaded = false;
-	return 0;
+	return status_success;
 }
 
-i8 font_renderer_destroy(struct font_renderer *renderer) {
+status font_renderer_destroy(struct font_renderer *renderer) {
 	if (renderer->vertices)
 		free(renderer->vertices);
 
@@ -43,7 +43,7 @@ i8 font_renderer_destroy(struct font_renderer *renderer) {
 	return 0;
 }
 
-i8 font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text) {
+status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text) {
 	hb_buffer_t *buffer = hb_buffer_create();
 	/* note: todo: the text data structure should have these properties. */
 	/* note: think about parallelising this later when you have an editor and it's data structures up and running and some basic rendering going on */
@@ -63,16 +63,16 @@ i8 font_renderer_load_text(struct font_renderer *renderer, struct font *font, co
 	/* note: we send 6 vertices per glyph i.e. 2 triangles */
 	if (!renderer->vertices) {
 		fprintf(stderr, "failed to allocate renderer->vertices\n");
-		return 1;
+		return status_failure;
 	}
 
 	/* this is the draw cursor or something? not sure */
 	struct point position = { .x = 0, .y = 400 };
-	i8 status = 0;
+	status rc = status_success;
 	for (u32 glyph_index = 0; glyph_index < glyph_count; ++glyph_index) {
 		hb_codepoint_t glyphid = glyph_info[glyph_index].codepoint;
 		struct glyph_info info;
-		if ((status = font_lookup_glyph(font, (u16) glyphid, &info) != 0)) {
+		if (!(rc = font_lookup_glyph(font, (u16) glyphid, &info))) {
 			fprintf(stderr, "failed to lookup glyph at index: %i\n", glyphid);
 			continue;
 		}
@@ -122,10 +122,10 @@ i8 font_renderer_load_text(struct font_renderer *renderer, struct font *font, co
 		position.y += scale * glyph_positions[glyph_index].y_advance;
 	}
 
-	return 0;
+	return status_success;
 }
 
-i8 font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans) {
+status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans) {
 	if (!renderer->uploaded || !renderer->initialized) {
 		fprintf(stderr, "renderer either not initialized or data not uploaded to gpu\n");
 	}

@@ -32,8 +32,8 @@ struct string *string_create_from_file(const char *path);
  * this function doesn't free part (infact it assumes part
  * to be stack allocated).
  */
-i8 string_append(struct string *string, const char *part);
-i8 string_append_file(struct string *string, const char *path);
+status string_append(struct string *string, const char *part);
+status string_append_file(struct string *string, const char *path);
 void string_destroy(struct string *string);
 
 #endif
