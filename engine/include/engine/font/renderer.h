@@ -73,8 +73,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 
 void glyph_vertex_print_info(struct glyph_vertex *vertex, FILE *descriptor);
 
-struct shader *__font_renderer_create_default_shader();
-void __font_renderer_setup_vbo_attributes(struct font_renderer *renderer, struct shader *shader);
-void __font_renderer_upload_to_gpu(struct font_renderer *renderer);
+void font_renderer_setup_quad_locations(struct font_renderer *renderer, struct shader *shader);
+void font_renderer_upload_to_gpu(struct font_renderer *renderer);
 
 #endif

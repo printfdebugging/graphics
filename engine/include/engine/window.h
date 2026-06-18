@@ -34,7 +34,7 @@ struct window {
 	struct bridge *bridge;
 };
 
-status window_create(struct window **window, struct window window_options);
+status window_init(struct window *window, struct window window_options);
 status window_set_icon(struct window *window, const char *path);
 status window_set_cursor_icon(struct window *window, const char *path, i32 size);
 status window_close(struct window *window);

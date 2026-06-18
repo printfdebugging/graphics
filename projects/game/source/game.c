@@ -45,7 +45,12 @@ status game_initialize(struct game_state *game, int argc, char *argv[]) {
 		.bridge = &game->bridge,
 	};
 
-	if (!(rc = window_create(&game->window, window_options))) {
+	if (!(game->window = calloc(1, sizeof(struct window)))) {
+		fprintf(stderr, "failed to allocate memory for window\n");
+		rc = status_failure;
+	}
+
+	if (!(rc = window_init(game->window, window_options))) {
 		/* note: we expect the error site to print the error message, so we don't do it in between */
 		/* note: only the endpoints print error messages, rest all log them */
 		return rc;

@@ -22,7 +22,7 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h);
  * explicitly in the main loop maybe there's another way, let's ask nitrix later */
 void process_input(struct editor_state *editor, struct window *window, f64 delta_time);
 
-struct shader *__font_renderer_create_default_shader();
+status font_renderer_init_default_shader(struct shader *shader);
 
 status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	status rc = status_success;
@@ -35,53 +35,44 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		.window_resize = window_resize,
 	};
 
+	if (!(editor->window = calloc(1, sizeof(struct window))) ||
+	    !(editor->font = calloc(1, sizeof(struct font))) ||
+	    !(editor->font_shader = calloc(1, sizeof(struct shader))) ||
+	    !(editor->font_renderer = calloc(1, sizeof(struct font_renderer)))) {
+		fprintf(stderr, "failed to allocate memory for editor\n");
+		rc = status_failure;
+		goto cleanup;
+	}
+
 	struct window window_options = {
 		WINDOW_DEFAULTS,
 		.bridge = &editor->bridge,
 	};
 
-	if (!(rc = window_create(&editor->window, window_options))) {
-		return rc;
-	}
-
-	if ((editor->font_shader = __font_renderer_create_default_shader()) == NULL) {
-		fprintf(stderr, "failed to create font shader\n");
-		return 1;
-	}
-
-	editor->font = calloc(1, sizeof(struct font));
-	if (!editor->font) {
-		fprintf(stderr, "failed to allocate struct font\n");
-		return EXIT_FAILURE;
+	if (!(rc = window_init(editor->window, window_options))) {
+		fprintf(stderr, "failed to init editor window\n");
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	const char *path = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	if (!(rc = font_init_from_file(editor->font, path))) {
-		fprintf(stderr, "failed to initialize font\n");
-		return EXIT_FAILURE;
-	}
-
-	editor->font_renderer = calloc(1, sizeof(struct font_renderer));
-	if (!editor->font_renderer) {
-		fprintf(stderr, "failed to allocate struct font_renderer\n");
-		return EXIT_FAILURE;
-	}
-
-	if (!(rc = font_renderer_init(editor->font_renderer))) {
-		fprintf(stderr, "failed to initialize font renderer\n");
-		return EXIT_FAILURE;
-	}
-
-	if (!(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
-		fprintf(stderr, "failed to load text in font renderer\n");
-		return EXIT_FAILURE;
+	if (!(rc = font_init_from_file(editor->font, path)) ||
+	    !(rc = font_renderer_init(editor->font_renderer)) ||
+	    !(rc = font_renderer_init_default_shader(editor->font_shader)) ||
+	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
+		fprintf(stderr, "failed to initialize font rendering infrastructure\n");
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	shader_use(editor->font_shader);
+	font_renderer_upload_to_gpu(editor->font_renderer);
+	font_renderer_setup_quad_locations(editor->font_renderer, editor->font_shader);
 
-	__font_renderer_upload_to_gpu(editor->font_renderer);
-	__font_renderer_setup_vbo_attributes(editor->font_renderer, editor->font_shader);
+	return rc;
 
+cleanup:
+	editor_shutdown(editor);
 	return rc;
 }
 
@@ -157,22 +148,25 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
 	fprintf(stderr, "window resized!!!\n");
 }
 
-struct shader *__font_renderer_create_default_shader() {
+status font_renderer_init_default_shader(struct shader *shader) {
 	const char *vert = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.vert";
 	const char *frag = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.frag";
 
-	struct string *vert_source = string_create_from_file(vert);
-	struct string *frag_source = string_create_from_file(frag);
-	if (!vert_source || !frag_source) {
-		return NULL;
-	}
+	struct string *vert_source = NULL;
+	struct string *frag_source = NULL;
+	status rc = status_success;
+
+	if (!(vert_source = string_create_from_file(vert)) ||
+	    !(frag_source = string_create_from_file(frag))) {
+		fprintf(stderr, "failed to read shader files\n");
+		rc = status_failure;
+		goto cleanup;
+	};
 
 	const char *vertex_main = vert_source->data;
 	const char *fragment_main = frag_source->data;
-
 	const char *version = "#version 330 core\n";
 	const char *preamble = "#define HB_GPU_DEMO_DRAW\n";
-	status rc = status_success;
 
 	const char *vert_sources[] = {
 		version,
@@ -190,31 +184,18 @@ struct shader *__font_renderer_create_default_shader() {
 		fragment_main,
 	};
 
-	struct shader *shader = calloc(1, sizeof(struct shader));
-	if (!shader) {
-		fprintf(stderr, "failed to allocate shader\n");
-		return NULL;
-	}
-
 	struct shader_options font_shader_opts = {
 		DEFAULT_SHADER_OPTIONS,
 	};
 
-	if (!(rc = shader_init_with_options(shader, font_shader_opts, shader_category_font))) {
-		free(shader);
-		free(vert_source);
-		free(frag_source);
-		return NULL;
+	if (!(rc = shader_init_with_options(shader, font_shader_opts, shader_category_font)) ||
+	    !(rc = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources)))) {
+		rc = status_failure;
+		goto cleanup;
 	}
 
-	if (!(rc = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources)))) {
-		free(shader);
-		free(vert_source);
-		free(frag_source);
-		return NULL;
-	}
-
-	free(vert_source);
-	free(frag_source);
-	return shader;
+cleanup:
+	string_destroy(vert_source);
+	string_destroy(frag_source);
+	return rc;
 }

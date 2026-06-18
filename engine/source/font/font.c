@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "engine/core/defines.h"
 #include "hb.h"
 
 #include "engine/font/font.h"
@@ -9,58 +10,37 @@
 static status __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_info *info);
 
 status font_init_from_file(struct font *font, const char *filepath) {
-	hb_blob_t *hb_blob = hb_blob_create_from_file(filepath);
-	if (!hb_blob) {
-		fprintf(stderr, "failed to read font file from path: %s\n", filepath);
-		return status_failure;
+	hb_blob_t *hb_blob = NULL;
+	status rc = status_success;
+
+	if (!(hb_blob = hb_blob_create_from_file(filepath)) ||
+	    !(font->face = hb_face_create(hb_blob, 0)) ||
+	    !(font->font = hb_font_create(font->face)) ||
+	    !(font->draw = hb_gpu_draw_create_or_fail())) {
+		fprintf(stderr, "failed to read/initialize font file from path: %s\n", filepath);
+		rc = status_failure;
+		goto cleanup;
 	}
 
-	font->face = hb_face_create(hb_blob, 0);
-	if (!font->face) {
-		fprintf(stderr, "failed to create face from font blob\n");
-		hb_blob_destroy(hb_blob);
-		font_destroy(font);
-		return status_failure;
-	}
-
-	font->font = hb_font_create(font->face);
-	if (!font->font) {
-		fprintf(stderr, "failed to create font from face\n");
-		font_destroy(font);
-		return status_failure;
-	}
-
-	font->draw = hb_gpu_draw_create_or_fail();
-	if (!font->draw) {
-		fprintf(stderr, "failed to create gpu shape encoder\n");
-		font_destroy(font);
-		return status_failure;
-	}
-
-	font->atlas = calloc(1, sizeof(struct atlas));
-	if (!font->atlas) {
-		fprintf(stderr, "failed to allocate struct atlas\n");
-		font_destroy(font);
-		return status_failure;
+	if (!(font->atlas = calloc(1, sizeof(struct atlas))) ||
+	    !(font->glyph_cache = calloc(U16_MAX, sizeof(struct glyph_info)))) {
+		fprintf(stderr, "failed to allocate memory\n");
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	atlas_init(font->atlas);
-
-	status rc = status_success;
-	if (!(rc = atlas_create_page(font->atlas))) {
-		font_destroy(font);
-		return rc;
-	}
-
-	font->glyph_cache = calloc(U16_MAX, sizeof(struct glyph_info));
-	if (!font->glyph_cache) {
-		fprintf(stderr, "failed to allocate struct glyph_info array\n");
-		font_destroy(font);
-		return status_failure;
-	}
+	if (!(rc = atlas_create_page(font->atlas)))
+		goto cleanup;
 
 	font->cached_glyph_bytes = 0;
 	font->cached_glyph_count = 0;
+	hb_blob_destroy(hb_blob);
+	return rc;
+
+cleanup:
+	hb_blob_destroy(hb_blob);
+	font_destroy(font);
 	return rc;
 }
 

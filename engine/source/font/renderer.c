@@ -177,7 +177,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 	return 0;
 }
 
-void __font_renderer_setup_vbo_attributes(struct font_renderer *renderer, struct shader *shader) {
+void font_renderer_setup_quad_locations(struct font_renderer *renderer, struct shader *shader) {
 	if (shader == NULL) {
 		fprintf(stderr, "shader not prepared yet, try again\n");
 		return;
@@ -215,7 +215,7 @@ void __font_renderer_setup_vbo_attributes(struct font_renderer *renderer, struct
 	// glUseProgram(0);
 }
 
-void __font_renderer_upload_to_gpu(struct font_renderer *renderer) {
+void font_renderer_upload_to_gpu(struct font_renderer *renderer) {
 	if (renderer->uploaded) {
 		fprintf(stderr, "renderer data already uploaded\n");
 		return;

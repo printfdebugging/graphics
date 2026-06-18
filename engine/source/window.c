@@ -48,7 +48,7 @@ static void __window_mouse_move_callback(GLFWwindow *window, f64 x, f64 y) {
 	_window->bridge->mouse_move(_window->bridge, _window, x, y);
 }
 
-status window_create(struct window **window, struct window opts) {
+status window_init(struct window *window, struct window opts) {
 	if (opts.window) {
 		/* after this, who will own the window.window if it exists? */
 		/* for now we don't do anything and don't allow that */
@@ -119,21 +119,13 @@ status window_create(struct window **window, struct window opts) {
 	// glEnable(GL_BLEND);
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	/* todo: move this out of this function and convert this function to an _init function */
-	*window = calloc(1, sizeof(struct window));
-	if (!*window) {
-		fprintf(stderr, "failed to initialize glad\n");
-		glfwTerminate();
-		return status_failure;
-	}
-
 	/* todo: clean this up a bit, it's confusing/complicated */
-	glfwSetWindowUserPointer(opts.window, *window);
+	glfwSetWindowUserPointer(opts.window, window);
 	glfwSetCursorPosCallback(opts.window, __window_mouse_move_callback);
 	glfwSetScrollCallback(opts.window, __window_mouse_scroll_callback);
 	glfwSetFramebufferSizeCallback(opts.window, __window_frame_buffer_resize_callback);
 
-	**window = opts;
+	*window = opts;
 	return status_success;
 }
 
