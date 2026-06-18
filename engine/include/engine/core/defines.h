@@ -61,14 +61,12 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #define MB (1024 * 1024)
 #define GB (1024 * 1024 * 1024)
 
-enum status_code {
-	status_success = 0,
-	status_failure = 1,
-	status_recoverable_failure,
-	status_unrecoverable_failure,
+enum status {
+	status_success = 1,
+	status_failure = 0,
 };
 
-typedef enum status_code status_code;
+typedef enum status status;
 
 /* Some useful macros */
 #define array_size(t) (sizeof(t) / sizeof(*t))
