@@ -11,6 +11,8 @@ install: clean
 	cmake -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -B build && cmake --build build
 	cmake --install build --prefix install
 
+dependencies:
+	./scripts/dependencies.sh
 
 reformat:
 	find engine/* projects/* -iname '*.h' -o -iname '*.c' -o -iname '*.vert' -o -iname '*.frag' | xargs clang-format -i
