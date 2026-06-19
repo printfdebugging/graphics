@@ -23,6 +23,7 @@ struct game_state {
 	/* todo: use systems/resource-managers instead of these. */
 	struct primitive *axes;
 	struct model *cengine;
+	struct shader *model_shader;
 };
 
 /* */

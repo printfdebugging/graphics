@@ -44,7 +44,7 @@ struct model {
 	u64 meshes_count;
 };
 
-void model_init(struct model *model);
+status model_init(struct model *model);
 void model_destroy(struct model *model);
 
 /** Loads model located in the `filepath` ?directory?. At the moment

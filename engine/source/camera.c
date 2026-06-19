@@ -7,14 +7,8 @@
 #include "engine/camera.h"
 #include "engine/core/defines.h"
 
-status camera_create(struct camera **camera, struct camera opts) {
-	*camera = calloc(1, sizeof(struct camera));
-	if (!*camera) {
-		fprintf(stderr, "failed to allocate memory for camera\n");
-		return status_failure;
-	}
-
-	**camera = opts;
+status camera_init(struct camera *camera, struct camera opts) {
+	*camera = opts;
 	return status_success;
 }
 

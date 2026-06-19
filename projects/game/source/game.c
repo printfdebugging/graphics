@@ -26,13 +26,25 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h);
  * explicitly in the main loop maybe there's another way, let's ask nitrix later */
 void process_input(struct game_state *game, struct window *window, f64 delta_time);
 
-struct primitive *create_axes_primitive();
-struct shader *create_axes_shader();
+status axes_primitive_init(struct primitive *axes);
+status axes_shader_init(struct shader *shader);
+status model_shader_init(struct shader *shader);
 
 status game_initialize(struct game_state *game, int argc, char *argv[]) {
 	status rc = status_success;
 	(void) argc;
 	(void) argv;
+
+	if (!(game->window = calloc(1, sizeof(struct window))) ||
+	    !(game->camera = calloc(1, sizeof(struct camera))) ||
+	    !(game->axes = calloc(1, sizeof(struct primitive))) ||
+	    !(game->axes->shader = calloc(1, sizeof(struct shader))) ||
+	    !(game->model_shader = calloc(1, sizeof(struct shader))) ||
+	    !(game->cengine = calloc(1, sizeof(struct model)))) {
+		fprintf(stderr, "failed to allocate memory for window\n");
+		rc = status_failure;
+		goto cleanup;
+	}
 
 	game->bridge = (struct bridge) {
 		.mouse_move = mouse_move,
@@ -45,17 +57,6 @@ status game_initialize(struct game_state *game, int argc, char *argv[]) {
 		.bridge = &game->bridge,
 	};
 
-	if (!(game->window = calloc(1, sizeof(struct window)))) {
-		fprintf(stderr, "failed to allocate memory for window\n");
-		rc = status_failure;
-	}
-
-	if (!(rc = window_init(game->window, window_options))) {
-		/* note: we expect the error site to print the error message, so we don't do it in between */
-		/* note: only the endpoints print error messages, rest all log them */
-		return rc;
-	}
-
 	struct camera camera_options = {
 		CAMERA_DEFAULTS,
 		.position = { { 0.0f, 4.0f, 9.0f } },
@@ -63,90 +64,24 @@ status game_initialize(struct game_state *game, int argc, char *argv[]) {
 		.pitch = -30.0f,
 	};
 
-	if (!(rc = camera_create(&game->camera, camera_options))) {
-		return rc;
+	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
+
+	if (!(rc = window_init(game->window, window_options)) ||
+	    !(rc = camera_init(game->camera, camera_options)) ||
+	    !(rc = axes_primitive_init(game->axes)) ||
+	    !(rc = axes_shader_init(game->axes->shader)) ||
+	    !(rc = model_shader_init(game->model_shader)) ||
+	    !(rc = model_init(game->cengine)) ||
+	    !(rc = model_load_from_file(game->cengine, engine_asset_path, game->model_shader))) {
+		goto cleanup;
 	}
 
 	game->light_position = (vec3s) { { 0.0f, 0.0f, 2.0f } };
 	camera_adjust_direction(game->camera);
+	return rc;
 
-	/* todo: add primitves etc to the game, or atleast some resource arenas */
-	/* todo: the shaders etc live in the model struct, nested deep to the level of primitives. so we never create them manually. */
-	/* todo: have some kind of resource specifier file which links a model to it's respective shaders, ideally a header file in the code, makes things much easier, something like `resource.h` */
-	/* todo: continue here, we were moving old main to this new game/engine layout */
-
-	game->axes = create_axes_primitive();
-	struct shader *axes_shader = create_axes_shader();
-	if (!game->axes || !axes_shader)
-		return EXIT_FAILURE;
-
-	game->axes->shader = axes_shader;
-
-	/* todo: create a proper shader for gltf models with a lot of optional features (inside include guards) */
-	struct shader *engine_shader = calloc(1, sizeof(struct shader));
-	if (!engine_shader) {
-		/* todo: cleanup the resources created above. an arena would be much helpful for that. */
-		/* todo: or maybe we can just destroy the game object which would check for allocated objects.. yes that sounds better here. */
-		fprintf(stderr, "failed to allocate struct shader\n");
-		return EXIT_FAILURE;
-	}
-
-	struct shader_options engine_shader_opts = {
-		DEFAULT_SHADER_OPTIONS,
-	};
-
-	if (!(rc = shader_init_with_options(engine_shader, engine_shader_opts, shader_category_model))) {
-		fprintf(stderr, "failed to initialize shader with opts\n");
-		return EXIT_FAILURE;
-	}
-
-	struct string *engine_vertex_shader_main;
-	struct string *engine_fragment_shader_main;
-
-	if ((engine_vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.vert")) == NULL) {
-		return EXIT_FAILURE;
-	}
-
-	if ((engine_fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.frag")) == NULL) {
-		return EXIT_FAILURE;
-	}
-
-	const char *vertex_sources[] = {
-		shader_version,
-		/* todo: preprocessor declarations */
-		engine_vertex_shader_main->data,
-
-	};
-
-	const char *fragment_sources[] = {
-		shader_version,
-		/* todo: preprocessor declarations */
-		engine_fragment_shader_main->data,
-	};
-
-	if (!(rc = shader_load_from_sources(engine_shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources)))) {
-		fprintf(stderr, "failed to load shader\n");
-		/* todo: free up resources */
-		return EXIT_FAILURE;
-	}
-
-	string_destroy(engine_vertex_shader_main);
-	string_destroy(engine_fragment_shader_main);
-
-	const char *engine_asset_path = ASSETS_DIR "models/CylinderEngine/glTF/2CylinderEngine.gltf";
-	game->cengine = calloc(1, sizeof(struct model));
-	if (!game->cengine) {
-		fprintf(stderr, "failed to allocate model\n");
-		return EXIT_FAILURE;
-	}
-
-	model_init(game->cengine);
-	/* todo: decouple this, passing this here for now, for testing purposes */
-	if (!(rc = model_load_from_file(game->cengine, engine_asset_path, engine_shader))) {
-		fprintf(stderr, "failed to load model: %s\n", engine_asset_path);
-		return EXIT_FAILURE;
-	}
-
+cleanup:
+	game_shutdown(game);
 	return rc;
 }
 
@@ -246,7 +181,7 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
 	fprintf(stderr, "window resized!!!\n");
 }
 
-struct primitive *create_axes_primitive() {
+status axes_primitive_init(struct primitive *axes) {
 	const i32 AXES = 2;
 	const i32 LINES_PER_AXIS = 11;
 	const i32 LINES_ON_EACH_SIDE = LINES_PER_AXIS / 2;
@@ -276,66 +211,82 @@ struct primitive *create_axes_primitive() {
 		vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (f32) LINES_ON_EACH_SIDE;
 	}
 
-	struct primitive *axes = calloc(1, sizeof(struct primitive));
-	if (!axes)
-		return NULL;
 	primitive_init(axes);
 	primitive_create_vertex_array(axes);
 	primitive_load_vertices(axes, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
 	axes->draw_mode = GL_LINES;
-	return axes;
+	return status_success;
 }
 
-struct shader *create_axes_shader() {
+status axes_shader_init(struct shader *shader) {
+	status rc = status_success;
+	struct string *vertex_shader_main = NULL;
+	struct string *fragment_shader_main = NULL;
+
+	if (!(vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/lines/shader.vert")) ||
+	    !(fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/lines/shader.frag"))) {
+		rc = status_failure;
+		goto cleanup;
+	}
+
+	const char *vertex_sources[] = {
+		shader_version,
+		vertex_shader_main->data,
+	};
+
+	const char *fragment_sources[] = {
+		shader_version,
+		fragment_shader_main->data,
+	};
+
 	struct shader_options opts = {
 		DEFAULT_SHADER_OPTIONS,
 		.has_normals = false,
 	};
 
-	struct shader *shader = calloc(1, sizeof(struct shader));
-	if (!shader) {
-		fprintf(stderr, "failed to allocate struct shader\n");
-		return NULL;
+	if (!(rc = shader_init_with_options(shader, opts, shader_category_model)) ||
+	    !(rc = shader_load_from_sources(shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources)))) {
+		goto cleanup;
 	}
 
+cleanup:
+	string_destroy(vertex_shader_main);
+	string_destroy(fragment_shader_main);
+	return rc;
+}
+
+status model_shader_init(struct shader *shader) {
 	status rc = status_success;
-	if (!(rc = shader_init_with_options(shader, opts, shader_category_model))) {
-		fprintf(stderr, "failed to initialize shader with opts\n");
-		return NULL;
-	}
+	struct string *engine_vertex_shader_main = NULL;
+	struct string *engine_fragment_shader_main = NULL;
 
-	struct string *vertex_shader_main;
-	struct string *fragment_shader_main;
-
-	if ((vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/lines/shader.vert")) == NULL) {
-		return NULL;
-	}
-
-	if ((fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/lines/shader.frag")) == NULL) {
-		return NULL;
+	if (!(engine_vertex_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.vert")) ||
+	    !(engine_fragment_shader_main = string_create_from_file(ASSETS_DIR "shaders/gltf/shader.frag"))) {
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	const char *vertex_sources[] = {
 		shader_version,
-		/* todo: preprocessor declarations */
-		vertex_shader_main->data,
-
+		engine_vertex_shader_main->data,
 	};
 
 	const char *fragment_sources[] = {
 		shader_version,
-		/* todo: preprocessor declarations */
-		fragment_shader_main->data,
+		engine_fragment_shader_main->data,
 	};
 
-	if (!(rc = shader_load_from_sources(shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources)))) {
-		fprintf(stderr, "failed to load shader\n");
-		/* todo: free up resources */
-		return NULL;
+	struct shader_options shader_opts = {
+		DEFAULT_SHADER_OPTIONS,
+	};
+
+	if (!(rc = shader_init_with_options(shader, shader_opts, shader_category_model)) ||
+	    !(rc = shader_load_from_sources(shader, vertex_sources, array_size(vertex_sources), fragment_sources, array_size(fragment_sources)))) {
+		goto cleanup;
 	}
 
-	string_destroy(vertex_shader_main);
-	string_destroy(fragment_shader_main);
-
-	return shader;
+cleanup:
+	string_destroy(engine_vertex_shader_main);
+	string_destroy(engine_fragment_shader_main);
+	return rc;
 }

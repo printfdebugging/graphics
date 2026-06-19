@@ -226,7 +226,7 @@ static status gltf_load_primitive_indices(struct primitive *mesh, const cgltf_pr
 	return rc;
 }
 
-void model_init(struct model *model) {
+status model_init(struct model *model) {
 	model->basepath = NULL;
 	model->nodes = NULL;
 	model->meshes = NULL;
@@ -237,6 +237,7 @@ void model_init(struct model *model) {
 		.model = { GLM_MAT4_IDENTITY_INIT },
 		/* todo: view and the project matrix defaults */
 	};
+	return status_success;
 }
 
 /* todo: destroy nodes and meshes */
