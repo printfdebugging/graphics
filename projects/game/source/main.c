@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
 	if (!(rc = game_initialize(&game, argc, argv)) ||
 	    !(rc = game_run(&game)) ||
 	    !(rc = game_shutdown(&game))) {
-		fprintf(stderr, "failed to initialize game\n");
+		fprintf(stderr, "game returned with a status_failure in main\n");
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
