@@ -25,10 +25,6 @@ static u32 glTypeToSize(GLenum type) {
 	}
 }
 
-void primitive_init(struct primitive *primitive) {
-	*primitive = (struct primitive) { 0 };
-}
-
 void primitive_create_vertex_array(struct primitive *primitive) {
 	glGenVertexArrays(1, &primitive->vao);
 	primitive->initialized = true;

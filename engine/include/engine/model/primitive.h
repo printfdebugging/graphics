@@ -47,10 +47,6 @@ struct primitive {
 	b8 initialized;
 };
 
-/** Initializes the primitive's attributes to 0. It's not necessary to
- * call this function. */
-void primitive_init(struct primitive *primitive);
-
 /** Creates the 'vao' and marks the 'initialized' to true. Without this,
  * the 'primitive_load_*' function calls return early and print an error
  * message, because it doesn't make sense to load vertices or indices without

@@ -211,7 +211,6 @@ status axes_primitive_init(struct primitive *axes) {
 		vertices[1][x + LINES_ON_EACH_SIDE][1][2] = (f32) LINES_ON_EACH_SIDE;
 	}
 
-	primitive_init(axes);
 	primitive_create_vertex_array(axes);
 	primitive_load_vertices(axes, &vertices[0][0][0][0], (u32) count, 3 * sizeof(float));
 	axes->draw_mode = GL_LINES;
