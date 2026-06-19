@@ -50,8 +50,6 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	};
 
 	if (!(rc = window_init(editor->window, window_options))) {
-		fprintf(stderr, "failed to init editor window\n");
-		rc = status_failure;
 		goto cleanup;
 	}
 
@@ -60,8 +58,6 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	    !(rc = font_renderer_init(editor->font_renderer)) ||
 	    !(rc = font_renderer_init_default_shader(editor->font_shader)) ||
 	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
-		fprintf(stderr, "failed to initialize font rendering infrastructure\n");
-		rc = status_failure;
 		goto cleanup;
 	}
 
@@ -158,7 +154,6 @@ status font_renderer_init_default_shader(struct shader *shader) {
 
 	if (!(vert_source = string_create_from_file(vert)) ||
 	    !(frag_source = string_create_from_file(frag))) {
-		fprintf(stderr, "failed to read shader files\n");
 		rc = status_failure;
 		goto cleanup;
 	};
@@ -190,7 +185,6 @@ status font_renderer_init_default_shader(struct shader *shader) {
 
 	if (!(rc = shader_init_with_options(shader, font_shader_opts, shader_category_font)) ||
 	    !(rc = shader_load_from_sources(shader, vert_sources, array_size(vert_sources), frag_sources, array_size(frag_sources)))) {
-		rc = status_failure;
 		goto cleanup;
 	}
 
