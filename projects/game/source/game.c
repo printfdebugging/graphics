@@ -14,7 +14,7 @@
 #include "engine/core/string.h"
 #include "engine/core/defines.h"
 
-#include "game.h"
+#include "game/game.h"
 
 static const char *shader_version = "#version 330 core\n";
 

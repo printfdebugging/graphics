@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "editor.h"
+#include "editor/editor.h"
 #include "engine/core/defines.h"
 
 int main(int argc, char *argv[]) {

@@ -12,7 +12,7 @@
 #include "engine/core/string.h"
 #include "engine/core/defines.h"
 
-#include "editor.h"
+#include "editor/editor.h"
 
 void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
 void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);

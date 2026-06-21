@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "game.h"
+#include "game/game.h"
 #include "engine/core/defines.h"
 
 int main(int argc, char *argv[]) {
