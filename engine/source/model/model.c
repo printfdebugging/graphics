@@ -252,37 +252,38 @@ void model_destroy(struct model *model) {
 }
 
 status model_load_from_file(struct model *model, const char *filepath, struct shader *shader) {
+	char *basepath = NULL;
 	cgltf_data *data = NULL;
 	const cgltf_options options = { 0 };
-	cgltf_result result;
-
-	/* todo: use status value in the following calls and subcalls*/
+	cgltf_result result = cgltf_result_success;
 	status rc = status_success;
 
-	result = cgltf_parse_file(&options, filepath, &data);
-	if (result != cgltf_result_success) {
+	if ((result = cgltf_parse_file(&options, filepath, &data)) != cgltf_result_success) {
 		fprintf(stderr, "failed to parse gltf file: %s\n", filepath);
-		return 1;
-	}
-
-	result = cgltf_load_buffers(&options, data, filepath);
-	if (result != cgltf_result_success) {
-		fprintf(stderr, "failed to load gltf buffers for file: %s\n", filepath);
-		return 1;
-	}
-
-	/* keep in local variables, assign to the model at the end  */
-	char *basepath = get_basepath(filepath);
-
-	u64 nodes_count = data->nodes_count;
-	struct node *nodes = calloc(nodes_count, sizeof(struct node));
-	if (!nodes) {
-		fprintf(stderr, "failed to allocate nodes\n");
-		free(basepath);
-		cgltf_free(data);
 		return status_failure;
 	}
 
+	if ((result = cgltf_load_buffers(&options, data, filepath)) != cgltf_result_success) {
+		fprintf(stderr, "failed to load gltf buffers for file: %s\n", filepath);
+		rc = status_failure;
+		goto cleanup;
+	}
+
+	if (!(model->basepath = get_basepath(filepath))) {
+		rc = status_failure;
+		goto cleanup;
+	}
+
+	u64 nodes_count = data->nodes_count;
+	model->nodes_count = nodes_count;
+
+	if (!(model->nodes = calloc(nodes_count, sizeof(struct node)))) {
+		fprintf(stderr, "failed to allocate for model\n");
+		rc = status_failure;
+		goto cleanup;
+	}
+
+	struct node *nodes = model->nodes;
 	for (u64 node_index = 0; node_index < nodes_count; ++node_index) {
 		cgltf_node *gltf_node = &data->nodes[node_index];
 		struct node *node = &nodes[node_index];
@@ -296,14 +297,11 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 		if (gltf_node->children_count != 0) {
 			u64 children_count = gltf_node->children_count;
 			node->children_count = children_count;
-			node->children = calloc(children_count, sizeof(struct node *));
-			if (!node->children) {
-				fprintf(stderr, "failed to allocate memory for node->children\n");
-				return status_failure;
-			}
 
-			for (u64 child_index = 0; child_index < children_count; ++child_index) {
-				node->children[child_index] = NULL;
+			if (!(node->children = calloc(children_count, sizeof(struct node *)))) {
+				fprintf(stderr, "failed to allocate memory for node->children\n");
+				rc = status_failure;
+				goto cleanup;
 			}
 		}
 
@@ -327,13 +325,14 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 	}
 
 	u64 mesh_count = data->meshes_count;
-	struct mesh *meshes = calloc(mesh_count, sizeof(struct mesh));
-	if (!meshes) { /* todo: call node destructor here node & node->children to be freed */
+	model->meshes_count = mesh_count;
+	if (!(model->meshes = calloc(mesh_count, sizeof(struct mesh)))) {
 		fprintf(stderr, "failed to allocate meshes\n");
-		free(basepath);
-		return status_failure;
+		rc = status_failure;
+		goto cleanup;
 	}
 
+	struct mesh *meshes = model->meshes;
 	for (u64 mesh_index = 0; mesh_index < mesh_count; ++mesh_index) {
 		cgltf_mesh *gltf_mesh = &data->meshes[mesh_index];
 		struct mesh *mesh = &meshes[mesh_index];
@@ -341,52 +340,43 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 
 		u64 primitive_count = gltf_mesh->primitives_count;
 		mesh->primitives_count = primitive_count;
-		mesh->primitives = calloc(primitive_count, sizeof(struct primitive));
-		if (!meshes) { /* todo: cleanup properly */
+		if (!(mesh->primitives = calloc(primitive_count, sizeof(struct primitive)))) {
 			fprintf(stderr, "failed to allocate mesh->primitives\n");
-			return status_failure;
+			rc = status_failure;
+			goto cleanup;
 		}
 
 		for (u64 primitive_index = 0; primitive_index < primitive_count; ++primitive_index) {
 			cgltf_primitive *gltf_primitive = &gltf_mesh->primitives[primitive_index];
 			struct primitive *primitive = &mesh->primitives[primitive_index];
-			primitive_init(primitive);
 			primitive_create_vertex_array(primitive);
 			/* todo: do this properly with some shader manager */
 			primitive->shader = shader;
 
 			if (gltf_primitive->type) {
 				if (!(rc = gltf_primitive_type_to_gl_type(&primitive->draw_mode, gltf_primitive->type))) {
-					/* todo: with arena, freeing up this memory would be easy */
-					return rc;
+					goto cleanup;
 				}
 			}
 
 			if (gltf_primitive->indices) {
 				if (!(rc = gltf_load_primitive_indices(primitive, gltf_primitive))) {
-					/* todo: with arena, freeing up this memory would be easy */
-					return rc;
+					goto cleanup;
 				}
 			}
 
 			/* todo: to a separate material loader function */
 			if (gltf_primitive->material) {
 				if (!(rc = gltf_load_primitive_material(primitive, gltf_primitive, basepath))) {
-					return rc;
+					goto cleanup;
 				}
 			}
 
 			if (!(rc = gltf_load_primitive_attributes(primitive, gltf_primitive))) {
-				return rc;
+				goto cleanup;
 			}
 		}
 	}
-
-	model->nodes = nodes;
-	model->nodes_count = nodes_count;
-	model->meshes = meshes;
-	model->meshes_count = mesh_count;
-	model->basepath = basepath;
 
 	/* create the parent-child node hierarchy */
 	for (u64 node_index = 0; node_index < nodes_count; ++node_index) {
@@ -405,18 +395,13 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 	/* load the root nodes from the scene*/
 	if (data->scene && data->scene->nodes_count != 0) {
 		u64 root_nodes_count = data->scene->nodes_count;
-		struct node **root_nodes = calloc(root_nodes_count, sizeof(struct node *));
-		if (!root_nodes) {
-			fprintf(stderr, "failed to allocate memory for root nodes\n");
-			/* todo: handle error properly, free allocated memory, an arena would make things massively simple. */
-			return status_failure;
+		model->root_nodes_count = root_nodes_count;
+		if (!(model->root_nodes = calloc(root_nodes_count, sizeof(struct node *)))) {
+			rc = status_failure;
+			goto cleanup;
 		}
 
-		/* clear the garbage values */
-		for (u64 node_index = 0; node_index < root_nodes_count; ++node_index) {
-			root_nodes[node_index] = NULL;
-		}
-
+		struct node **root_nodes = model->root_nodes;
 		/* setup root node pointers */
 		for (u64 node_index = 0; node_index < root_nodes_count; ++node_index) {
 			cgltf_node *gltf_node = data->scene->nodes[node_index];
@@ -424,9 +409,6 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 			root_nodes[node_index] = &model->nodes[index_in_nodes_array];
 			root_nodes[node_index]->parent = NULL; /* set it explicitly, already done in node_init though. */
 		}
-
-		model->root_nodes = root_nodes;
-		model->root_nodes_count = root_nodes_count;
 	}
 
 	/* setup meshes for all the nodes */
@@ -440,5 +422,10 @@ status model_load_from_file(struct model *model, const char *filepath, struct sh
 	}
 
 	cgltf_free(data);
-	return status_success;
+	return rc;
+
+cleanup:
+	free(model->basepath);
+	cgltf_free(data);
+	return rc;
 }
