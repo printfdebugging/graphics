@@ -14,6 +14,15 @@ install: clean
 dependencies:
 	./scripts/dependencies.sh
 
+perf: debug
+	perf record --call-graph dwarf,65528 ./build/bin/editor
+	perf script -i perf.data | ./external/flamegraph/stackcollapse-perf.pl | ./external/flamegraph/flamegraph.pl \
+		--width=2400 \
+		--minwidth=2 \
+		--height=20 \
+		--bgcolors="#282c34" > flamegraph.svg
+	chromium flamegraph.svg
+
 reformat:
 	find engine/* projects/* -iname '*.h' -o -iname '*.c' -o -iname '*.vert' -o -iname '*.frag' | xargs clang-format -i
 
