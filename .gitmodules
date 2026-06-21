@@ -16,3 +16,6 @@
 [submodule "subprojects/harfbuzz"]
 	path = external/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz
+[submodule "external/flamegraph"]
+	path = external/flamegraph
+	url = https://github.com/brendangregg/FlameGraph/
