@@ -110,8 +110,8 @@ status editor_shutdown(struct editor_state *editor) {
 
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
 	// shader_destroy((*editor->cengine->primitives)->shader);
-	window_destroy(editor->window);
 	shader_destroy(editor->font_shader);
+	window_destroy(editor->window);
 	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
 
 	return rc;
