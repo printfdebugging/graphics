@@ -15,7 +15,7 @@ dependencies:
 	./scripts/dependencies.sh
 
 perf: debug
-	perf record --call-graph dwarf,65528 ./build/bin/editor
+	perf record --debuginfod --call-graph dwarf,65528 ./build/bin/editor
 	perf script -i perf.data | ./external/flamegraph/stackcollapse-perf.pl | ./external/flamegraph/flamegraph.pl \
 		--width=2400 \
 		--minwidth=2 \
