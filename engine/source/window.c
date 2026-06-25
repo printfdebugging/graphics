@@ -35,6 +35,7 @@ static void __window_frame_buffer_resize_callback(GLFWwindow *window, i32 width,
 	struct window *_window = glfwGetWindowUserPointer(window);
 	_window->bridge->window_resize(_window->bridge, _window, width, height);
 	/* maybe this should be moved to the client side code? */
+	fprintf(stderr, "setting width, height: %i, %i\n", width, height);
 	glViewport(0, 0, width, height);
 }
 

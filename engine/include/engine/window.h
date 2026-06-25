@@ -39,6 +39,8 @@ status window_set_icon(struct window *window, const char *path);
 status window_set_cursor_icon(struct window *window, const char *path, i32 size);
 status window_close(struct window *window);
 
+/* todo: get window size */
+
 void window_set_clear_color(struct window *window, vec4s color);
 void window_process_input(struct window *window);
 void window_poll_events(struct window *window);
