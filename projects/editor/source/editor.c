@@ -94,7 +94,7 @@ status editor_run(struct editor_state *editor) {
 		 * fix the up-side-down rendering of the text here.*/
 		mat4s vp = { GLM_MAT4_IDENTITY_INIT };
 		vp = glms_rotate(vp, glm_rad(90.0f), (vec3s) { { 1.0f, 0.0f, 0.0f } });
-		vp = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.1f, 100.0f);
+		vp = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f);
 		vp = glms_translate(vp, (vec3s) { { 0.0f, 0.0f, -24.0f } });
 
 		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, vp);

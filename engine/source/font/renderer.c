@@ -77,7 +77,7 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 			continue;
 		}
 
-		f64 fontsize = 105;
+		f64 fontsize = 30;
 		f64 scale = fontsize / info.upem;
 		// todo: look into what this is useful for struct extents ink_extents;
 		position.x += scale * glyph_positions[glyph_index].x_offset;

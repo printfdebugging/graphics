@@ -22,6 +22,14 @@ status font_init_from_file(struct font *font, const char *filepath) {
 		goto cleanup;
 	}
 
+	/* https://harfbuzz.github.io/harfbuzz-hb-font.html#hb-font-set-scale explains some details on how to set the font size properly */
+	int dpi = 192;
+	/* here we should load the font with font size 1 and only in the `font_renderer_load_text`
+	 * should we specify the font size in the scale. that way we would have a
+	 * scaling free cache and the quads will be scaled as we render things... */
+	hb_font_set_ptem(font->font, (float) dpi);
+	hb_font_set_scale(font->font, dpi * 1, dpi * 1);
+
 	if (!(font->atlas = calloc(1, sizeof(struct atlas))) ||
 	    !(font->glyph_cache = calloc(U16_MAX, sizeof(struct glyph_info)))) {
 		fprintf(stderr, "failed to allocate memory\n");
@@ -80,7 +88,7 @@ static status __font_upload_glyph(struct font *font, u16 glyph_index, struct gly
 		.extents.min_y = extents.y_bearing,
 		.extents.max_y = extents.y_bearing + extents.height,
 		.advance = hb_font_get_glyph_h_advance(font->font, glyph_index),
-		.upem = yscale,
+		.upem = yscale, /* warn: should this be set to some value such that scaling becomes easier? */
 		.empty = (length == 0),
 		.cached = true,
 	};
