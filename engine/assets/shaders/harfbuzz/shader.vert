@@ -26,4 +26,4 @@ void main() {
 	gl_Position = u_matViewProjection * vec4(pos, 0.0, 1.0);
 	v_texcoord = tex;
 	v_glyphLoc = a_glyphLoc;
-};
+}
