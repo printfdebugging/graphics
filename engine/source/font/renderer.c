@@ -98,7 +98,7 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 
 			corners[corner_index] = (struct glyph_vertex) {
 				.x = (f32) (position.x + scale * ex),
-				.y = (f32) (position.y - scale * ey),
+				.y = (f32) (position.y + scale * ey),
 				.tx = (f32) ex,
 				.ty = (f32) ey,
 				.nx = cx ? 1.f : -1.f,
