@@ -3,8 +3,12 @@
 ## Environment Setup
 
 - Windows
-  - Install MSYS2 with `winget install MSYS2.MSYS2`, add `C:\msys64\clang64\bin` to PATH
+  - Install MSYS2 with `winget install MSYS2.MSYS2`
+  - Add `C:\msys64\clang64\bin` to PATH
+   - You can do that from the *Edit the system environment variables* dialog
+   - Or run this on Powershell `if ($env:Path -notlike "*C:\msys64\clang64\bin*") { [Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";C:\msys64\clang64\bin", "User") }`
   - Install Git with `winget install Git.Git`
+  - Install VSCode with `winget install Microsoft.VisualStudioCode`
 
 ## Dependencies
 
