@@ -22,7 +22,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 
 set(CMAKE_C_STANDARD 23)
-add_compile_options(-std=gnu23)
+add_compile_options(-std=gnu2x)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Debug)
 
