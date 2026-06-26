@@ -61,6 +61,10 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #define MB (1024 * 1024)
 #define GB (1024 * 1024 * 1024)
 
+#define MM   (1.0f)
+#define CM   (10.0f MM)
+#define INCH (25.4f * MM)
+
 typedef enum {
 	status_failure = 0,
 	status_success = 1,

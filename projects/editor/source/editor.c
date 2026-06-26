@@ -77,6 +77,11 @@ status editor_run(struct editor_state *editor) {
 	glfwShowWindow(editor->window->window);
 
 	while (!window_close(editor->window)) {
+		/* initially we would assume that all the monitors are scaled the same way,
+		 * later we would fix this (as windows allows different monitors with different scaling).
+		 */
+		u32 dpi;
+		window_get_monitor_dpi(editor->window, &dpi);
 		f64 current_frame = glfwGetTime();
 		editor->delta_time = current_frame - editor->last_frame;
 		editor->last_frame = current_frame;
@@ -141,7 +146,7 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
 	(void) window;
 	(void) w;
 	(void) h;
-	fprintf(stderr, "window resized!!!\n");
+	// fprintf(stderr, "window resized!!!\n");
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {

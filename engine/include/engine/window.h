@@ -39,6 +39,22 @@ status window_set_icon(struct window *window, const char *path);
 status window_set_cursor_icon(struct window *window, const char *path, i32 size);
 status window_close(struct window *window);
 
+/** Note that if the display is `scaled`, then this size
+ * too would be scaled. This should be considered as the actual
+ * size of the window on a scaled up monitor, not the `.width` &
+ * `.height` properties of `struct window`, those are unscaled.
+ */
+void window_get_size(struct window *window, i32 *width, i32 *height);
+
+void window_get_content_scale(struct window *window, f32 *xscale, f32 *yscale);
+
+/** Similar to the windo size, this too is scaled with the display scaling.
+ */
+void window_get_framebuffer_size(struct window *window, i32 *width, i32 *height);
+
+void window_get_monitor_dpi(struct window *window, u32 *dpi);
+void window_get_monitor_scale(struct window *window, f32 *xscale, f32 *yscale);
+
 void window_set_clear_color(struct window *window, vec4s color);
 void window_process_input(struct window *window);
 void window_poll_events(struct window *window);
