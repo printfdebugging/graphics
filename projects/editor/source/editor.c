@@ -80,52 +80,8 @@ status editor_run(struct editor_state *editor) {
 		/* initially we would assume that all the monitors are scaled the same way,
 		 * later we would fix this (as windows allows different monitors with different scaling).
 		 */
-
-		GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-		float monitor_scale_x, monitor_scale_y;
-		glfwGetMonitorContentScale(monitor, &monitor_scale_x, &monitor_scale_y); /* display scaling */
-		fprintf(stderr, "monitor_scale: { .x = %f, .y = %f };\n", monitor_scale_x, monitor_scale_y);
-
-		float window_scale_x, window_scale_y;
-		glfwGetWindowContentScale(editor->window->window, &window_scale_x, &window_scale_y);
-		fprintf(stderr, "window_scale: { .x = %f, .y = %f };\n", window_scale_x, window_scale_y);
-
-		int monitor_size_x, monitor_size_y;
-		glfwGetMonitorPhysicalSize(monitor, &monitor_size_x, &monitor_size_y);
-		fprintf(stderr, "monitor_size: { .x = %i, .y = %i };\n", monitor_size_x, monitor_size_y);
-
-		int window_size_x, window_size_y;
-		glfwGetWindowSize(editor->window->window, &window_size_x, &window_size_y);
-		fprintf(stderr, "window_size: { .x = %i, .y = %i };\n", window_size_x, window_size_y);
-
-		const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-		const char *modstring =
-		    "vidmode {\n"
-		    "    .width = %i\n"
-		    "    .height = %i\n"
-		    "    .redBits = %i\n"
-		    "    .greenBits = %i\n"
-		    "    .blueBits = %i\n"
-		    "    .refreshRate = %i\n"
-		    "}\n";
-
-		fprintf(
-		    stderr,
-		    modstring,
-		    mode->width,
-		    mode->height,
-		    mode->redBits,
-		    mode->greenBits,
-		    mode->blueBits,
-		    mode->refreshRate
-		);
-
-		int framebuffer_x,
-		    framebuffer_y;
-		glfwGetFramebufferSize(editor->window->window, &framebuffer_x, &framebuffer_y);
-		fprintf(stderr, "framebuffer_size: { .x = %i, .y = %i };\n", framebuffer_x, framebuffer_y);
-		/* without display scaling it matches exactly the display resolution. it would be interesting to see how it changes when the display resolution changes */
-
+		u32 dpi;
+		window_get_monitor_dpi(editor->window, &dpi);
 		f64 current_frame = glfwGetTime();
 		editor->delta_time = current_frame - editor->last_frame;
 		editor->last_frame = current_frame;

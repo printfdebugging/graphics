@@ -197,3 +197,46 @@ status window_set_cursor_icon(struct window *window, const char *path, i32 size)
 	stbi_image_free(image.pixels);
 	return status_success;
 }
+
+void window_get_size(struct window *window, i32 *width, i32 *height) {
+	glfwGetWindowSize(window->window, width, height);
+	fprintf(stderr, "WindowSize: { .width = %i, .height = %i };\n", *width, *height);
+}
+
+void window_get_content_scale(struct window *window, f32 *xscale, f32 *yscale) {
+	glfwGetWindowContentScale(window->window, xscale, yscale);
+	fprintf(stderr, "WindowScale: { .xscale = %f, .yscale = %f };\n", *xscale, *yscale);
+}
+
+void window_get_framebuffer_size(struct window *window, i32 *width, i32 *height) {
+	glfwGetFramebufferSize(window->window, width, height);
+	fprintf(stderr, "FramebufferSize: { .width = %i, .height = %i };\n", *width, *height);
+}
+
+/* todo: use window to get the monitor it is on */
+void window_get_monitor_dpi(struct window *window, u32 *dpi) {
+	(void) window;
+	GLFWmonitor *monitor = NULL;
+	const GLFWvidmode *videomode = NULL;
+
+	if (!(monitor = glfwGetPrimaryMonitor()) ||
+	    !(videomode = glfwGetVideoMode(monitor))) {
+		fprintf(stderr, "unable to get the monitor or videomode\n");
+		return;
+	}
+
+	i32 width_mm, height_mm;
+	glfwGetMonitorPhysicalSize(monitor, &width_mm, &height_mm);
+
+	f32 width_in = (f32) width_mm / INCH;
+	f32 pixels = (f32) videomode->width;
+	*dpi = (u32) (pixels / width_in);
+
+	fprintf(stderr, "monitor_size: { .width = %i, .height = %i, .dpi = %i };\n", width_mm, height_mm, *dpi);
+}
+
+void window_get_monitor_scale(struct window *window, f32 *xscale, f32 *yscale) {
+	GLFWmonitor *monitor = glfwGetWindowMonitor(window->window);
+	glfwGetMonitorContentScale(monitor, xscale, yscale);
+	fprintf(stderr, "MonitorScale: { .xscale = %f, .yscale = %f };\n", *xscale, *yscale);
+}
