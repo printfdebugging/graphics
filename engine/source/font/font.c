@@ -23,6 +23,7 @@ status font_init_from_file(struct font *font, const char *filepath) {
 	}
 
 	/* https://harfbuzz.github.io/harfbuzz-hb-font.html#hb-font-set-scale explains some details on how to set the font size properly */
+	/* todo: change this. get this from the windowing system & update this if and when the monitor scale changes. */
 	int dpi = 192;
 	/* here we should load the font with font size 1 and only in the `font_renderer_load_text`
 	 * should we specify the font size in the scale. that way we would have a
