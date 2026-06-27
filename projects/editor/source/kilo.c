@@ -1,0 +1,170 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <termios.h>
+#include <unistd.h>
+
+#include "engine/core/defines.h"
+
+#include "editor/editor.h"
+
+/* defines */
+#define CTRL_KEY(k) ((k) & 0x1f)
+
+/* data */
+struct editor_config {
+	int screenrows;
+	int screencols;
+	struct termios orig_termios;
+};
+
+struct editor_config e;
+
+/* terminal */
+void enable_raw_mode();
+void disable_raw_mode();
+void die(const char *s);
+
+char editor_read_key();
+void editor_process_keypress();
+void editor_refresh_screen();
+void editor_draw_rows();
+
+int get_window_size(int *rows, int *cols);
+int get_cursor_position(int *rows, int *cols);
+
+void init_editor();
+
+status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
+	status rc = status_success;
+	enable_raw_mode();
+	init_editor();
+	return rc;
+}
+
+status editor_run(struct editor_state *editor) {
+	status rc = status_success;
+	while (true) {
+		editor_refresh_screen();
+		editor_process_keypress();
+	}
+
+	return rc;
+}
+
+status editor_shutdown(struct editor_state *editor) {
+	status rc = status_success;
+	return rc;
+}
+
+void enable_raw_mode() {
+	if (tcgetattr(STDIN_FILENO, &e.orig_termios) == -1)
+		die("tcgetattr");
+
+	atexit(disable_raw_mode);
+
+	struct termios raw = e.orig_termios;
+	raw.c_iflag &= ~(BRKINT | ICRNL | ISTRIP | IXON);
+	raw.c_oflag &= ~(OPOST);
+	raw.c_cflag |= (CS8);
+	raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG); /* read input byte by byte */
+	raw.c_cc[VMIN] = 0;
+	raw.c_cc[VTIME] = 1;
+
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1)
+		die("tcsetattr");
+}
+
+void disable_raw_mode() {
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &e.orig_termios) == -1)
+		die("tcsetattr");
+}
+
+void die(const char *s) {
+	write(STDOUT_FILENO, "\x1b[2J", 4);
+	write(STDOUT_FILENO, "\x1b[H", 3);
+	perror(s);
+	exit(1);
+}
+
+char editor_read_key() {
+	int nread;
+	char c;
+
+	while ((nread = read(STDIN_FILENO, &c, 1) != 1)) {
+		if (nread == -1 && errno != EAGAIN)
+			die("read");
+	}
+
+	return c;
+}
+
+void editor_process_keypress() {
+	char c = editor_read_key();
+	switch (c) {
+		case CTRL_KEY('q'): {
+			write(STDOUT_FILENO, "\x1b[2J", 4);
+			write(STDOUT_FILENO, "\x1b[H", 3);
+			exit(0);
+			break;
+		}
+	}
+}
+
+void editor_refresh_screen() {
+	write(STDOUT_FILENO, "\x1b[2J", 4);
+	write(STDOUT_FILENO, "\x1b[H", 3);
+	editor_draw_rows();
+	write(STDOUT_FILENO, "\x1b[H", 3);
+}
+
+void editor_draw_rows() {
+	int y;
+	for (y = 0; y < e.screenrows; ++y) {
+		write(STDIN_FILENO, "~", 1);
+		if (y < e.screenrows - 1)
+			write(STDOUT_FILENO, "\r\n", 2);
+	}
+}
+
+int get_window_size(int *rows, int *cols) {
+	struct winsize ws;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
+		if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12)
+			return -1;
+		return get_cursor_position(rows, cols);
+	} else {
+		*cols = ws.ws_col;
+		*rows = ws.ws_row;
+		return 0;
+	}
+}
+
+int get_cursor_position(int *rows, int *cols) {
+	char buf[32];
+	u32 i = 0;
+	if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4)
+		return -1;
+
+	while (i < sizeof(buf) - 1) {
+		if (read(STDIN_FILENO, &buf[i], 1) != 1)
+			break;
+		if (buf[i] == 'R')
+			break;
+		i++;
+	}
+
+	buf[i] = '\0';
+	if (buf[0] != '\x1b' || buf[1] != '[')
+		return -1;
+	if (sscanf(&buf[2], "%d;%d", rows, cols) != 2)
+		return -1;
+	return 0;
+}
+
+void init_editor() {
+	if (get_window_size(&e.screenrows, &e.screencols) == -1) {
+		die("get_window_size");
+	}
+}
