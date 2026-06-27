@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 #include <sys/ioctl.h>
 #include <errno.h>
@@ -11,8 +12,17 @@
 
 /* defines */
 #define CTRL_KEY(k) ((k) & 0x1f)
+#define ABUF_INIT   { NULL, 0 }
 
 /* data */
+struct abuf {
+	char *b;
+	int len;
+};
+
+void abuf_append(struct abuf *ab, const char *s, int len);
+void abuf_free(struct abuf *ab);
+
 struct editor_config {
 	int screenrows;
 	int screencols;
@@ -29,7 +39,7 @@ void die(const char *s);
 char editor_read_key();
 void editor_process_keypress();
 void editor_refresh_screen();
-void editor_draw_rows();
+void editor_draw_rows(struct abuf *ab);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -113,18 +123,27 @@ void editor_process_keypress() {
 }
 
 void editor_refresh_screen() {
-	write(STDOUT_FILENO, "\x1b[2J", 4);
-	write(STDOUT_FILENO, "\x1b[H", 3);
-	editor_draw_rows();
-	write(STDOUT_FILENO, "\x1b[H", 3);
+	struct abuf ab = ABUF_INIT;
+
+	abuf_append(&ab, "\x1b[?25l", 6);
+	abuf_append(&ab, "\x1b[H", 3);
+
+	editor_draw_rows(&ab);
+
+	abuf_append(&ab, "\x1b[H", 3);
+	abuf_append(&ab, "\x1b[?25h", 6);
+
+	write(STDOUT_FILENO, ab.b, (u32) ab.len);
+	abuf_free(&ab);
 }
 
-void editor_draw_rows() {
+void editor_draw_rows(struct abuf *ab) {
 	int y;
 	for (y = 0; y < e.screenrows; ++y) {
-		write(STDIN_FILENO, "~", 1);
+		abuf_append(ab, "~", 1);
+		abuf_append(ab, "\x1b[K", 3);
 		if (y < e.screenrows - 1)
-			write(STDOUT_FILENO, "\r\n", 2);
+			abuf_append(ab, "\r\n", 2);
 	}
 }
 
@@ -167,4 +186,18 @@ void init_editor() {
 	if (get_window_size(&e.screenrows, &e.screencols) == -1) {
 		die("get_window_size");
 	}
+}
+
+void abuf_append(struct abuf *ab, const char *s, int len) {
+	char *new = realloc(ab->b, (u32) ab->len + (u32) len);
+	if (new == NULL)
+		return;
+
+	memcpy(&new[ab->len], s, (u32) len);
+	ab->b = new;
+	ab->len += len;
+}
+
+void abuf_free(struct abuf *ab) {
+	free(ab->b);
 }
