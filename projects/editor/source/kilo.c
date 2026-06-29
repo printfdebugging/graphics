@@ -16,6 +16,13 @@
 #define KILO_VERSION "0.0.1"
 
 /* data */
+enum editor_key {
+	KEY_ARROW_LEFT = 'h',
+	KEY_ARROW_RIGHT = 'l',
+	KEY_ARROW_DOWN = 'j',
+	KEY_ARROW_UP = 'k',
+};
+
 struct abuf {
 	char *b;
 	int len;
@@ -110,7 +117,29 @@ char editor_read_key() {
 			die("read");
 	}
 
-	return c;
+	if (c == '\x1b') {
+		char seq[3];
+		if (read(STDIN_FILENO, &seq[0], 1) != 1)
+			return '\x1b';
+		if (read(STDIN_FILENO, &seq[1], 1) != 1)
+			return '\x1b';
+		if (seq[0] == '[') {
+			switch (seq[1]) {
+				case 'A':
+					return KEY_ARROW_UP;
+				case 'B':
+					return KEY_ARROW_DOWN;
+				case 'C':
+					return KEY_ARROW_RIGHT;
+				case 'D':
+					return KEY_ARROW_LEFT;
+			}
+		}
+
+		return '\x1b';
+	} else {
+		return c;
+	}
 }
 
 void editor_process_keypress() {
@@ -122,10 +151,10 @@ void editor_process_keypress() {
 			exit(0);
 			break;
 		}
-		case 'h':
-		case 'l':
-		case 'j':
-		case 'k': {
+		case KEY_ARROW_LEFT:
+		case KEY_ARROW_RIGHT:
+		case KEY_ARROW_DOWN:
+		case KEY_ARROW_UP: {
 			editor_move_cursor(c);
 			break;
 		}
@@ -236,16 +265,16 @@ void abuf_free(struct abuf *ab) {
 
 void editor_move_cursor(char key) {
 	switch (key) {
-		case 'h':
+		case KEY_ARROW_LEFT:
 			e.cx--;
 			break;
-		case 'l':
+		case KEY_ARROW_RIGHT:
 			e.cx++;
 			break;
-		case 'j':
+		case KEY_ARROW_DOWN:
 			e.cy++;
 			break;
-		case 'k':
+		case KEY_ARROW_UP:
 			e.cy--;
 			break;
 	}
