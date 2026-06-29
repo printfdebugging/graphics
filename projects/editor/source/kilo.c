@@ -47,6 +47,7 @@ typedef struct erow {
 
 struct editor_config {
 	int cx, cy;
+	int rowoff;
 	int screenrows;
 	int screencols;
 	int numrows;
@@ -69,6 +70,7 @@ void editor_draw_rows(struct abuf *ab);
 void editor_move_cursor(int key);
 void editor_open(char *filename);
 void editor_row_append(char *s, size_t len);
+void editor_scroll();
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -225,6 +227,7 @@ void editor_process_keypress() {
 }
 
 void editor_refresh_screen() {
+	editor_scroll();
 	struct abuf ab = ABUF_INIT;
 
 	abuf_append(&ab, "\x1b[?25l", 6);
@@ -233,7 +236,7 @@ void editor_refresh_screen() {
 	editor_draw_rows(&ab);
 
 	char buf[32];
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", e.cy + 1, e.cx + 1);
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, e.cx + 1);
 	abuf_append(&ab, buf, (i32) strlen(buf));
 	abuf_append(&ab, "\x1b[?25h", 6);
 
@@ -244,7 +247,8 @@ void editor_refresh_screen() {
 void editor_draw_rows(struct abuf *ab) {
 	int y;
 	for (y = 0; y < e.screenrows; ++y) {
-		if (y >= e.numrows) {
+		int filerow = y + e.rowoff;
+		if (filerow >= e.numrows) {
 			if (e.numrows == 0 && y == e.screenrows / 3) {
 				char welcome[80];
 				int welcomelen = snprintf(welcome, sizeof(welcome), "Kilo editor -- version %s", KILO_VERSION);
@@ -265,10 +269,10 @@ void editor_draw_rows(struct abuf *ab) {
 				abuf_append(ab, "~", 1);
 			}
 		} else {
-			int len = e.row[y].size;
+			int len = e.row[filerow].size;
 			if (len > e.screencols)
 				len = e.screencols;
-			abuf_append(ab, e.row[y].chars, len);
+			abuf_append(ab, e.row[filerow].chars, len);
 		}
 
 		abuf_append(ab, "\x1b[K", 3);
@@ -315,6 +319,7 @@ int get_cursor_position(int *rows, int *cols) {
 void editor_init() {
 	e.cx = 0;
 	e.cy = 0;
+	e.rowoff = 0;
 	e.numrows = 0;
 	e.row = NULL;
 
@@ -347,7 +352,7 @@ void editor_move_cursor(int key) {
 				e.cx++;
 			break;
 		case KEY_ARROW_DOWN:
-			if (e.cy != e.screenrows - 1)
+			if (e.cy < e.numrows)
 				e.cy++;
 			break;
 		case KEY_ARROW_UP:
@@ -383,4 +388,14 @@ void editor_row_append(char *s, size_t len) {
 	memcpy(e.row[at].chars, s, (u32) len);
 	e.row[at].chars[len] = '\0';
 	e.numrows++;
+}
+
+/** An important thing to note here is that the cy is the location
+ * of the cursor in the file & e.rowoff is the line number of the top
+ * line visible in the window. so the math checks out that way. */
+void editor_scroll() {
+	if (e.cy < e.rowoff)
+		e.rowoff = e.cy;
+	if (e.cy >= e.rowoff + e.screenrows)
+		e.rowoff = e.cy - e.screenrows + 1;
 }
