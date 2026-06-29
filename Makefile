@@ -1,5 +1,5 @@
 run: debug
-	./build/bin/editor ./data/gridwin.cxx
+	./build/bin/editor ./data/test.md
 
 debug:
 	cmake \
