@@ -25,6 +25,7 @@ void abuf_append(struct abuf *ab, const char *s, int len);
 void abuf_free(struct abuf *ab);
 
 struct editor_config {
+	int cx, cy;
 	int screenrows;
 	int screencols;
 	struct termios orig_termios;
@@ -41,6 +42,7 @@ char editor_read_key();
 void editor_process_keypress();
 void editor_refresh_screen();
 void editor_draw_rows(struct abuf *ab);
+void editor_move_cursor(char key);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -120,6 +122,13 @@ void editor_process_keypress() {
 			exit(0);
 			break;
 		}
+		case 'h':
+		case 'l':
+		case 'j':
+		case 'k': {
+			editor_move_cursor(c);
+			break;
+		}
 	}
 }
 
@@ -131,7 +140,9 @@ void editor_refresh_screen() {
 
 	editor_draw_rows(&ab);
 
-	abuf_append(&ab, "\x1b[H", 3);
+	char buf[32];
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", e.cy + 1, e.cx + 1);
+	abuf_append(&ab, buf, (i32) strlen(buf));
 	abuf_append(&ab, "\x1b[?25h", 6);
 
 	write(STDOUT_FILENO, ab.b, (u32) ab.len);
@@ -202,6 +213,8 @@ int get_cursor_position(int *rows, int *cols) {
 }
 
 void init_editor() {
+	e.cx = 0;
+	e.cy = 0;
 	if (get_window_size(&e.screenrows, &e.screencols) == -1) {
 		die("get_window_size");
 	}
@@ -219,4 +232,21 @@ void abuf_append(struct abuf *ab, const char *s, int len) {
 
 void abuf_free(struct abuf *ab) {
 	free(ab->b);
+}
+
+void editor_move_cursor(char key) {
+	switch (key) {
+		case 'h':
+			e.cx--;
+			break;
+		case 'l':
+			e.cx++;
+			break;
+		case 'j':
+			e.cy++;
+			break;
+		case 'k':
+			e.cy--;
+			break;
+	}
 }
