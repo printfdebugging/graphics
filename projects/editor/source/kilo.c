@@ -21,6 +21,8 @@ enum editor_key {
 	KEY_ARROW_RIGHT,
 	KEY_ARROW_DOWN,
 	KEY_ARROW_UP,
+	KEY_PAGE_UP,
+	KEY_PAGE_DOWN,
 };
 
 struct abuf {
@@ -124,15 +126,28 @@ int editor_read_key() {
 		if (read(STDIN_FILENO, &seq[1], 1) != 1)
 			return '\x1b';
 		if (seq[0] == '[') {
-			switch (seq[1]) {
-				case 'A':
-					return KEY_ARROW_UP;
-				case 'B':
-					return KEY_ARROW_DOWN;
-				case 'C':
-					return KEY_ARROW_RIGHT;
-				case 'D':
-					return KEY_ARROW_LEFT;
+			if (seq[1] >= '0' && seq[1] <= '9') {
+				if (read(STDIN_FILENO, &seq[2], 1) != 1)
+					return '\x1b';
+				if (seq[2] == '~') {
+					switch (seq[1]) {
+						case '5':
+							return KEY_PAGE_UP;
+						case '6':
+							return KEY_PAGE_DOWN;
+					}
+				}
+			} else {
+				switch (seq[1]) {
+					case 'A':
+						return KEY_ARROW_UP;
+					case 'B':
+						return KEY_ARROW_DOWN;
+					case 'C':
+						return KEY_ARROW_RIGHT;
+					case 'D':
+						return KEY_ARROW_LEFT;
+				}
 			}
 		}
 
@@ -149,15 +164,19 @@ void editor_process_keypress() {
 			write(STDOUT_FILENO, "\x1b[2J", 4);
 			write(STDOUT_FILENO, "\x1b[H", 3);
 			exit(0);
-			break;
-		}
+		} break;
+		case KEY_PAGE_UP:
+		case KEY_PAGE_DOWN: {
+			int times = e.screenrows;
+			while (times--)
+				editor_move_cursor(c == KEY_PAGE_UP ? KEY_ARROW_UP : KEY_ARROW_DOWN);
+		} break;
 		case KEY_ARROW_LEFT:
 		case KEY_ARROW_RIGHT:
 		case KEY_ARROW_DOWN:
 		case KEY_ARROW_UP: {
 			editor_move_cursor(c);
-			break;
-		}
+		} break;
 	}
 }
 
