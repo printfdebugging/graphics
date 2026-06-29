@@ -50,6 +50,7 @@ void enable_raw_mode();
 void disable_raw_mode();
 void die(const char *s);
 
+void editor_init();
 int editor_read_key();
 void editor_process_keypress();
 void editor_refresh_screen();
@@ -59,12 +60,10 @@ void editor_move_cursor(int key);
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
 
-void init_editor();
-
 status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	status rc = status_success;
 	enable_raw_mode();
-	init_editor();
+	editor_init();
 	return rc;
 }
 
@@ -290,7 +289,7 @@ int get_cursor_position(int *rows, int *cols) {
 	return 0;
 }
 
-void init_editor() {
+void editor_init() {
 	e.cx = 0;
 	e.cy = 0;
 	if (get_window_size(&e.screenrows, &e.screencols) == -1) {
