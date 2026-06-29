@@ -266,16 +266,20 @@ void abuf_free(struct abuf *ab) {
 void editor_move_cursor(int key) {
 	switch (key) {
 		case KEY_ARROW_LEFT:
-			e.cx--;
+			if (e.cx != 0)
+				e.cx--;
 			break;
 		case KEY_ARROW_RIGHT:
-			e.cx++;
+			if (e.cx != e.screencols - 1)
+				e.cx++;
 			break;
 		case KEY_ARROW_DOWN:
-			e.cy++;
+			if (e.cy != e.screenrows - 1)
+				e.cy++;
 			break;
 		case KEY_ARROW_UP:
-			e.cy--;
+			if (e.cy != 0)
+				e.cy--;
 			break;
 	}
 }
