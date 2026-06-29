@@ -17,10 +17,10 @@
 
 /* data */
 enum editor_key {
-	KEY_ARROW_LEFT = 'h',
-	KEY_ARROW_RIGHT = 'l',
-	KEY_ARROW_DOWN = 'j',
-	KEY_ARROW_UP = 'k',
+	KEY_ARROW_LEFT = 1000,
+	KEY_ARROW_RIGHT,
+	KEY_ARROW_DOWN,
+	KEY_ARROW_UP,
 };
 
 struct abuf {
@@ -45,11 +45,11 @@ void enable_raw_mode();
 void disable_raw_mode();
 void die(const char *s);
 
-char editor_read_key();
+int editor_read_key();
 void editor_process_keypress();
 void editor_refresh_screen();
 void editor_draw_rows(struct abuf *ab);
-void editor_move_cursor(char key);
+void editor_move_cursor(int key);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -108,7 +108,7 @@ void die(const char *s) {
 	exit(1);
 }
 
-char editor_read_key() {
+int editor_read_key() {
 	int nread;
 	char c;
 
@@ -143,7 +143,7 @@ char editor_read_key() {
 }
 
 void editor_process_keypress() {
-	char c = editor_read_key();
+	int c = editor_read_key();
 	switch (c) {
 		case CTRL_KEY('q'): {
 			write(STDOUT_FILENO, "\x1b[2J", 4);
@@ -263,7 +263,7 @@ void abuf_free(struct abuf *ab) {
 	free(ab->b);
 }
 
-void editor_move_cursor(char key) {
+void editor_move_cursor(int key) {
 	switch (key) {
 		case KEY_ARROW_LEFT:
 			e.cx--;
