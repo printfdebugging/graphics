@@ -21,6 +21,7 @@ enum editor_key {
 	KEY_ARROW_RIGHT,
 	KEY_ARROW_DOWN,
 	KEY_ARROW_UP,
+	KEY_DEL,
 	KEY_PAGE_UP,
 	KEY_PAGE_DOWN,
 	KEY_HOME,
@@ -135,6 +136,8 @@ int editor_read_key() {
 					switch (seq[1]) {
 						case '1':
 							return KEY_HOME;
+						case '3':
+							return KEY_DEL;
 						case '4':
 							return KEY_END;
 						case '5':
