@@ -48,6 +48,7 @@ typedef struct erow {
 struct editor_config {
 	int cx, cy;
 	int rowoff;
+	int coloff;
 	int screenrows;
 	int screencols;
 	int numrows;
@@ -236,7 +237,7 @@ void editor_refresh_screen() {
 	editor_draw_rows(&ab);
 
 	char buf[32];
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, e.cx + 1);
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, (e.cx - e.coloff) + 1);
 	abuf_append(&ab, buf, (i32) strlen(buf));
 	abuf_append(&ab, "\x1b[?25h", 6);
 
@@ -269,10 +270,12 @@ void editor_draw_rows(struct abuf *ab) {
 				abuf_append(ab, "~", 1);
 			}
 		} else {
-			int len = e.row[filerow].size;
+			int len = e.row[filerow].size - e.coloff;
+			if (len < 0)
+				len = 0;
 			if (len > e.screencols)
 				len = e.screencols;
-			abuf_append(ab, e.row[filerow].chars, len);
+			abuf_append(ab, &e.row[filerow].chars[e.coloff], len);
 		}
 
 		abuf_append(ab, "\x1b[K", 3);
@@ -320,6 +323,7 @@ void editor_init() {
 	e.cx = 0;
 	e.cy = 0;
 	e.rowoff = 0;
+	e.coloff = 0;
 	e.numrows = 0;
 	e.row = NULL;
 
@@ -348,8 +352,7 @@ void editor_move_cursor(int key) {
 				e.cx--;
 			break;
 		case KEY_ARROW_RIGHT:
-			if (e.cx != e.screencols - 1)
-				e.cx++;
+			e.cx++;
 			break;
 		case KEY_ARROW_DOWN:
 			if (e.cy < e.numrows)
@@ -398,4 +401,8 @@ void editor_scroll() {
 		e.rowoff = e.cy;
 	if (e.cy >= e.rowoff + e.screenrows)
 		e.rowoff = e.cy - e.screenrows + 1;
+	if (e.cx < e.coloff)
+		e.coloff = e.cx;
+	if (e.cx >= e.coloff + e.screencols)
+		e.coloff = e.cx - e.screencols + 1;
 }
