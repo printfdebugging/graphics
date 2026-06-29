@@ -210,6 +210,7 @@ void editor_process_keypress() {
 			e.cx = 0;
 		} break;
 		case KEY_END: {
+			/* todo: snap to the last character */
 			e.cx = e.screencols - 1;
 		} break;
 		case KEY_PAGE_UP:
@@ -365,6 +366,11 @@ void editor_move_cursor(int key) {
 				e.cy--;
 			break;
 	}
+
+	row = (e.cy >= e.numrows) ? NULL : &e.row[e.cy];
+	int rowlen = row ? row->size : 0;
+	if (e.cx > rowlen)
+		e.cx = rowlen;
 }
 
 void editor_open(char *filename) {
