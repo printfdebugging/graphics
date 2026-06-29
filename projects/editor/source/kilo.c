@@ -11,8 +11,9 @@
 #include "editor/editor.h"
 
 /* defines */
-#define CTRL_KEY(k) ((k) & 0x1f)
-#define ABUF_INIT   { NULL, 0 }
+#define CTRL_KEY(k)  ((k) & 0x1f)
+#define ABUF_INIT    { NULL, 0 }
+#define KILO_VERSION "0.0.1"
 
 /* data */
 struct abuf {
@@ -140,7 +141,25 @@ void editor_refresh_screen() {
 void editor_draw_rows(struct abuf *ab) {
 	int y;
 	for (y = 0; y < e.screenrows; ++y) {
-		abuf_append(ab, "~", 1);
+		if (y == e.screenrows / 3) {
+			char welcome[80];
+			int welcomelen = snprintf(welcome, sizeof(welcome), "Kilo editor -- version %s", KILO_VERSION);
+			if (welcomelen > e.screencols)
+				welcomelen = e.screencols;
+
+			int padding = (e.screencols - welcomelen) / 2;
+			if (padding) {
+				abuf_append(ab, "~", 1);
+				padding--;
+			}
+
+			while (padding--) {
+				abuf_append(ab, " ", 1);
+			}
+			abuf_append(ab, welcome, welcomelen);
+		} else {
+			abuf_append(ab, "~", 1);
+		}
 		abuf_append(ab, "\x1b[K", 3);
 		if (y < e.screenrows - 1)
 			abuf_append(ab, "\r\n", 2);
