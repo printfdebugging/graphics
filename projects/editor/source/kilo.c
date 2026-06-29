@@ -23,6 +23,8 @@ enum editor_key {
 	KEY_ARROW_UP,
 	KEY_PAGE_UP,
 	KEY_PAGE_DOWN,
+	KEY_HOME,
+	KEY_END,
 };
 
 struct abuf {
@@ -131,10 +133,18 @@ int editor_read_key() {
 					return '\x1b';
 				if (seq[2] == '~') {
 					switch (seq[1]) {
+						case '1':
+							return KEY_HOME;
+						case '4':
+							return KEY_END;
 						case '5':
 							return KEY_PAGE_UP;
 						case '6':
 							return KEY_PAGE_DOWN;
+						case '7':
+							return KEY_HOME;
+						case '8':
+							return KEY_END;
 					}
 				}
 			} else {
@@ -147,7 +157,18 @@ int editor_read_key() {
 						return KEY_ARROW_RIGHT;
 					case 'D':
 						return KEY_ARROW_LEFT;
+					case 'H':
+						return KEY_HOME;
+					case 'F':
+						return KEY_END;
 				}
+			}
+		} else if (seq[0] == 'O') {
+			switch (seq[1]) {
+				case 'H':
+					return KEY_HOME;
+				case 'F':
+					return KEY_END;
 			}
 		}
 
@@ -164,6 +185,12 @@ void editor_process_keypress() {
 			write(STDOUT_FILENO, "\x1b[2J", 4);
 			write(STDOUT_FILENO, "\x1b[H", 3);
 			exit(0);
+		} break;
+		case KEY_HOME: {
+			e.cx = 0;
+		} break;
+		case KEY_END: {
+			e.cx = e.screencols - 1;
 		} break;
 		case KEY_PAGE_UP:
 		case KEY_PAGE_DOWN: {
