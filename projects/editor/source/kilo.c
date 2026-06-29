@@ -346,13 +346,15 @@ void abuf_free(struct abuf *ab) {
 }
 
 void editor_move_cursor(int key) {
+	erow *row = (e.cy >= e.numrows) ? NULL : &e.row[e.cy];
 	switch (key) {
 		case KEY_ARROW_LEFT:
 			if (e.cx != 0)
 				e.cx--;
 			break;
 		case KEY_ARROW_RIGHT:
-			e.cx++;
+			if (row && e.cx < row->size)
+				e.cx++;
 			break;
 		case KEY_ARROW_DOWN:
 			if (e.cy < e.numrows)
