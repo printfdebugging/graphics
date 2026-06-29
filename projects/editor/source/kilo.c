@@ -350,12 +350,21 @@ void editor_move_cursor(int key) {
 	erow *row = (e.cy >= e.numrows) ? NULL : &e.row[e.cy];
 	switch (key) {
 		case KEY_ARROW_LEFT:
-			if (e.cx != 0)
+			if (e.cx != 0) {
 				e.cx--;
+			} else if (e.cy > 0) {
+				e.cy--;
+				e.cx = e.row[e.cy].size;
+			}
 			break;
 		case KEY_ARROW_RIGHT:
-			if (row && e.cx < row->size)
+			if (row && e.cx < row->size) {
 				e.cx++;
+			} else if (row && e.cx == row->size) {
+				e.cy++;
+				e.cx = 0;
+			}
+
 			break;
 		case KEY_ARROW_DOWN:
 			if (e.cy < e.numrows)
