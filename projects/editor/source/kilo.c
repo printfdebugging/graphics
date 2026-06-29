@@ -1,6 +1,10 @@
+#define _DEFAULT_SOURCE
+#define _BSD_SOURCE
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
+#include <sys/types.h>
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <termios.h>
@@ -36,10 +40,17 @@ struct abuf {
 void abuf_append(struct abuf *ab, const char *s, int len);
 void abuf_free(struct abuf *ab);
 
+typedef struct erow {
+	int size;
+	char *chars;
+} erow;
+
 struct editor_config {
 	int cx, cy;
 	int screenrows;
 	int screencols;
+	int numrows;
+	erow *row;
 	struct termios orig_termios;
 };
 
@@ -56,6 +67,8 @@ void editor_process_keypress();
 void editor_refresh_screen();
 void editor_draw_rows(struct abuf *ab);
 void editor_move_cursor(int key);
+void editor_open(char *filename);
+void editor_row_append(char *s, size_t len);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -64,6 +77,8 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	status rc = status_success;
 	enable_raw_mode();
 	editor_init();
+	if (argc >= 2)
+		editor_open(argv[1]);
 	return rc;
 }
 
@@ -229,25 +244,33 @@ void editor_refresh_screen() {
 void editor_draw_rows(struct abuf *ab) {
 	int y;
 	for (y = 0; y < e.screenrows; ++y) {
-		if (y == e.screenrows / 3) {
-			char welcome[80];
-			int welcomelen = snprintf(welcome, sizeof(welcome), "Kilo editor -- version %s", KILO_VERSION);
-			if (welcomelen > e.screencols)
-				welcomelen = e.screencols;
+		if (y >= e.numrows) {
+			if (e.numrows == 0 && y == e.screenrows / 3) {
+				char welcome[80];
+				int welcomelen = snprintf(welcome, sizeof(welcome), "Kilo editor -- version %s", KILO_VERSION);
+				if (welcomelen > e.screencols)
+					welcomelen = e.screencols;
 
-			int padding = (e.screencols - welcomelen) / 2;
-			if (padding) {
+				int padding = (e.screencols - welcomelen) / 2;
+				if (padding) {
+					abuf_append(ab, "~", 1);
+					padding--;
+				}
+
+				while (padding--) {
+					abuf_append(ab, " ", 1);
+				}
+				abuf_append(ab, welcome, welcomelen);
+			} else {
 				abuf_append(ab, "~", 1);
-				padding--;
 			}
-
-			while (padding--) {
-				abuf_append(ab, " ", 1);
-			}
-			abuf_append(ab, welcome, welcomelen);
 		} else {
-			abuf_append(ab, "~", 1);
+			int len = e.row[y].size;
+			if (len > e.screencols)
+				len = e.screencols;
+			abuf_append(ab, e.row[y].chars, len);
 		}
+
 		abuf_append(ab, "\x1b[K", 3);
 		if (y < e.screenrows - 1)
 			abuf_append(ab, "\r\n", 2);
@@ -292,9 +315,11 @@ int get_cursor_position(int *rows, int *cols) {
 void editor_init() {
 	e.cx = 0;
 	e.cy = 0;
-	if (get_window_size(&e.screenrows, &e.screencols) == -1) {
+	e.numrows = 0;
+	e.row = NULL;
+
+	if (get_window_size(&e.screenrows, &e.screencols) == -1)
 		die("get_window_size");
-	}
 }
 
 void abuf_append(struct abuf *ab, const char *s, int len) {
@@ -330,4 +355,32 @@ void editor_move_cursor(int key) {
 				e.cy--;
 			break;
 	}
+}
+
+void editor_open(char *filename) {
+	FILE *fp = fopen(filename, "r");
+	if (!fp)
+		die("fopen");
+
+	char *line = NULL;
+	size_t linecap = 0;
+	ssize_t linelen;
+
+	while ((linelen = getline(&line, &linecap, fp)) != -1) {
+		while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
+			linelen--;
+		editor_row_append(line, (size_t) linelen);
+	}
+	free(line);
+	fclose(fp);
+}
+
+void editor_row_append(char *s, size_t len) {
+	e.row = realloc(e.row, sizeof(erow) * ((u32) e.numrows + 1));
+	int at = e.numrows;
+	e.row[at].size = (int) len;
+	e.row[at].chars = malloc((u32) len + 1);
+	memcpy(e.row[at].chars, s, (u32) len);
+	e.row[at].chars[len] = '\0';
+	e.numrows++;
 }
