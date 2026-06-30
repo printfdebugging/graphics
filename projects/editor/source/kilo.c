@@ -220,8 +220,7 @@ void editor_process_keypress() {
 			e.cx = 0;
 		} break;
 		case KEY_END: {
-			/* todo: snap to the last character */
-			e.cx = e.screencols - 1;
+			e.cx = e.row[e.cy].size;
 		} break;
 		case KEY_PAGE_UP:
 		case KEY_PAGE_DOWN: {
