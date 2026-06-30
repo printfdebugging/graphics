@@ -1,1 +1,3 @@
--DBUILD_SHARED_LIBS=ON
+-Ddefault_library=static
+-Dglib=disabled
+-Dgobject=disabled

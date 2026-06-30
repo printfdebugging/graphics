@@ -8,7 +8,7 @@ run: debug
 $(eval $(call build_wrapper_meson,fontconfig))
 $(eval $(call build_wrapper_cmake,cglm))
 $(eval $(call build_wrapper_cmake,freetype))
-$(eval $(call build_wrapper_cmake,harfbuzz))
+$(eval $(call build_wrapper_meson,harfbuzz))
 $(eval $(call build_wrapper_cmake,glfw))
 $(eval $(call build_wrapper_cmake,glad))
 $(eval $(call build_wrapper_autotools,ffmpeg))
