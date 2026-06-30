@@ -1,7 +1,6 @@
 # Graphics
 
 ## Environment Setup
-
 - Windows
   - Install MSYS2 with `winget install MSYS2.MSYS2`
   - Add `C:\msys64\clang64\bin` to PATH
@@ -14,7 +13,6 @@ if ($env:Path -notlike "*C:\msys64\clang64\bin*") { [Environment]::SetEnvironmen
 ```
 
 ## Dependencies
-
 - On Windows, open the `MSYS2 CLANG64` shell
 - On Linux, use "THE BASH"
 - Run `./scripts/dependencies.sh`, this installs compilers, build tools etc
@@ -25,7 +23,6 @@ if ($env:Path -notlike "*C:\msys64\clang64\bin*") { [Environment]::SetEnvironmen
 > names and add them to the script, thanks!
 
 ## Bulid Steps
-
 ```bash
 # pull in the git submodules
 git submodule update --init --recursive
@@ -40,18 +37,23 @@ make debug
 ```
 
 ## Style
-
 - Everything :snake: `snake_case`
 - Avoid unnecessary `typedef`ing
 - Format as per `.clang-format`
 
-## Error Handling
+## Commits
+- Commits should be signed, add  `Signed-off-by: John Doe <john.doe@example.org>` at the bottom, fill in your name/email
+- Feature work / development happens on separate branches and is merged in `main` via a PR
+- Feature branches should have sequence numbers in the commit message title, like `engine: part-##: use i32 for dpi instead of u32 (or f32)`
+- Chores like reformatting, readme changes, config changes etc. can be commited with `chore: ` prefix and without a part number
+- Commit title should be all lowercase while the commit body should follow english grammer rules
+- See git log for examples
 
+## Error Handling
 - Error should be propogated up the function call stack.
 - On error, every function should cleanup it's allocations and let the parent handle their allocations
 - Error message should be printed/logged at the site it happened and very bottom of the stack, rest all should just cleanup and propogate
 
 ## Memory Management
-
 - Never use `malloc`, use `calloc` as that sets the memory to `0` and we can use that to set some default flags to 0, like `initialized`.
 - Always call `foo_init` after allocation.
