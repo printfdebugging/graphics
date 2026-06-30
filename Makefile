@@ -1,5 +1,24 @@
+include ./scripts/make/exports.mk
+include ./scripts/make/build_wrappers.mk
+include ./scripts/make/system_dependencies.mk
+
 run: debug
 	./build/bin/editor ./data/test.md
+
+$(eval $(call build_wrapper_meson,fontconfig))
+$(eval $(call build_wrapper_cmake,cglm))
+$(eval $(call build_wrapper_cmake,freetype))
+$(eval $(call build_wrapper_meson,harfbuzz))
+$(eval $(call build_wrapper_cmake,glfw))
+$(eval $(call build_wrapper_cmake,glad))
+$(eval $(call build_wrapper_autotools,ffmpeg))
+
+externals: \
+	glfw \
+	harfbuzz \
+	glad \
+	cglm \
+	fontconfig
 
 debug:
 	cmake \
@@ -11,7 +30,8 @@ release:
 		-DCMAKE_BUILD_TYPE=Release \
 		-B build && cmake --build build
 
-install: clean
+# todo: fix installs
+install:
 	cmake \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=install \
