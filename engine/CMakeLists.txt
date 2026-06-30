@@ -82,11 +82,11 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PUBLIC
 	stb
 	cgltf
-	glad
-	glfw
-	harfbuzz
-	harfbuzz-gpu
-	cglm
+	PkgConfig::GLAD
+	PkgConfig::GLFW
+	PkgConfig::CGLM
+	PkgConfig::HARFBUZZ
+	PkgConfig::HARFBUZZ_GPU
 	pthread
 	m
 	$<$<BOOL:${WIN32}>:dwmapi>
