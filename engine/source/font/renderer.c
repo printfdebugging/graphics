@@ -66,7 +66,10 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		return status_failure;
 	}
 
-	/* this is the draw cursor or something? not sure */
+	/* todo: this should be abstracted away as rows */
+	/* todo: separate editor renderer from the engine renderer,
+	 * - here renderer should provide the base functionality
+	 * - editor should build abstractions/wrappers around that */
 	struct point position = { .x = 0, .y = 400 };
 	status rc = status_success;
 	for (u32 glyph_index = 0; glyph_index < glyph_count; ++glyph_index) {

@@ -38,6 +38,9 @@ struct font {
 	struct glyph_info *glyph_cache;
 	u32 cached_glyph_count;
 	u32 cached_glyph_bytes;
+
+	/* todo: we need some kind of indentifier for the font here. */
+	/* todo: we would also need some kind of font renderer which holds and manages these font objects. */
 };
 
 status font_init_from_file(struct font *font, const char *filepath, i32 dpi);
