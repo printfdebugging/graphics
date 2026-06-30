@@ -14,7 +14,6 @@ $(1).configure:
 
 $(1).build:
 	cmake --build "$$(BUILD_DIRECTORY)/$(1)"
-	cp "$$(BUILD_DIRECTORY)/$(1)/compile_commands.json" "$$(BUILD_DIRECTORY)/$(1)_compile_commands.json"
 
 $(1).install:
 	cmake --install "$$(BUILD_DIRECTORY)/$(1)" --prefix "$$(INSTALL_DIRECTORY)"
@@ -37,7 +36,6 @@ $(1).configure:
 
 $(1).build:
 	meson compile -C "$$(BUILD_DIRECTORY)/$(1)"
-	cp "$$(BUILD_DIRECTORY)/$(1)/compile_commands.json" "$$(BUILD_DIRECTORY)/$(1)_compile_commands.json"
 
 $(1).install:
 	meson install -C "$$(BUILD_DIRECTORY)/$(1)"
