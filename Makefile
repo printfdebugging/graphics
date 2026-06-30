@@ -20,10 +20,14 @@ externals: \
 	cglm \
 	fontconfig
 
-debug:
+debug: clangd
 	cmake \
 		-DCMAKE_BUILD_TYPE=Debug \
 		-B build && cmake --build build
+
+clangd:
+	$(call clangd_config_string,engine,$(BUILD_DIRECTORY))
+	$(call clangd_config_string,projects,$(BUILD_DIRECTORY))
 
 release:
 	cmake \
@@ -70,3 +74,4 @@ reformat:
 clean:
 	rm -rf build
 	rm -rf install
+	rm .clangd
