@@ -49,12 +49,14 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		.bridge = &editor->bridge,
 	};
 
-	if (!(rc = window_init(editor->window, window_options))) {
+	i32 dpi;
+	if (!(rc = window_init(editor->window, window_options)) ||
+	    !(rc = window_get_monitor_dpi(editor->window, &dpi))) {
 		goto cleanup;
 	}
 
 	const char *path = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	if (!(rc = font_init_from_file(editor->font, path)) ||
+	if (!(rc = font_init_from_file(editor->font, path, dpi)) ||
 	    !(rc = font_renderer_init(editor->font_renderer)) ||
 	    !(rc = font_renderer_init_default_shader(editor->font_shader)) ||
 	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
@@ -77,11 +79,6 @@ status editor_run(struct editor_state *editor) {
 	glfwShowWindow(editor->window->window);
 
 	while (!window_close(editor->window)) {
-		/* initially we would assume that all the monitors are scaled the same way,
-		 * later we would fix this (as windows allows different monitors with different scaling).
-		 */
-		u32 dpi;
-		window_get_monitor_dpi(editor->window, &dpi);
 		f64 current_frame = glfwGetTime();
 		editor->delta_time = current_frame - editor->last_frame;
 		editor->last_frame = current_frame;
