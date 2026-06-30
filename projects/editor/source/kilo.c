@@ -225,6 +225,16 @@ void editor_process_keypress() {
 		} break;
 		case KEY_PAGE_UP:
 		case KEY_PAGE_DOWN: {
+			/* place the cursor at the top/bottom of the screen */
+			if (c == KEY_PAGE_UP) {
+				e.cy = e.rowoff;
+			} else if (c == KEY_PAGE_DOWN) {
+				e.cy = e.rowoff + e.screenrows - 1;
+				if (e.cy > e.numrows)
+					e.cy = e.numrows;
+			}
+
+			/* scroll an entire screen's worth of rows up/down */
 			int times = e.screenrows;
 			while (times--)
 				editor_move_cursor(c == KEY_PAGE_UP ? KEY_ARROW_UP : KEY_ARROW_DOWN);
