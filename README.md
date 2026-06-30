@@ -30,9 +30,9 @@ if ($env:Path -notlike "*C:\msys64\clang64\bin*") { [Environment]::SetEnvironmen
 # pull in the git submodules
 git submodule update --init --recursive
 
-# build with cmake
-cmake -B build
-cmake --build build
+# build steps
+make externals
+make debug
 
 # run the executable(s)
 ./build/bin/editor
