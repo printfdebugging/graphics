@@ -71,6 +71,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 	# -Werror
 	-Wno-override-init
 	-Wno-override-init-side-effects
+	-Werror=return-type
 )
 
 target_include_directories(${PROJECT_NAME}
