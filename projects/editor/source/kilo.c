@@ -15,9 +15,10 @@
 #include "editor/editor.h"
 
 /* defines */
-#define CTRL_KEY(k)  ((k) & 0x1f)
-#define ABUF_INIT    { NULL, 0 }
-#define KILO_VERSION "0.0.1"
+#define CTRL_KEY(k)   ((k) & 0x1f)
+#define ABUF_INIT     { NULL, 0 }
+#define KILO_VERSION  "0.0.1"
+#define KILO_TAB_STOP 8
 
 /* data */
 enum editor_key {
@@ -42,7 +43,9 @@ void abuf_free(struct abuf *ab);
 
 typedef struct erow {
 	int size;
+	int rsize;
 	char *chars;
+	char *render;
 } erow;
 
 struct editor_config {
@@ -72,6 +75,7 @@ void editor_move_cursor(int key);
 void editor_open(char *filename);
 void editor_row_append(char *s, size_t len);
 void editor_scroll();
+void editor_update_row(erow *row);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -271,12 +275,12 @@ void editor_draw_rows(struct abuf *ab) {
 				abuf_append(ab, "~", 1);
 			}
 		} else {
-			int len = e.row[filerow].size - e.coloff;
+			int len = e.row[filerow].rsize - e.coloff;
 			if (len < 0)
 				len = 0;
 			if (len > e.screencols)
 				len = e.screencols;
-			abuf_append(ab, &e.row[filerow].chars[e.coloff], len);
+			abuf_append(ab, &e.row[filerow].render[e.coloff], len);
 		}
 
 		abuf_append(ab, "\x1b[K", 3);
@@ -407,6 +411,11 @@ void editor_row_append(char *s, size_t len) {
 	e.row[at].chars = malloc((u32) len + 1);
 	memcpy(e.row[at].chars, s, (u32) len);
 	e.row[at].chars[len] = '\0';
+
+	e.row[at].rsize = 0;
+	e.row[at].render = NULL;
+	editor_update_row(&e.row[at]);
+
 	e.numrows++;
 }
 
@@ -422,4 +431,28 @@ void editor_scroll() {
 		e.coloff = e.cx;
 	if (e.cx >= e.coloff + e.screencols)
 		e.coloff = e.cx - e.screencols + 1;
+}
+
+void editor_update_row(erow *row) {
+	u32 tabs = 0;
+	for (int j = 0; j < row->size; ++j)
+		if (row->chars[j] == '\t')
+			++tabs;
+
+	free(row->render);
+	row->render = malloc((u32) row->size + 1 + (tabs * (KILO_TAB_STOP - 1)));
+
+	int idx = 0;
+	for (int j = 0; j < row->size; ++j) {
+		if (row->chars[j] == '\t') {
+			row->render[idx++] = ' ';
+			while (idx % KILO_TAB_STOP != 0)
+				row->render[idx++] = ' ';
+		} else {
+			row->render[idx++] = row->chars[j];
+		}
+	}
+
+	row->render[idx] = '\0';
+	row->rsize = idx;
 }
