@@ -2,9 +2,11 @@ EXTERNALS 			= $(shell realpath ./external)
 EXTERNALS_CONFIG 	= $(shell realpath ./config/external)
 INSTALL_DIRECTORY = $(shell realpath ./install)
 BUILD_DIRECTORY 	= $(shell realpath ./build)
+CLANGD_CONFIG 		= $(shell realpath ./.clangd)
 PLATFORM 			= $(shell uname -s)
 MESON_BUILD_TYPE 	= debug
 CMAKE_BUILD_TYPE  = Debug
+SHELL 				:= /bin/bash
 
 ifeq ($(PLATFORM),Linux)
 	PLATFORM_CONFIG_EXTENSION = linux
