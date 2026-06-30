@@ -497,13 +497,20 @@ int editor_row_cx_to_rx(erow *row, int cx) {
 void editor_draw_status_bar(struct abuf *ab) {
 	abuf_append(ab, "\x1b[7m", 4);
 	char status[80];
+	char rstatus[80];
 	int len = snprintf(status, sizeof(status), "%.20s - %d lines", e.filename ? e.filename : "[No Name]", e.numrows);
+	int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", e.cy + 1, e.numrows);
 	if (len > e.screencols)
 		len = e.screencols;
 	abuf_append(ab, status, len);
 	while (len < e.screencols) {
-		abuf_append(ab, " ", 1);
-		++len;
+		if (e.screencols - len == rlen) {
+			abuf_append(ab, rstatus, rlen);
+			break;
+		} else {
+			abuf_append(ab, " ", 1);
+			++len;
+		}
 	}
 
 	abuf_append(ab, "\x1b[m", 3);
