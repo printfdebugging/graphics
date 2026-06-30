@@ -220,7 +220,7 @@ void window_get_framebuffer_size(struct window *window, i32 *width, i32 *height)
 }
 
 /* todo: use window to get the monitor it is on */
-status window_get_monitor_dpi(struct window *window, u32 *dpi) {
+status window_get_monitor_dpi(struct window *window, i32 *dpi) {
 	(void) window;
 	GLFWmonitor *monitor = NULL;
 	const GLFWvidmode *videomode = NULL;
@@ -236,7 +236,7 @@ status window_get_monitor_dpi(struct window *window, u32 *dpi) {
 
 	f32 width_in = (f32) width_mm / INCH;
 	f32 pixels = (f32) videomode->width;
-	*dpi = (u32) (pixels / width_in);
+	*dpi = (i32) (pixels / width_in);
 
 	fprintf(stderr, "monitor_size: { .width = %i, .height = %i, .dpi = %i };\n", width_mm, height_mm, *dpi);
 	return status_success;

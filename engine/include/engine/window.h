@@ -52,7 +52,7 @@ void window_get_content_scale(struct window *window, f32 *xscale, f32 *yscale);
  */
 void window_get_framebuffer_size(struct window *window, i32 *width, i32 *height);
 
-status window_get_monitor_dpi(struct window *window, u32 *dpi);
+status window_get_monitor_dpi(struct window *window, i32 *dpi);
 void window_get_monitor_scale(struct window *window, f32 *xscale, f32 *yscale);
 
 void window_set_clear_color(struct window *window, vec4s color);
