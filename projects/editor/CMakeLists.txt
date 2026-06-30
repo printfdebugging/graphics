@@ -38,7 +38,8 @@ set(ENGINE_ASSETS_DIR "${ENGINE_PROJECT_NAME}/assets/")
 # source
 add_executable(${PROJECT_NAME}
 	source/main.c
-	source/editor.c
+	source/kilo.c
+	# source/editor.c
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
@@ -70,6 +71,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 	# -Werror
 	-Wno-override-init
 	-Wno-override-init-side-effects
+	-Werror=return-type
 )
 
 target_include_directories(${PROJECT_NAME}

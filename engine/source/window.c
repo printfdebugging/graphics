@@ -50,21 +50,22 @@ static void __window_mouse_move_callback(GLFWwindow *window, f64 x, f64 y) {
 }
 
 status window_init(struct window *window, struct window opts) {
+	status rc = status_success;
 	if (opts.window) {
-		/* after this, who will own the window.window if it exists? */
-		/* for now we don't do anything and don't allow that */
-		return status_failure;
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	if (!opts.bridge) {
 		fprintf(stderr, "opts.bridge is required to create a window");
-		return status_failure;
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	if (!glfwInit()) {
 		fprintf(stderr, "failed to initialize glfw");
-		/* todo: another type of error, failed to initialize internal library, we need an enum for that */
-		return status_failure;
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -81,15 +82,15 @@ status window_init(struct window *window, struct window opts) {
 	opts.window = glfwCreateWindow(opts.width, opts.height, opts.title, NULL, NULL);
 	if (!opts.window) {
 		fprintf(stderr, "failed to create glfw winodw\n");
-		glfwTerminate();
-		return status_failure;
+		rc = status_failure;
+		goto glfw_cleanup;
 	}
 
 	glfwMakeContextCurrent(opts.window);
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
 		fprintf(stderr, "failed to initialize glad\n");
-		glfwTerminate();
-		return status_failure;
+		rc = status_failure;
+		goto glfw_cleanup;
 	}
 
 	/* use a dark titlebar on windows in dark mode. */
@@ -101,8 +102,8 @@ status window_init(struct window *window, struct window opts) {
 
 	if (!window_set_icon(&opts, opts.icon)) {
 		fprintf(stderr, "failed to set window icon\n");
-		glfwTerminate();
-		return status_failure;
+		rc = status_failure;
+		goto glfw_cleanup;
 	}
 
 	glfwSetInputMode(opts.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -127,7 +128,12 @@ status window_init(struct window *window, struct window opts) {
 	glfwSetFramebufferSizeCallback(opts.window, __window_frame_buffer_resize_callback);
 
 	*window = opts;
-	return status_success;
+cleanup:
+	return rc;
+
+glfw_cleanup:
+	glfwTerminate();
+	return rc;
 }
 
 void window_set_clear_color(struct window *window, vec4s color) {
