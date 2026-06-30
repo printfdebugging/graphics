@@ -22,3 +22,6 @@
 [submodule "external/fontconfig"]
 	path = external/fontconfig
 	url = https://github.com/debuffio/fontconfig
+[submodule "external/ffmpeg"]
+	path = external/ffmpeg
+	url = https://github.com/ffmpeg/ffmpeg
