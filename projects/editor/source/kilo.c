@@ -50,6 +50,11 @@ typedef struct erow {
 
 struct editor_config {
 	int cx, cy;
+
+	/** While `cx` is the index into the raw text row.chars,
+	 * `rx` is an index into the render field. */
+	int rx;
+
 	int rowoff;
 	int coloff;
 	int screenrows;
@@ -76,6 +81,7 @@ void editor_open(char *filename);
 void editor_row_append(char *s, size_t len);
 void editor_scroll();
 void editor_update_row(erow *row);
+int editor_row_cx_to_rx(erow *row, int cx);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -242,7 +248,7 @@ void editor_refresh_screen() {
 	editor_draw_rows(&ab);
 
 	char buf[32];
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, (e.cx - e.coloff) + 1);
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, (e.rx - e.coloff) + 1);
 	abuf_append(&ab, buf, (i32) strlen(buf));
 	abuf_append(&ab, "\x1b[?25h", 6);
 
@@ -327,6 +333,7 @@ int get_cursor_position(int *rows, int *cols) {
 void editor_init() {
 	e.cx = 0;
 	e.cy = 0;
+	e.rx = 0;
 	e.rowoff = 0;
 	e.coloff = 0;
 	e.numrows = 0;
@@ -423,14 +430,18 @@ void editor_row_append(char *s, size_t len) {
  * of the cursor in the file & e.rowoff is the line number of the top
  * line visible in the window. so the math checks out that way. */
 void editor_scroll() {
+	e.rx = 0;
+	if (e.cy < e.numrows)
+		e.rx = editor_row_cx_to_rx(&e.row[e.cy], e.cx);
+
 	if (e.cy < e.rowoff)
 		e.rowoff = e.cy;
 	if (e.cy >= e.rowoff + e.screenrows)
 		e.rowoff = e.cy - e.screenrows + 1;
-	if (e.cx < e.coloff)
-		e.coloff = e.cx;
-	if (e.cx >= e.coloff + e.screencols)
-		e.coloff = e.cx - e.screencols + 1;
+	if (e.rx < e.coloff)
+		e.coloff = e.rx;
+	if (e.rx >= e.coloff + e.screencols)
+		e.coloff = e.rx - e.screencols + 1;
 }
 
 void editor_update_row(erow *row) {
@@ -455,4 +466,14 @@ void editor_update_row(erow *row) {
 
 	row->render[idx] = '\0';
 	row->rsize = idx;
+}
+
+int editor_row_cx_to_rx(erow *row, int cx) {
+	int rx = 0;
+	for (int j = 0; j < cx; ++j) {
+		if (row->chars[j] == '\t')
+			rx += (KILO_TAB_STOP - 1) - (rx % KILO_TAB_STOP);
+		rx++;
+	}
+	return rx;
 }
