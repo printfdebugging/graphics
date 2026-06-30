@@ -19,3 +19,6 @@
 [submodule "external/flamegraph"]
 	path = external/flamegraph
 	url = https://github.com/brendangregg/FlameGraph/
+[submodule "external/fontconfig"]
+	path = external/fontconfig
+	url = https://github.com/debuffio/fontconfig
