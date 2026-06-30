@@ -30,7 +30,8 @@ release:
 		-DCMAKE_BUILD_TYPE=Release \
 		-B build && cmake --build build
 
-install: clean
+# todo: fix installs
+install:
 	cmake \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=install \
