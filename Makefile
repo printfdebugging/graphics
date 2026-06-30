@@ -1,5 +1,14 @@
-run: debug
+include ./scripts/make/exports.mk
+include ./scripts/make/build_wrappers.mk
+include ./scripts/make/system_dependencies.mk
+
+$(eval $(call build_wrapper_meson,fontconfig))
+$(eval $(call build_wrapper_cmake,cglm))
+$(eval $(call build_wrapper_autotools,ffmpeg))
+
+run:
 	./build/bin/editor ./data/test.md
+
 
 debug:
 	cmake \
