@@ -1,6 +1,8 @@
 define build_wrapper_cmake
 $(1)_CONFIGURE_FLAGS=$$(shell cat $$(EXTERNALS_CONFIG)/$(1)/{flags.common,flags.$$(PLATFORM_CONFIG_EXTENSION)} | xargs)
 
+$(1): $(1).configure $(1).build $(1).install
+
 $(1).configure:
 	cmake \
 		-DCMAKE_BUILD_TYPE=$$(CMAKE_BUILD_TYPE) \
@@ -23,6 +25,8 @@ endef
 define build_wrapper_meson
 $(1)_CONFIGURE_FLAGS=$$(shell cat $$(EXTERNALS_CONFIG)/$(1)/{flags.common,flags.$$(PLATFORM_CONFIG_EXTENSION)} | xargs)
 
+$(1): $(1).configure $(1).build $(1).install
+
 $(1).configure:
 	meson setup \
 		-Dbuildtype=$$(MESON_BUILD_TYPE) \
@@ -42,6 +46,8 @@ endef
 
 define build_wrapper_autotools
 $(1)_CONFIGURE_FLAGS=$$(shell cat $$(EXTERNALS_CONFIG)/$(1)/{flags.common,flags.$$(PLATFORM_CONFIG_EXTENSION)} | xargs)
+
+$(1): $(1).configure $(1).build $(1).install
 
 $(1).configure:
 	mkdir -p "$$(BUILD_DIRECTORY)/$(1)"
