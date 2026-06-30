@@ -8,7 +8,9 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <termios.h>
+#include <time.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #include "engine/core/defines.h"
 
@@ -62,6 +64,8 @@ struct editor_config {
 	int numrows;
 	erow *row;
 	char *filename;
+	char statusmsg[80];
+	time_t statusmsg_time;
 	struct termios orig_termios;
 };
 
@@ -84,6 +88,8 @@ void editor_scroll();
 void editor_update_row(erow *row);
 int editor_row_cx_to_rx(erow *row, int cx);
 void editor_draw_status_bar(struct abuf *ab);
+void editor_draw_message_bar(struct abuf *ab);
+void editor_set_status_message(const char *fmt, ...);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -94,6 +100,8 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	editor_init();
 	if (argc >= 2)
 		editor_open(argv[1]);
+
+	editor_set_status_message("HELP: Ctrl-Q = quit");
 	return rc;
 }
 
@@ -258,6 +266,7 @@ void editor_refresh_screen() {
 
 	editor_draw_rows(&ab);
 	editor_draw_status_bar(&ab);
+	editor_draw_message_bar(&ab);
 
 	char buf[32];
 	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, (e.rx - e.coloff) + 1);
@@ -350,10 +359,12 @@ void editor_init() {
 	e.numrows = 0;
 	e.row = NULL;
 	e.filename = NULL;
+	e.statusmsg[0] = '\0';
+	e.statusmsg_time = 0;
 
 	if (get_window_size(&e.screenrows, &e.screencols) == -1)
 		die("get_window_size");
-	e.screenrows -= 1;
+	e.screenrows -= 2;
 }
 
 void abuf_append(struct abuf *ab, const char *s, int len) {
@@ -514,4 +525,22 @@ void editor_draw_status_bar(struct abuf *ab) {
 	}
 
 	abuf_append(ab, "\x1b[m", 3);
+	abuf_append(ab, "\r\n", 2);
+}
+
+void editor_draw_message_bar(struct abuf *ab) {
+	abuf_append(ab, "\x1b[K", 3);
+	int msglen = (int) strlen((const char *) e.statusmsg);
+	if (msglen > e.screencols)
+		msglen = e.screencols;
+	if (msglen && time(NULL) - e.statusmsg_time < 5)
+		abuf_append(ab, e.statusmsg, msglen);
+}
+
+void editor_set_status_message(const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(e.statusmsg, sizeof(e.statusmsg), fmt, ap);
+	va_end(ap);
+	e.statusmsg_time = time(NULL);
 }
