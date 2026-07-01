@@ -25,6 +25,12 @@ struct glyph_vertex {
 	u32 atlas_page;
 };
 
+/* renderer shader globals */
+struct font_renderer_options {
+	f64 font_size;
+	mat4s transformation_matrix;
+};
+
 /** The `font_renderer` does not contain any font related state, or
  * text for that matter. It is just an interface to render something
  * and should not have to store or allocate/manage any object which
@@ -69,7 +75,7 @@ struct font_renderer {
 status font_renderer_init(struct font_renderer *renderer);
 status font_renderer_destroy(struct font_renderer *renderer);
 status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text);
-status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans);
+status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, struct font_renderer_options renderer_opts);
 
 void glyph_vertex_print_info(struct glyph_vertex *vertex, FILE *descriptor);
 

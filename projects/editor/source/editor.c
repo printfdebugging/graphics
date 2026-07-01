@@ -101,7 +101,12 @@ status editor_run(struct editor_state *editor) {
 		vp = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f);
 		vp = glms_translate(vp, (vec3s) { { 0.0f, 0.0f, -24.0f } });
 
-		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, vp);
+		struct font_renderer_options renderer_opts = {
+			.font_size = 30,
+			.transformation_matrix = vp,
+		};
+
+		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, renderer_opts);
 
 		window_swap_buffers(editor->window);
 	}

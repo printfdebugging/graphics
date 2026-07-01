@@ -129,7 +129,8 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 	return status_success;
 }
 
-status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans) {
+/* this would be used for chunks at a time, so the renderer would have to rebuild renderer options from the layouting layer */
+status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, struct font_renderer_options renderer_opts) {
 	if (!renderer->uploaded || !renderer->initialized) {
 		fprintf(stderr, "renderer either not initialized or data not uploaded to gpu\n");
 	}
@@ -144,11 +145,14 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 	glBindVertexArray(renderer->vertex_array_object);
 	shader_use(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader->program, "u_matViewProjection"), 1, GL_FALSE, trans.col[0].raw);
+	glUniformMatrix4fv(glGetUniformLocation(shader->program, "u_matViewProjection"), 1, GL_FALSE, renderer_opts.transformation_matrix.col[0].raw);
 
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	glUniform2f(glGetUniformLocation(shader->program, "u_viewport"), (float) viewport[2], (float) viewport[3]);
+
+	/* todo: cache the shader variable locations here */
+	glUniform1f(glGetUniformLocation(shader->program, "u_scale"), renderer_opts.font_size);
 
 	int location = glGetUniformLocation(shader->program, "hb_gpu_atlas");
 	glUniform1i(location, (i32) current_texture_unit - GL_TEXTURE0);
