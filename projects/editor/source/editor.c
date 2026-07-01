@@ -55,11 +55,13 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		goto cleanup;
 	}
 
-	const char *path = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	if (!(rc = font_init_from_file(editor->font, path, dpi)) ||
+	editor->text = "abcdefghijklmnopqrstuvwxyz";
+	editor->font_filepath = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
+
+	if (!(rc = font_init_from_file(editor->font, editor->font_filepath, dpi)) ||
 	    !(rc = font_renderer_init(editor->font_renderer)) ||
 	    !(rc = font_renderer_init_default_shader(editor->font_shader)) ||
-	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
+	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, editor->text))) {
 		goto cleanup;
 	}
 

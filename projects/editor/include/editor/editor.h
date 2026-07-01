@@ -20,6 +20,10 @@ struct editor_state {
 	struct font_renderer *font_renderer;
 	struct shader *font_shader;
 
+	/* text rendering specific */
+	const char *text;
+	const char *font_filepath;
+
 	f64 last_frame;
 	f64 delta_time;
 };
