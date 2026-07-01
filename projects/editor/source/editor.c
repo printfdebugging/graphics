@@ -142,10 +142,8 @@ void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y) {
 
 void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
 	(void) userdata;
-	(void) window;
-	(void) w;
-	(void) h;
-	// fprintf(stderr, "window resized!!!\n");
+	window->width = w;
+	window->height = h;
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {
