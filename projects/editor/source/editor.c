@@ -8,11 +8,11 @@
 #include "engine/engine.h"
 #include "engine/shader.h"
 #include "engine/window.h"
-#include "engine/font/renderer.h"
 #include "engine/core/string.h"
 #include "engine/core/defines.h"
 
 #include "editor/editor.h"
+#include "editor/font/renderer.h"
 
 void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
 void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);
