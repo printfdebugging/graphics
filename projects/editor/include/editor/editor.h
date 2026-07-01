@@ -7,8 +7,9 @@
 #include "engine/window.h"
 #include "engine/shader.h"
 #include "engine/font/font.h"
-#include "engine/font/renderer.h"
 #include "engine/core/defines.h"
+
+#include "editor/font/renderer.h"
 
 struct editor_state {
 	/**The bridge connects the engine subsystems with the editor's event handlers. */

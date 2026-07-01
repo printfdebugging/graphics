@@ -7,8 +7,9 @@
 
 #include "engine/shader.h"
 #include "engine/font/font.h"
-#include "editor/font/renderer.h"
 #include "engine/core/string.h"
+
+#include "editor/font/renderer.h"
 
 /* todo: think about the api/organization/malloc/free later,
  * first we need to have some font rendered on the screen, design
