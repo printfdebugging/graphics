@@ -147,8 +147,8 @@ void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {
-	const char *vert = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.vert";
-	const char *frag = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.frag";
+	const char *vert = ASSETS_DIR "shaders/harfbuzz/shader.vert";
+	const char *frag = ASSETS_DIR "shaders/harfbuzz/shader.frag";
 
 	struct string *vert_source = NULL;
 	struct string *frag_source = NULL;
