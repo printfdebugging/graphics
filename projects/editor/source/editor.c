@@ -57,6 +57,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 
 	editor->text = "abcdefghijklmnopqrstuvwxyz";
 	editor->font_filepath = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
+	editor->font_size = 30;
 
 	if (!(rc = font_init_from_file(editor->font, editor->font_filepath, dpi)) ||
 	    !(rc = font_renderer_init(editor->font_renderer)) ||
@@ -90,24 +91,14 @@ status editor_run(struct editor_state *editor) {
 		window_clear_color(editor->window);
 		process_input(editor, editor->window, editor->delta_time);
 
-		/* todo: note: i think i don't fully understand the various trs and mvp
-		 * matrices and the significance of the order in which they are applied.
-		 * i need to learn this first. */
-
-		/* todo: go through the coordinate system chapter once again and then
-		 * fix the up-side-down rendering of the text here.*/
-		mat4s vp = { GLM_MAT4_IDENTITY_INIT };
-		vp = glms_rotate(vp, glm_rad(90.0f), (vec3s) { { 1.0f, 0.0f, 0.0f } });
-		vp = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f);
-		vp = glms_translate(vp, (vec3s) { { 0.0f, 0.0f, -24.0f } });
-
+		i32 xscale, yscale;
+		hb_font_get_scale(editor->font->font, &xscale, &yscale);
 		struct font_renderer_options renderer_opts = {
-			.font_size = 30,
-			.transformation_matrix = vp,
+			.font_size = editor->font_size / (f32) yscale,
+			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
 		};
 
 		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, renderer_opts);
-
 		window_swap_buffers(editor->window);
 	}
 

@@ -81,11 +81,9 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 			continue;
 		}
 
-		f64 fontsize = 30;
-		f64 scale = fontsize / info.upem;
 		// todo: look into what this is useful for struct extents ink_extents;
-		position.x += scale * glyph_positions[glyph_index].x_offset;
-		position.y += scale * glyph_positions[glyph_index].y_offset;
+		position.x += glyph_positions[glyph_index].x_offset;
+		position.y += glyph_positions[glyph_index].y_offset;
 
 		if (info.empty) {
 			fprintf(stderr, "glyph info empty for glyph id: %i", glyphid);
@@ -101,13 +99,13 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 			double ey = (1 - cy) * info.extents.min_y + cy * info.extents.max_y;
 
 			corners[corner_index] = (struct glyph_vertex) {
-				.x = (f32) (position.x + scale * ex),
-				.y = (f32) (position.y + scale * ey),
+				.x = (f32) position.x,
+				.y = (f32) position.y,
 				.tx = (f32) ex,
 				.ty = (f32) ey,
 				.nx = cx ? 1.f : -1.f,
 				.ny = cy ? -1.f : 1.f,
-				.emPerPos = (float) (1.0 / scale),
+				.emPerPos = 1.0,
 				.atlas_offset = info.atlas_offset / TEXEL_SIZE,
 				.atlas_page = info.atlas_page,
 			};
@@ -122,8 +120,8 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		renderer->vertices[index + 4] = corners[2];
 		renderer->vertices[index + 5] = corners[3];
 
-		position.x += scale * glyph_positions[glyph_index].x_advance;
-		position.y += scale * glyph_positions[glyph_index].y_advance;
+		position.x += glyph_positions[glyph_index].x_advance;
+		position.y += glyph_positions[glyph_index].y_advance;
 	}
 
 	return status_success;
