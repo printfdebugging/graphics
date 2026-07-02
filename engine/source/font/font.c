@@ -87,7 +87,9 @@ static status __font_upload_glyph(struct font *font, u16 glyph_index, struct gly
 		.extents.min_y = extents.y_bearing,
 		.extents.max_y = extents.y_bearing + extents.height,
 		.advance = hb_font_get_glyph_h_advance(font->font, glyph_index),
-		.upem = yscale, /* note: hardcoded as 1 in `font_init_from_file` */
+		/* note: `.upem` is hardcoded as display dpi in `font_init_from_file`.
+		 * This is not used anywhere, but is worth keeping with the glyphs. */
+		.upem = yscale,
 		.empty = (length == 0),
 		.cached = true,
 	};
