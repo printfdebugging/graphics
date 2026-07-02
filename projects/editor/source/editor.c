@@ -13,6 +13,7 @@
 
 #include "editor/editor.h"
 #include "editor/font/renderer.h"
+#include "editor/layout/layout.h"
 
 void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
 void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);
@@ -66,6 +67,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		goto cleanup;
 	}
 
+	editor_count_rows(editor);
 	shader_use(editor->font_shader);
 	font_renderer_upload_to_gpu(editor->font_renderer);
 	font_renderer_setup_quad_locations(editor->font_renderer, editor->font_shader);
@@ -137,9 +139,10 @@ void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y) {
 }
 
 void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
-	(void) userdata;
 	window->width = w;
 	window->height = h;
+	struct editor_state *editor = userdata;
+	editor_count_rows(editor);
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {

@@ -26,6 +26,10 @@ struct editor_state {
 	const char *font_filepath;
 	f64 font_size;
 
+	/* Number of `rows` we can draw on the window.
+	 * Each row is `font_size` pixels high. */
+	u32 screen_rows;
+
 	f64 last_frame;
 	f64 delta_time;
 };
