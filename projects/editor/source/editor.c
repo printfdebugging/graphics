@@ -12,12 +12,9 @@
 #include "engine/core/defines.h"
 
 #include "editor/editor.h"
+#include "editor/events.h"
 #include "editor/font/renderer.h"
 #include "editor/layout/layout.h"
-
-void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
-void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);
-void window_resize(void *userdata, struct window *window, i32 w, i32 h);
 
 /* this is for keyboard inputs which we don't get via callbacks, but we check for
  * explicitly in the main loop maybe there's another way, let's ask nitrix later */
@@ -31,9 +28,9 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	(void) argv;
 
 	editor->bridge = (struct bridge) {
-		.mouse_move = mouse_move,
-		.mouse_scroll = mouse_scroll,
-		.window_resize = window_resize,
+		.mouse_move = mouse_move_callback,
+		.mouse_scroll = mouse_scroll_callback,
+		.window_resize = window_resize_callback,
 	};
 
 	if (!(editor->window = calloc(1, sizeof(struct window))) ||
@@ -123,26 +120,6 @@ void process_input(struct editor_state *editor, struct window *window, f64 delta
 	// input_move_point_light(window, delta_time);
 	// fprintf(stderr, "process_input\n");
 	(void) editor;
-}
-
-void mouse_move(void *userdata, struct window *window, f64 x, f64 y) {
-	(void) x;
-	// struct editor_state *editor = userdata;
-	fprintf(stderr, "mouse_move\n");
-}
-
-void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y) {
-	(void) x;
-	(void) window;
-	// struct editor_state *editor = userdata;
-	fprintf(stderr, "mouse_scroll\n");
-}
-
-void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
-	window->width = w;
-	window->height = h;
-	struct editor_state *editor = userdata;
-	editor_count_rows(editor);
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {

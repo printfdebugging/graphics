@@ -40,6 +40,7 @@ add_executable(${PROJECT_NAME}
 	source/main.c
 	# source/kilo.c
 	source/editor.c
+	source/events.c
 	source/font/renderer.c
 	source/layout/layout.c
 )
