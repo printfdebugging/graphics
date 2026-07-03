@@ -27,7 +27,7 @@ struct glyph_vertex {
 
 /* renderer shader globals */
 struct font_renderer_options {
-	f64 font_size;
+	f32 font_size;
 	mat4s transformation_matrix;
 };
 
