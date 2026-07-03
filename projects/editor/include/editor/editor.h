@@ -27,12 +27,9 @@ struct editor_state {
 
 	struct window *window;
 	struct font *font;
-	struct font_renderer *font_renderer;
-	struct font_renderer_options font_renderer_opts;
 	struct shader *font_shader;
 
 	/* text rendering specific */
-	const char *text;
 	const char *font_filepath;
 	f32 font_size;
 

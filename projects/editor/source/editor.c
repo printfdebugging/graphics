@@ -36,8 +36,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 
 	if (!(editor->window = calloc(1, sizeof(struct window))) ||
 	    !(editor->font = calloc(1, sizeof(struct font))) ||
-	    !(editor->font_shader = calloc(1, sizeof(struct shader))) ||
-	    !(editor->font_renderer = calloc(1, sizeof(struct font_renderer)))) {
+	    !(editor->font_shader = calloc(1, sizeof(struct shader)))) {
 		fprintf(stderr, "failed to allocate memory for editor\n");
 		rc = status_failure;
 		goto cleanup;
@@ -54,14 +53,11 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		goto cleanup;
 	}
 
-	editor->text = "abcdefghijklmnopqrstuvwxyz";
 	editor->font_filepath = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
 	editor->font_size = 30;
 
 	if (!(rc = font_init_from_file(editor->font, editor->font_filepath, dpi)) ||
-	    !(rc = font_renderer_init(editor->font_renderer)) ||
-	    !(rc = font_renderer_init_default_shader(editor->font_shader)) ||
-	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, editor->text))) {
+	    !(rc = font_renderer_init_default_shader(editor->font_shader))) {
 		goto cleanup;
 	}
 
@@ -75,8 +71,6 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 
 	editor_count_rows(editor);
 	shader_use(editor->font_shader);
-	font_renderer_upload_to_gpu(editor->font_renderer);
-	font_renderer_setup_quad_locations(editor->font_renderer, editor->font_shader);
 
 	return rc;
 
@@ -113,7 +107,6 @@ status editor_run(struct editor_state *editor) {
 			font_renderer_render_text(&row->renderer_data, editor->font, editor->font_shader, renderer_opts);
 		}
 
-		// font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, renderer_opts);
 		window_swap_buffers(editor->window);
 	}
 
@@ -124,7 +117,6 @@ status editor_shutdown(struct editor_state *editor) {
 	status rc = status_success;
 
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
-	// shader_destroy((*editor->cengine->primitives)->shader);
 	shader_destroy(editor->font_shader);
 	window_destroy(editor->window);
 	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
