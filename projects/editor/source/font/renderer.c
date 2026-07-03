@@ -135,6 +135,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 
 	struct atlas_page *current_page = &font->atlas->pages[font->atlas->used_pages_count - 1];
 	u32 current_texture = current_page->texture;
+	(void) current_texture;
 	u32 current_texture_unit = current_page->texture_unit;
 
 	glBindVertexArray(renderer->vertex_array_object);
@@ -147,7 +148,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 	glUniform2f(glGetUniformLocation(shader->program, "u_viewport"), (float) viewport[2], (float) viewport[3]);
 
 	/* todo: cache the shader variable locations here */
-	glUniform1f(glGetUniformLocation(shader->program, "u_scale"), renderer_opts.font_size);
+	glUniform1f(glGetUniformLocation(shader->program, "u_scale"), (f32) renderer_opts.font_size);
 
 	int location = glGetUniformLocation(shader->program, "hb_gpu_atlas");
 	glUniform1i(location, (i32) current_texture_unit - GL_TEXTURE0);
@@ -181,6 +182,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 }
 
 void font_renderer_setup_quad_locations(struct font_renderer *renderer, struct shader *shader) {
+	(void) renderer;
 	if (shader == NULL) {
 		fprintf(stderr, "shader not prepared yet, try again\n");
 		return;

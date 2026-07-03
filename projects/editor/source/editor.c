@@ -120,6 +120,8 @@ void process_input(struct editor_state *editor, struct window *window, f64 delta
 	// input_move_point_light(window, delta_time);
 	// fprintf(stderr, "process_input\n");
 	(void) editor;
+	(void) window;
+	(void) delta_time;
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {

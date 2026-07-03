@@ -3,13 +3,18 @@
 
 void mouse_move_callback(void *userdata, struct window *window, f64 x, f64 y) {
 	(void) x;
+	(void) y;
+	(void) window;
+	(void) userdata;
 	// struct editor_state *editor = userdata;
 	fprintf(stderr, "mouse_move\n");
 }
 
 void mouse_scroll_callback(void *userdata, struct window *window, f64 x, f64 y) {
 	(void) x;
+	(void) y;
 	(void) window;
+	(void) userdata;
 	// struct editor_state *editor = userdata;
 	fprintf(stderr, "mouse_scroll\n");
 }
