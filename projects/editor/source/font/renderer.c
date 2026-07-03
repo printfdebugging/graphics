@@ -64,11 +64,7 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		return status_failure;
 	}
 
-	/* todo: this should be abstracted away as rows */
-	/* todo: separate editor renderer from the engine renderer,
-	 * - here renderer should provide the base functionality
-	 * - editor should build abstractions/wrappers around that */
-	struct point position = { .x = 0, .y = 400 };
+	struct point position = { .x = 0, .y = 0 };
 	status rc = status_success;
 	for (u32 glyph_index = 0; glyph_index < glyph_count; ++glyph_index) {
 		hb_codepoint_t glyphid = glyph_info[glyph_index].codepoint;
@@ -83,7 +79,7 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		position.y += glyph_positions[glyph_index].y_offset;
 
 		if (info.empty) {
-			fprintf(stderr, "glyph info empty for glyph id: %i", glyphid);
+			fprintf(stderr, "glyph info empty for glyph id: %i\n", glyphid);
 			continue;
 		}
 
@@ -149,6 +145,8 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 
 	/* todo: cache the shader variable locations here */
 	glUniform1f(glGetUniformLocation(shader->program, "u_scale"), (f32) renderer_opts.font_size);
+
+	glUniform2f(glGetUniformLocation(shader->program, "u_position"), 0, renderer_opts.position);
 
 	int location = glGetUniformLocation(shader->program, "hb_gpu_atlas");
 	glUniform1i(location, (i32) current_texture_unit - GL_TEXTURE0);

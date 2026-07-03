@@ -93,6 +93,7 @@ status editor_run(struct editor_state *editor) {
 		i32 xscale, yscale;
 		hb_font_get_scale(editor->font->font, &xscale, &yscale);
 		struct font_renderer_options renderer_opts = {
+			.position = 770, /* render on the very top. */
 			.font_size = editor->font_size / (f32) yscale,
 			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
 		};
