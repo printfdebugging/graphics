@@ -2,12 +2,9 @@
 #include <stdio.h>
 
 #include "glad/glad.h"
-#include "cglm/struct.h"
-#include "GLFW/glfw3.h"
 
 #include "engine/shader.h"
 #include "engine/font/font.h"
-#include "engine/core/string.h"
 
 #include "editor/font/renderer.h"
 
