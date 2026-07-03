@@ -11,6 +11,16 @@
 
 #include "editor/font/renderer.h"
 
+/* todo: later we will most likely separate layouting from the actual text
+ * data structure (ropes), but for now we keep it like this just to get
+ * things started. */
+struct editor_row {
+	char *raw_data;
+	u32 raw_data_size;
+
+	struct font_renderer renderer_data;
+};
+
 struct editor_state {
 	/**The bridge connects the engine subsystems with the editor's event handlers. */
 	struct bridge bridge;
@@ -29,6 +39,9 @@ struct editor_state {
 	/* Number of `rows` we can draw on the window.
 	 * Each row is `font_size` pixels high. */
 	u32 screen_rows;
+
+	struct editor_row *rows;
+	u32 rows_count;
 
 	f64 last_frame;
 	f64 delta_time;

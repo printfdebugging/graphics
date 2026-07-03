@@ -43,6 +43,7 @@ add_executable(${PROJECT_NAME}
 	source/events.c
 	source/font/renderer.c
 	source/layout/layout.c
+	source/filesystem/file.c
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

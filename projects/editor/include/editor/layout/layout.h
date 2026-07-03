@@ -14,4 +14,12 @@
  */
 status editor_count_rows(struct editor_state *editor);
 
+void editor_row_append(struct editor_state *editor, char *line, u32 linelen);
+
+/* this is where we prepare the quads for the row. this involves all the glyph
+ * quad structures... */
+void editor_row_layout(struct editor_state *editor, struct editor_row *row);
+
+f32 editor_row_get_screen_location(struct editor_state *editor, u32 row_number);
+
 #endif

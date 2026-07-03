@@ -15,6 +15,7 @@
 #include "editor/events.h"
 #include "editor/font/renderer.h"
 #include "editor/layout/layout.h"
+#include "editor/filesystem/file.h"
 
 /* this is for keyboard inputs which we don't get via callbacks, but we check for
  * explicitly in the main loop maybe there's another way, let's ask nitrix later */
@@ -64,6 +65,14 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		goto cleanup;
 	}
 
+	/* we need the font shader from above in the editor_open function,
+	 * so we call this after setting up the basic globals objects. */
+	if (argc >= 2) {
+		if (!(editor_open(editor, argv[1]))) {
+			goto cleanup;
+		}
+	}
+
 	editor_count_rows(editor);
 	shader_use(editor->font_shader);
 	font_renderer_upload_to_gpu(editor->font_renderer);
@@ -92,13 +101,19 @@ status editor_run(struct editor_state *editor) {
 
 		i32 xscale, yscale;
 		hb_font_get_scale(editor->font->font, &xscale, &yscale);
+
 		struct font_renderer_options renderer_opts = {
-			.position = 770, /* render on the very top. */
 			.font_size = editor->font_size / (f32) yscale,
 			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
 		};
 
-		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, renderer_opts);
+		for (u32 row_index = 0; row_index < editor->rows_count; ++row_index) {
+			renderer_opts.position = editor_row_get_screen_location(editor, row_index + 1);
+			struct editor_row *row = &editor->rows[row_index];
+			font_renderer_render_text(&row->renderer_data, editor->font, editor->font_shader, renderer_opts);
+		}
+
+		// font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, renderer_opts);
 		window_swap_buffers(editor->window);
 	}
 
@@ -113,6 +128,7 @@ status editor_shutdown(struct editor_state *editor) {
 	shader_destroy(editor->font_shader);
 	window_destroy(editor->window);
 	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
+	free(editor->rows);
 
 	return rc;
 }
