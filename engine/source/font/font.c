@@ -9,7 +9,7 @@
 
 static status __font_upload_glyph(struct font *font, u16 glyph_index, struct glyph_info *info);
 
-status font_init_from_file(struct font *font, const char *filepath) {
+status font_init_from_file(struct font *font, const char *filepath, i32 dpi) {
 	hb_blob_t *hb_blob = NULL;
 	status rc = status_success;
 
@@ -22,14 +22,9 @@ status font_init_from_file(struct font *font, const char *filepath) {
 		goto cleanup;
 	}
 
-	/* https://harfbuzz.github.io/harfbuzz-hb-font.html#hb-font-set-scale explains some details on how to set the font size properly */
-	/* todo: change this. get this from the windowing system & update this if and when the monitor scale changes. */
-	int dpi = 192;
-	/* here we should load the font with font size 1 and only in the `font_renderer_load_text`
-	 * should we specify the font size in the scale. that way we would have a
-	 * scaling free cache and the quads will be scaled as we render things... */
-	hb_font_set_ptem(font->font, (float) dpi);
-	hb_font_set_scale(font->font, dpi * 1, dpi * 1);
+	/* see https://harfbuzz.github.io/harfbuzz-hb-font.html#hb-font-set-scale */
+	hb_font_set_ptem(font->font, (f32) dpi);
+	hb_font_set_scale(font->font, (i32) dpi * 1, (i32) dpi * 1);
 
 	if (!(font->atlas = calloc(1, sizeof(struct atlas))) ||
 	    !(font->glyph_cache = calloc(U16_MAX, sizeof(struct glyph_info)))) {
@@ -44,6 +39,9 @@ status font_init_from_file(struct font *font, const char *filepath) {
 
 	font->cached_glyph_bytes = 0;
 	font->cached_glyph_count = 0;
+	font->dpi = dpi;
+	font->xscale = 1;
+	font->yscale = 1;
 	hb_blob_destroy(hb_blob);
 	return rc;
 
@@ -89,7 +87,9 @@ static status __font_upload_glyph(struct font *font, u16 glyph_index, struct gly
 		.extents.min_y = extents.y_bearing,
 		.extents.max_y = extents.y_bearing + extents.height,
 		.advance = hb_font_get_glyph_h_advance(font->font, glyph_index),
-		.upem = yscale, /* warn: should this be set to some value such that scaling becomes easier? */
+		/* note: `.upem` is hardcoded as display dpi in `font_init_from_file`.
+		 * This is not used anywhere, but is worth keeping with the glyphs. */
+		.upem = yscale,
 		.empty = (length == 0),
 		.cached = true,
 	};

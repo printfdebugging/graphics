@@ -21,6 +21,13 @@ struct point {
 struct glyph_info {
 	struct extents extents;
 	f64 advance;
+
+	/** `upem` is the dpi of the display, or more specifically how points
+	 * map to pixels. This is `unused` since we directly use the dpi to
+	 * render the text. We don't scale the glyph quads on cpu, that's done
+	 * in the shader using a `u_scale` uniform. that way we can easily change
+	 * the font size without invalidating the glyph quads.
+	 */
 	i32 upem;
 
 	/** These are the glyph's primitive locations in the texture on the gpu.

@@ -8,15 +8,14 @@
 #include "engine/engine.h"
 #include "engine/shader.h"
 #include "engine/window.h"
-#include "engine/font/renderer.h"
 #include "engine/core/string.h"
 #include "engine/core/defines.h"
 
 #include "editor/editor.h"
-
-void mouse_move(void *userdata, struct window *window, f64 x, f64 y);
-void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y);
-void window_resize(void *userdata, struct window *window, i32 w, i32 h);
+#include "editor/events.h"
+#include "editor/font/renderer.h"
+#include "editor/layout/layout.h"
+#include "editor/filesystem/file.h"
 
 /* this is for keyboard inputs which we don't get via callbacks, but we check for
  * explicitly in the main loop maybe there's another way, let's ask nitrix later */
@@ -30,15 +29,14 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	(void) argv;
 
 	editor->bridge = (struct bridge) {
-		.mouse_move = mouse_move,
-		.mouse_scroll = mouse_scroll,
-		.window_resize = window_resize,
+		.mouse_move = mouse_move_callback,
+		.mouse_scroll = mouse_scroll_callback,
+		.window_resize = window_resize_callback,
 	};
 
 	if (!(editor->window = calloc(1, sizeof(struct window))) ||
 	    !(editor->font = calloc(1, sizeof(struct font))) ||
-	    !(editor->font_shader = calloc(1, sizeof(struct shader))) ||
-	    !(editor->font_renderer = calloc(1, sizeof(struct font_renderer)))) {
+	    !(editor->font_shader = calloc(1, sizeof(struct shader)))) {
 		fprintf(stderr, "failed to allocate memory for editor\n");
 		rc = status_failure;
 		goto cleanup;
@@ -49,21 +47,30 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 		.bridge = &editor->bridge,
 	};
 
-	if (!(rc = window_init(editor->window, window_options))) {
+	i32 dpi;
+	if (!(rc = window_init(editor->window, window_options)) ||
+	    !(rc = window_get_monitor_dpi(editor->window, &dpi))) {
 		goto cleanup;
 	}
 
-	const char *path = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	if (!(rc = font_init_from_file(editor->font, path)) ||
-	    !(rc = font_renderer_init(editor->font_renderer)) ||
-	    !(rc = font_renderer_init_default_shader(editor->font_shader)) ||
-	    !(rc = font_renderer_load_text(editor->font_renderer, editor->font, "abcdefghijklmnopqrstuvwxyz"))) {
+	editor->font_filepath = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
+	editor->font_size = 30;
+
+	if (!(rc = font_init_from_file(editor->font, editor->font_filepath, dpi)) ||
+	    !(rc = font_renderer_init_default_shader(editor->font_shader))) {
 		goto cleanup;
 	}
 
+	/* we need the font shader from above in the editor_open function,
+	 * so we call this after setting up the basic globals objects. */
+	if (argc >= 2) {
+		if (!(editor_open(editor, argv[1]))) {
+			goto cleanup;
+		}
+	}
+
+	editor_count_rows(editor);
 	shader_use(editor->font_shader);
-	font_renderer_upload_to_gpu(editor->font_renderer);
-	font_renderer_setup_quad_locations(editor->font_renderer, editor->font_shader);
 
 	return rc;
 
@@ -77,11 +84,6 @@ status editor_run(struct editor_state *editor) {
 	glfwShowWindow(editor->window->window);
 
 	while (!window_close(editor->window)) {
-		/* initially we would assume that all the monitors are scaled the same way,
-		 * later we would fix this (as windows allows different monitors with different scaling).
-		 */
-		u32 dpi;
-		window_get_monitor_dpi(editor->window, &dpi);
 		f64 current_frame = glfwGetTime();
 		editor->delta_time = current_frame - editor->last_frame;
 		editor->last_frame = current_frame;
@@ -91,18 +93,19 @@ status editor_run(struct editor_state *editor) {
 		window_clear_color(editor->window);
 		process_input(editor, editor->window, editor->delta_time);
 
-		/* todo: note: i think i don't fully understand the various trs and mvp
-		 * matrices and the significance of the order in which they are applied.
-		 * i need to learn this first. */
+		i32 xscale, yscale;
+		hb_font_get_scale(editor->font->font, &xscale, &yscale);
 
-		/* todo: go through the coordinate system chapter once again and then
-		 * fix the up-side-down rendering of the text here.*/
-		mat4s vp = { GLM_MAT4_IDENTITY_INIT };
-		vp = glms_rotate(vp, glm_rad(90.0f), (vec3s) { { 1.0f, 0.0f, 0.0f } });
-		vp = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f);
-		vp = glms_translate(vp, (vec3s) { { 0.0f, 0.0f, -24.0f } });
+		struct font_renderer_options renderer_opts = {
+			.font_size = editor->font_size / (f32) yscale,
+			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
+		};
 
-		font_renderer_render_text(editor->font_renderer, editor->font, editor->font_shader, vp);
+		for (u32 row_index = 0; row_index < editor->rows_count; ++row_index) {
+			renderer_opts.position = editor_row_get_screen_location(editor, row_index + 1);
+			struct editor_row *row = &editor->rows[row_index];
+			font_renderer_render_text(&row->renderer_data, editor->font, editor->font_shader, renderer_opts);
+		}
 
 		window_swap_buffers(editor->window);
 	}
@@ -114,10 +117,10 @@ status editor_shutdown(struct editor_state *editor) {
 	status rc = status_success;
 
 	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
-	// shader_destroy((*editor->cengine->primitives)->shader);
 	shader_destroy(editor->font_shader);
 	window_destroy(editor->window);
 	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
+	free(editor->rows);
 
 	return rc;
 }
@@ -126,32 +129,13 @@ void process_input(struct editor_state *editor, struct window *window, f64 delta
 	// input_move_point_light(window, delta_time);
 	// fprintf(stderr, "process_input\n");
 	(void) editor;
-}
-
-void mouse_move(void *userdata, struct window *window, f64 x, f64 y) {
-	(void) x;
-	// struct editor_state *editor = userdata;
-	fprintf(stderr, "mouse_move\n");
-}
-
-void mouse_scroll(void *userdata, struct window *window, f64 x, f64 y) {
-	(void) x;
 	(void) window;
-	// struct editor_state *editor = userdata;
-	fprintf(stderr, "mouse_scroll\n");
-}
-
-void window_resize(void *userdata, struct window *window, i32 w, i32 h) {
-	(void) userdata;
-	(void) window;
-	(void) w;
-	(void) h;
-	// fprintf(stderr, "window resized!!!\n");
+	(void) delta_time;
 }
 
 status font_renderer_init_default_shader(struct shader *shader) {
-	const char *vert = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.vert";
-	const char *frag = ENGINE_ASSETS_DIR "shaders/harfbuzz/shader.frag";
+	const char *vert = ASSETS_DIR "shaders/harfbuzz/shader.vert";
+	const char *frag = ASSETS_DIR "shaders/harfbuzz/shader.frag";
 
 	struct string *vert_source = NULL;
 	struct string *frag_source = NULL;

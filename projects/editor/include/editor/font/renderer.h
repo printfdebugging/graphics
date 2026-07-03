@@ -1,5 +1,5 @@
-#ifndef ENGINE_FONT_RENDERER_H
-#define ENGINE_FONT_RENDERER_H
+#ifndef EDITOR_FONT_RENDERER_H
+#define EDITOR_FONT_RENDERER_H
 
 #include <stdio.h>
 
@@ -23,6 +23,13 @@ struct glyph_vertex {
 	f32 emPerPos;
 	u32 atlas_offset;
 	u32 atlas_page;
+};
+
+/* renderer shader globals */
+struct font_renderer_options {
+	f32 font_size;
+	f32 position;
+	mat4s transformation_matrix;
 };
 
 /** The `font_renderer` does not contain any font related state, or
@@ -69,7 +76,7 @@ struct font_renderer {
 status font_renderer_init(struct font_renderer *renderer);
 status font_renderer_destroy(struct font_renderer *renderer);
 status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text);
-status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans);
+status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, struct font_renderer_options renderer_opts);
 
 void glyph_vertex_print_info(struct glyph_vertex *vertex, FILE *descriptor);
 

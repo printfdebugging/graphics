@@ -2,13 +2,11 @@
 #include <stdio.h>
 
 #include "glad/glad.h"
-#include "cglm/struct.h"
-#include "GLFW/glfw3.h"
 
 #include "engine/shader.h"
 #include "engine/font/font.h"
-#include "engine/font/renderer.h"
-#include "engine/core/string.h"
+
+#include "editor/font/renderer.h"
 
 /* todo: think about the api/organization/malloc/free later,
  * first we need to have some font rendered on the screen, design
@@ -66,8 +64,7 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		return status_failure;
 	}
 
-	/* this is the draw cursor or something? not sure */
-	struct point position = { .x = 0, .y = 400 };
+	struct point position = { .x = 0, .y = 0 };
 	status rc = status_success;
 	for (u32 glyph_index = 0; glyph_index < glyph_count; ++glyph_index) {
 		hb_codepoint_t glyphid = glyph_info[glyph_index].codepoint;
@@ -77,14 +74,12 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 			continue;
 		}
 
-		f64 fontsize = 30;
-		f64 scale = fontsize / info.upem;
 		// todo: look into what this is useful for struct extents ink_extents;
-		position.x += scale * glyph_positions[glyph_index].x_offset;
-		position.y += scale * glyph_positions[glyph_index].y_offset;
+		position.x += glyph_positions[glyph_index].x_offset;
+		position.y += glyph_positions[glyph_index].y_offset;
 
 		if (info.empty) {
-			fprintf(stderr, "glyph info empty for glyph id: %i", glyphid);
+			fprintf(stderr, "glyph info empty for glyph id: %i\n", glyphid);
 			continue;
 		}
 
@@ -97,13 +92,13 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 			double ey = (1 - cy) * info.extents.min_y + cy * info.extents.max_y;
 
 			corners[corner_index] = (struct glyph_vertex) {
-				.x = (f32) (position.x + scale * ex),
-				.y = (f32) (position.y + scale * ey),
+				.x = (f32) position.x,
+				.y = (f32) position.y,
 				.tx = (f32) ex,
 				.ty = (f32) ey,
 				.nx = cx ? 1.f : -1.f,
 				.ny = cy ? -1.f : 1.f,
-				.emPerPos = (float) (1.0 / scale),
+				.emPerPos = 1.0,
 				.atlas_offset = info.atlas_offset / TEXEL_SIZE,
 				.atlas_page = info.atlas_page,
 			};
@@ -118,14 +113,15 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		renderer->vertices[index + 4] = corners[2];
 		renderer->vertices[index + 5] = corners[3];
 
-		position.x += scale * glyph_positions[glyph_index].x_advance;
-		position.y += scale * glyph_positions[glyph_index].y_advance;
+		position.x += glyph_positions[glyph_index].x_advance;
+		position.y += glyph_positions[glyph_index].y_advance;
 	}
 
 	return status_success;
 }
 
-status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, mat4s trans) {
+/* this would be used for chunks at a time, so the renderer would have to rebuild renderer options from the layouting layer */
+status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, struct font_renderer_options renderer_opts) {
 	if (!renderer->uploaded || !renderer->initialized) {
 		fprintf(stderr, "renderer either not initialized or data not uploaded to gpu\n");
 	}
@@ -135,16 +131,22 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 
 	struct atlas_page *current_page = &font->atlas->pages[font->atlas->used_pages_count - 1];
 	u32 current_texture = current_page->texture;
+	(void) current_texture;
 	u32 current_texture_unit = current_page->texture_unit;
 
 	glBindVertexArray(renderer->vertex_array_object);
 	shader_use(shader);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader->program, "u_matViewProjection"), 1, GL_FALSE, trans.col[0].raw);
+	glUniformMatrix4fv(glGetUniformLocation(shader->program, "u_matViewProjection"), 1, GL_FALSE, renderer_opts.transformation_matrix.col[0].raw);
 
 	GLint viewport[4];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 	glUniform2f(glGetUniformLocation(shader->program, "u_viewport"), (float) viewport[2], (float) viewport[3]);
+
+	/* todo: cache the shader variable locations here */
+	glUniform1f(glGetUniformLocation(shader->program, "u_scale"), (f32) renderer_opts.font_size);
+
+	glUniform2f(glGetUniformLocation(shader->program, "u_position"), 0, renderer_opts.position);
 
 	int location = glGetUniformLocation(shader->program, "hb_gpu_atlas");
 	glUniform1i(location, (i32) current_texture_unit - GL_TEXTURE0);
@@ -178,6 +180,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 }
 
 void font_renderer_setup_quad_locations(struct font_renderer *renderer, struct shader *shader) {
+	(void) renderer;
 	if (shader == NULL) {
 		fprintf(stderr, "shader not prepared yet, try again\n");
 		return;
