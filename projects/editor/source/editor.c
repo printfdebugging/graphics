@@ -102,8 +102,9 @@ status editor_run(struct editor_state *editor) {
 		};
 
 		for (u32 row_index = 0; row_index < editor->screen_rows; ++row_index) {
+			u32 top_row_index = row_index + editor->row_offset;
 			renderer_opts.position = editor_row_get_screen_location(editor, row_index + 1);
-			struct editor_row *row = &editor->rows[row_index];
+			struct editor_row *row = &editor->rows[top_row_index];
 			font_renderer_render_text(&row->renderer_data, editor->font, editor->font_shader, renderer_opts);
 		}
 

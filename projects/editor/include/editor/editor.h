@@ -39,6 +39,7 @@ struct editor_state {
 
 	struct editor_row *rows;
 	u32 rows_count;
+	u32 row_offset;
 
 	f64 last_frame;
 	f64 delta_time;
