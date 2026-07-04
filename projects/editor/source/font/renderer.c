@@ -158,7 +158,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 	glUniform1f(location, 1.0);
 
 	location = glGetUniformLocation(shader->program, "u_foreground");
-	glUniform4f(location, 1.0f, 1.0f, 1.0f, 1.f);
+	glUniform4fv(location, 1, renderer_opts.font_color.raw);
 	if (location == -1) {
 		fprintf(stderr, "uniform for %s not found\n", "u_foreground");
 	}

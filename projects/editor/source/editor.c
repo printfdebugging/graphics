@@ -45,6 +45,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	struct window window_options = {
 		WINDOW_DEFAULTS,
 		.bridge = &editor->bridge,
+		.color = { { color_rgba_hex(0x282C34FF) } },
 	};
 
 	i32 dpi;
@@ -98,6 +99,7 @@ status editor_run(struct editor_state *editor) {
 
 		struct font_renderer_options renderer_opts = {
 			.font_size = editor->font_size / (f32) yscale,
+			.font_color = { { color_rgba_hex(0xBBC2CFFF) } },
 			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
 		};
 
