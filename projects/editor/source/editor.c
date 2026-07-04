@@ -64,10 +64,19 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 
 	/* we need the font shader from above in the editor_open function,
 	 * so we call this after setting up the basic globals objects. */
-	if (argc >= 2) {
-		if (!(editor_open(editor, argv[1]))) {
-			goto cleanup;
-		}
+#ifdef DEBUG_BUILD
+	const char *filename = "./data/test.md";
+#else
+	if (argc < 2) {
+		fprintf(stderr, "provide filepath argument\n");
+		rc = status_failure;
+		goto cleanup;
+	}
+
+	const char *filename = argv[1];
+#endif
+	if (!(editor_open(editor, filename))) {
+		goto cleanup;
 	}
 
 	editor_count_rows(editor);

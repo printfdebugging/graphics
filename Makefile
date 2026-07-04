@@ -3,7 +3,7 @@ include ./scripts/make/build_wrappers.mk
 include ./scripts/make/system_dependencies.mk
 
 run: debug
-	./build/bin/editor ./data/test.md
+	./build/bin/editor
 
 $(eval $(call build_wrapper_meson,fontconfig))
 $(eval $(call build_wrapper_cmake,cglm))
