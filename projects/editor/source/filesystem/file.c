@@ -12,12 +12,11 @@ status editor_open(struct editor_state *editor, const char *filepath) {
 
 	char *line = NULL;
 	u64 linecap = 0;
-
-	u32 ret = 0;
-	while ((ret = getline(&line, &linecap, file) != -1)) {
-		while (linecap > 0 && (line[linecap - 1] == '\n' || line[linecap - 1] == '\r'))
-			linecap--;
-		editor_row_append(editor, line, (u32) linecap);
+	i32 linelen = 0;
+	while ((linelen = (i32) getline(&line, &linecap, file)) != -1) {
+		while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
+			linelen--;
+		editor_row_append(editor, line, (u32) linelen);
 	}
 
 	free(line);
