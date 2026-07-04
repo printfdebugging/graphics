@@ -101,7 +101,7 @@ status editor_run(struct editor_state *editor) {
 			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
 		};
 
-		for (u32 row_index = 0; row_index < editor->rows_count; ++row_index) {
+		for (u32 row_index = 0; row_index < editor->screen_rows; ++row_index) {
 			renderer_opts.position = editor_row_get_screen_location(editor, row_index + 1);
 			struct editor_row *row = &editor->rows[row_index];
 			font_renderer_render_text(&row->renderer_data, editor->font, editor->font_shader, renderer_opts);
