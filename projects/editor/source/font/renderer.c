@@ -78,10 +78,17 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		position.x += glyph_positions[glyph_index].x_offset;
 		position.y += glyph_positions[glyph_index].y_offset;
 
-		if (info.empty) {
-			fprintf(stderr, "glyph info empty for glyph id: %i\n", glyphid);
-			continue;
-		}
+		/*
+		 * note: we keep the empty glyphs as we would want to render the block
+		 * cursor over them. also later we might use this to layout each quad separately
+		 * if that's efficient and then based on that we can only invalidate/reshape the
+		 * part being edited.
+		 *
+		 * if (info.empty) {
+		 * 	fprintf(stderr, "glyph info empty for glyph id: %i\n", glyphid);
+		 * 	continue;
+		 * }
+		 */
 
 		struct glyph_vertex corners[4];
 		for (int corner_index = 0; corner_index < 4; corner_index++) {
