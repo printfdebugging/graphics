@@ -65,6 +65,17 @@ STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #define CM   (10.0f MM)
 #define INCH (25.4f * MM)
 
+#define color_rgb_hex(color)                  \
+	(((color >> 16) & 0xFF) / 255.0f),    \
+	    (((color >> 8) & 0xFF) / 255.0f), \
+	    (((color) & 0xFF) / 255.0f)
+
+#define color_rgba_hex(color)                  \
+	(((color >> 24) & 0xFF) / 255.0f),     \
+	    (((color >> 16) & 0xFF) / 255.0f), \
+	    (((color >> 8) & 0xFF) / 255.0f),  \
+	    (((color) & 0xFF) / 255.0f)
+
 typedef enum {
 	status_failure = 0,
 	status_success = 1,
