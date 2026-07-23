@@ -128,12 +128,16 @@ status editor_run(struct editor_state *editor) {
 status editor_shutdown(struct editor_state *editor) {
 	status rc = status_success;
 
-	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
-	shader_destroy(editor->font_shader);
-	window_destroy(editor->window);
-	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
-	free(editor->rows);
+	/* todo: create a function to do it */
+	for (u32 rowidx = 0; rowidx < editor->rows_count; ++rowidx) {
+		font_renderer_destroy(&editor->rows[rowidx].renderer_data);
+		free(editor->rows[rowidx].raw_data);
+	}
 
+	free(editor->rows);
+	font_destroy(editor->font);
+	shader_destroy(editor->font_shader); /* todo: manage through a shader manger */
+	window_destroy(editor->window);
 	return rc;
 }
 
