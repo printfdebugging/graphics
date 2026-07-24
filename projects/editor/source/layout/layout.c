@@ -51,6 +51,13 @@ static void __editor_row_print_runes(struct editor_row *row) {
 	fprintf(stderr, "\n");
 }
 
+/**
+ * @brief
+ * 	Counts the number of tabs in the row, then allocates a buffer
+ * 	large enough to hold the new space glyphs (for the expanded tab),
+ * 	then copies over all the runes, substituting the tabs with
+ * 	`tabstop` number of spaces.
+ */
 static void __editor_row_substitute_tabs(struct editor_row *row) {
 	u32 tabcount = __editor_row_count_tabs(row);
 	if (tabcount) {
@@ -74,6 +81,15 @@ static void __editor_row_substitute_tabs(struct editor_row *row) {
 		row->runes = new_runes;
 		row->runelen = new_runelen;
 	}
+}
+
+/**
+ * @brief Replaces the newline runes with space runes.
+ */
+static void __editor_row_substitute_newlines(struct editor_row *row) {
+	for (u32 runeidx = 0; runeidx < row->runelen; ++runeidx)
+		if (row->runes[runeidx] == newline)
+			row->runes[runeidx] = space;
 }
 
 status editor_count_rows(struct editor_state *editor) {
@@ -122,6 +138,7 @@ void editor_row_append(struct editor_state *editor, char *line, u32 linelen) {
 	 * 	the renderer.
 	 */
 	__editor_row_substitute_tabs(row);
+	__editor_row_substitute_newlines(row);
 
 	font_renderer_init(&row->renderer_data);
 	editor_row_layout(editor, row);
