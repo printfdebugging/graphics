@@ -20,8 +20,8 @@ bool is_zaxis() {
 
 bool is_grid_edge() {
 	return int(in_position.x) % 10 == 0 &&
-	       int(in_position.y) % 10 == 0 &&
-	       int(in_position.z) % 10 == 0;
+	    int(in_position.y) % 10 == 0 &&
+	    int(in_position.z) % 10 == 0;
 }
 
 void main() {

@@ -27,8 +27,8 @@ void main() {
 		float adj = cov;
 		if (u_stem_darkening > 0.0) {
 			float brightness = c.a > 0.0
-					       ? dot(c.rgb, vec3(1.0 / 3.0)) / c.a
-					       : 0.0;
+			    ? dot(c.rgb, vec3(1.0 / 3.0)) / c.a
+			    : 0.0;
 			adj = hb_gpu_stem_darken(adj, brightness, 1.0 / max(fwidth(v_texcoord).x, fwidth(v_texcoord).y));
 		}
 		if (u_gamma != 1.0)
