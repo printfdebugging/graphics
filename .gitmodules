@@ -25,3 +25,6 @@
 [submodule "external/ffmpeg"]
 	path = external/ffmpeg
 	url = https://github.com/ffmpeg/ffmpeg
+[submodule "external/unicode"]
+	path = external/unicode
+	url = https://github.com/printfdebugging/unicode

@@ -41,11 +41,12 @@ status font_renderer_destroy(struct font_renderer *renderer) {
 	return 0;
 }
 
-status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text) {
+status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const u32 *runes, const u32 runelen) {
 	hb_buffer_t *buffer = hb_buffer_create();
+	status rc = status_success;
 	/* note: todo: the text data structure should have these properties. */
 	/* note: think about parallelising this later when you have an editor and it's data structures up and running and some basic rendering going on */
-	hb_buffer_add_utf8(buffer, text, -1, 0, -1);
+	hb_buffer_add_codepoints(buffer, runes, (i32) runelen, 0, -1);
 	hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
 	hb_buffer_set_language(buffer, hb_language_from_string("en", -1));
 	/* todo: enable ligatures and see how they are rendered */
@@ -61,11 +62,11 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 	/* note: we send 6 vertices per glyph i.e. 2 triangles */
 	if (!renderer->vertices) {
 		fprintf(stderr, "failed to allocate renderer->vertices\n");
-		return status_failure;
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	struct point position = { .x = 0, .y = 0 };
-	status rc = status_success;
 	for (u32 glyph_index = 0; glyph_index < glyph_count; ++glyph_index) {
 		hb_codepoint_t glyphid = glyph_info[glyph_index].codepoint;
 		struct glyph_info info;
@@ -78,10 +79,17 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		position.x += glyph_positions[glyph_index].x_offset;
 		position.y += glyph_positions[glyph_index].y_offset;
 
-		if (info.empty) {
-			fprintf(stderr, "glyph info empty for glyph id: %i\n", glyphid);
-			continue;
-		}
+		/*
+		 * note: we keep the empty glyphs as we would want to render the block
+		 * cursor over them. also later we might use this to layout each quad separately
+		 * if that's efficient and then based on that we can only invalidate/reshape the
+		 * part being edited.
+		 *
+		 * if (info.empty) {
+		 * 	fprintf(stderr, "glyph info empty for glyph id: %i\n", glyphid);
+		 * 	continue;
+		 * }
+		 */
 
 		struct glyph_vertex corners[4];
 		for (int corner_index = 0; corner_index < 4; corner_index++) {
@@ -117,7 +125,9 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		position.y += glyph_positions[glyph_index].y_advance;
 	}
 
-	return status_success;
+cleanup:
+	hb_buffer_destroy(buffer);
+	return rc;
 }
 
 /* this would be used for chunks at a time, so the renderer would have to rebuild renderer options from the layouting layer */
@@ -158,7 +168,7 @@ status font_renderer_render_text(struct font_renderer *renderer, struct font *fo
 	glUniform1f(location, 1.0);
 
 	location = glGetUniformLocation(shader->program, "u_foreground");
-	glUniform4f(location, 1.0f, 1.0f, 1.0f, 1.f);
+	glUniform4fv(location, 1, renderer_opts.font_color.raw);
 	if (location == -1) {
 		fprintf(stderr, "uniform for %s not found\n", "u_foreground");
 	}

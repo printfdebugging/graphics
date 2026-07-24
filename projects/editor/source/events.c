@@ -12,11 +12,20 @@ void mouse_move_callback(void *userdata, struct window *window, f64 x, f64 y) {
 
 void mouse_scroll_callback(void *userdata, struct window *window, f64 x, f64 y) {
 	(void) x;
-	(void) y;
 	(void) window;
-	(void) userdata;
-	// struct editor_state *editor = userdata;
-	fprintf(stderr, "mouse_scroll\n");
+	struct editor_state *editor = userdata;
+
+	if (y > 0) {
+		if (editor->row_offset > 0)
+			editor->row_offset--;
+		else
+			editor->row_offset = 0;
+	} else {
+		if (editor->row_offset < editor->rows_count - editor->screen_rows)
+			editor->row_offset++;
+		else
+			editor->row_offset = editor->rows_count - editor->screen_rows;
+	}
 }
 
 void window_resize_callback(void *userdata, struct window *window, i32 w, i32 h) {

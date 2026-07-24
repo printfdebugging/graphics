@@ -45,6 +45,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	struct window window_options = {
 		WINDOW_DEFAULTS,
 		.bridge = &editor->bridge,
+		.color = { { color_rgba_hex(0x282C34FF) } },
 	};
 
 	i32 dpi;
@@ -54,7 +55,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	}
 
 	editor->font_filepath = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	editor->font_size = 30;
+	editor->font_size = 18;
 
 	if (!(rc = font_init_from_file(editor->font, editor->font_filepath, dpi)) ||
 	    !(rc = font_renderer_init_default_shader(editor->font_shader))) {
@@ -63,10 +64,19 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 
 	/* we need the font shader from above in the editor_open function,
 	 * so we call this after setting up the basic globals objects. */
-	if (argc >= 2) {
-		if (!(editor_open(editor, argv[1]))) {
-			goto cleanup;
-		}
+#ifdef DEBUG_BUILD
+	const char *filename = "./data/test.md";
+#else
+	if (argc < 2) {
+		fprintf(stderr, "provide filepath argument\n");
+		rc = status_failure;
+		goto cleanup;
+	}
+
+	const char *filename = argv[1];
+#endif
+	if (!(editor_open(editor, filename))) {
+		goto cleanup;
 	}
 
 	editor_count_rows(editor);
@@ -98,12 +108,14 @@ status editor_run(struct editor_state *editor) {
 
 		struct font_renderer_options renderer_opts = {
 			.font_size = editor->font_size / (f32) yscale,
+			.font_color = { { color_rgba_hex(0xBBC2CFFF) } },
 			.transformation_matrix = glms_ortho(0, (f32) editor->window->width, 0, (f32) editor->window->height, 0.0f, 100.0f),
 		};
 
-		for (u32 row_index = 0; row_index < editor->rows_count; ++row_index) {
+		for (u32 row_index = 0; row_index < editor->screen_rows; ++row_index) {
+			u32 top_row_index = row_index + editor->row_offset;
 			renderer_opts.position = editor_row_get_screen_location(editor, row_index + 1);
-			struct editor_row *row = &editor->rows[row_index];
+			struct editor_row *row = &editor->rows[top_row_index];
 			font_renderer_render_text(&row->renderer_data, editor->font, editor->font_shader, renderer_opts);
 		}
 
@@ -116,12 +128,16 @@ status editor_run(struct editor_state *editor) {
 status editor_shutdown(struct editor_state *editor) {
 	status rc = status_success;
 
-	/* todo: do this till we have a shader_manager or something similar which can take care of the lifetimes responsibly */
-	shader_destroy(editor->font_shader);
-	window_destroy(editor->window);
-	/* todo: no need to destroy the editor state itself, it's allocated on the stack in main */
-	free(editor->rows);
+	/* todo: create a function to do it */
+	for (u32 rowidx = 0; rowidx < editor->rows_count; ++rowidx) {
+		font_renderer_destroy(&editor->rows[rowidx].renderer_data);
+		free(editor->rows[rowidx].runes);
+	}
 
+	free(editor->rows);
+	font_destroy(editor->font);
+	shader_destroy(editor->font_shader); /* todo: manage through a shader manger */
+	window_destroy(editor->window);
 	return rc;
 }
 

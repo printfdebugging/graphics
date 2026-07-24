@@ -7,26 +7,31 @@
 #include "engine/model/primitive.h"
 #include "engine/core/defines.h"
 
-static const char *shader_variable_names[] = {
-	[PRIMITIVE_ATTRIBUTE_POSITION] = "in_position",
-	[PRIMITIVE_ATTRIBUTE_COLOR] = "in_color",
-	[PRIMITIVE_ATTRIBUTE_UV] = "in_uv",
-	[PRIMITIVE_ATTRIBUTE_NORMAL] = "in_normal",
-};
-
 /** Cache for the current shader program. used in `shader_use` to
  * avoid unnecessary `glUseProgram` calls. */
 static u32 current_program = 0;
 
-static void shader_bind_variable_names(u32 program);
 static status __shader_get_compile_status(u32 shader_object);
 static status __shader_get_link_status(u32 program);
 
-static void shader_bind_variable_names(u32 program) {
-	for (enum primitive_attribute i = PRIMITIVE_ATTRIBUTE_POSITION; i < PRIMITIVE_ATTRIBUTE_COUNT; ++i) {
-		glBindAttribLocation(program, i, shader_variable_names[i]);
-	}
-}
+/*
+ * todo: remove this, we do it manually now, atleast for the harfbuzz shaders. maybe later
+ * we standardize a few things there as well, though i think that won't be a good idea
+ * static const char *shader_variable_names[] = {
+ * 	[PRIMITIVE_ATTRIBUTE_POSITION] = "in_position",
+ * 	[PRIMITIVE_ATTRIBUTE_COLOR] = "in_color",
+ * 	[PRIMITIVE_ATTRIBUTE_UV] = "in_uv",
+ * 	[PRIMITIVE_ATTRIBUTE_NORMAL] = "in_normal",
+ * };
+ *
+ * static void shader_bind_variable_names(u32 program);
+ *
+ * static void shader_bind_variable_names(u32 program) {
+ * 	for (enum primitive_attribute i = PRIMITIVE_ATTRIBUTE_POSITION; i < PRIMITIVE_ATTRIBUTE_COUNT; ++i) {
+ * 		glBindAttribLocation(program, i, shader_variable_names[i]);
+ * 	}
+ * }
+ */
 
 static status __shader_get_compile_status(u32 shader_object) {
 	i32 compile_status;

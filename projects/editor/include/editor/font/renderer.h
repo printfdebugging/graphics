@@ -28,6 +28,7 @@ struct glyph_vertex {
 /* renderer shader globals */
 struct font_renderer_options {
 	f32 font_size;
+	vec4s font_color;
 	f32 position;
 	mat4s transformation_matrix;
 };
@@ -75,7 +76,7 @@ struct font_renderer {
 
 status font_renderer_init(struct font_renderer *renderer);
 status font_renderer_destroy(struct font_renderer *renderer);
-status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text);
+status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const u32 *runes, const u32 runelen);
 status font_renderer_render_text(struct font_renderer *renderer, struct font *font, struct shader *shader, struct font_renderer_options renderer_opts);
 
 void glyph_vertex_print_info(struct glyph_vertex *vertex, FILE *descriptor);

@@ -23,7 +23,7 @@
 #define KILO_TAB_STOP 8
 
 /* data */
-enum editor_key {
+enum kilo_editor_key {
 	KEY_ARROW_LEFT = 1000,
 	KEY_ARROW_RIGHT,
 	KEY_ARROW_DOWN,
@@ -50,7 +50,7 @@ typedef struct erow {
 	char *render;
 } erow;
 
-struct editor_config {
+struct kilo_editor_config {
 	int cx, cy;
 
 	/** While `cx` is the index into the raw text row.chars,
@@ -69,27 +69,27 @@ struct editor_config {
 	struct termios orig_termios;
 };
 
-struct editor_config e;
+struct kilo_editor_config e;
 
 /* terminal */
 void enable_raw_mode();
 void disable_raw_mode();
 void die(const char *s);
 
-void editor_init();
-int editor_read_key();
-void editor_process_keypress();
-void editor_refresh_screen();
-void editor_draw_rows(struct abuf *ab);
-void editor_move_cursor(int key);
-void editor_open(char *filename);
-void editor_row_append(char *s, size_t len);
-void editor_scroll();
-void editor_update_row(erow *row);
-int editor_row_cx_to_rx(erow *row, int cx);
-void editor_draw_status_bar(struct abuf *ab);
-void editor_draw_message_bar(struct abuf *ab);
-void editor_set_status_message(const char *fmt, ...);
+void kilo_editor_init();
+int kilo_editor_read_key();
+void kilo_editor_process_keypress();
+void kilo_editor_refresh_screen();
+void kilo_editor_draw_rows(struct abuf *ab);
+void kilo_editor_move_cursor(int key);
+void kilo_editor_open(char *filename);
+void kilo_editor_row_append(char *s, size_t len);
+void kilo_editor_scroll();
+void kilo_editor_update_row(erow *row);
+int kilo_editor_row_cx_to_rx(erow *row, int cx);
+void kilo_editor_draw_status_bar(struct abuf *ab);
+void kilo_editor_draw_message_bar(struct abuf *ab);
+void kilo_editor_set_status_message(const char *fmt, ...);
 
 int get_window_size(int *rows, int *cols);
 int get_cursor_position(int *rows, int *cols);
@@ -97,19 +97,19 @@ int get_cursor_position(int *rows, int *cols);
 status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	status rc = status_success;
 	enable_raw_mode();
-	editor_init();
+	kilo_editor_init();
 	if (argc >= 2)
-		editor_open(argv[1]);
+		kilo_editor_open(argv[1]);
 
-	editor_set_status_message("HELP: Ctrl-Q = quit");
+	kilo_editor_set_status_message("HELP: Ctrl-Q = quit");
 	return rc;
 }
 
 status editor_run(struct editor_state *editor) {
 	status rc = status_success;
 	while (true) {
-		editor_refresh_screen();
-		editor_process_keypress();
+		kilo_editor_refresh_screen();
+		kilo_editor_process_keypress();
 	}
 
 	return rc;
@@ -150,7 +150,7 @@ void die(const char *s) {
 	exit(1);
 }
 
-int editor_read_key() {
+int kilo_editor_read_key() {
 	int nread;
 	char c;
 
@@ -218,8 +218,8 @@ int editor_read_key() {
 	}
 }
 
-void editor_process_keypress() {
-	int c = editor_read_key();
+void kilo_editor_process_keypress() {
+	int c = kilo_editor_read_key();
 	switch (c) {
 		case CTRL_KEY('q'): {
 			write(STDOUT_FILENO, "\x1b[2J", 4);
@@ -246,27 +246,27 @@ void editor_process_keypress() {
 			/* scroll an entire screen's worth of rows up/down */
 			int times = e.screenrows;
 			while (times--)
-				editor_move_cursor(c == KEY_PAGE_UP ? KEY_ARROW_UP : KEY_ARROW_DOWN);
+				kilo_editor_move_cursor(c == KEY_PAGE_UP ? KEY_ARROW_UP : KEY_ARROW_DOWN);
 		} break;
 		case KEY_ARROW_LEFT:
 		case KEY_ARROW_RIGHT:
 		case KEY_ARROW_DOWN:
 		case KEY_ARROW_UP: {
-			editor_move_cursor(c);
+			kilo_editor_move_cursor(c);
 		} break;
 	}
 }
 
-void editor_refresh_screen() {
-	editor_scroll();
+void kilo_editor_refresh_screen() {
+	kilo_editor_scroll();
 	struct abuf ab = ABUF_INIT;
 
 	abuf_append(&ab, "\x1b[?25l", 6);
 	abuf_append(&ab, "\x1b[H", 3);
 
-	editor_draw_rows(&ab);
-	editor_draw_status_bar(&ab);
-	editor_draw_message_bar(&ab);
+	kilo_editor_draw_rows(&ab);
+	kilo_editor_draw_status_bar(&ab);
+	kilo_editor_draw_message_bar(&ab);
 
 	char buf[32];
 	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (e.cy - e.rowoff) + 1, (e.rx - e.coloff) + 1);
@@ -277,7 +277,7 @@ void editor_refresh_screen() {
 	abuf_free(&ab);
 }
 
-void editor_draw_rows(struct abuf *ab) {
+void kilo_editor_draw_rows(struct abuf *ab) {
 	int y;
 	for (y = 0; y < e.screenrows; ++y) {
 		int filerow = y + e.rowoff;
@@ -350,7 +350,7 @@ int get_cursor_position(int *rows, int *cols) {
 	return 0;
 }
 
-void editor_init() {
+void kilo_editor_init() {
 	e.cx = 0;
 	e.cy = 0;
 	e.rx = 0;
@@ -381,7 +381,7 @@ void abuf_free(struct abuf *ab) {
 	free(ab->b);
 }
 
-void editor_move_cursor(int key) {
+void kilo_editor_move_cursor(int key) {
 	erow *row = (e.cy >= e.numrows) ? NULL : &e.row[e.cy];
 	switch (key) {
 		case KEY_ARROW_LEFT:
@@ -417,7 +417,7 @@ void editor_move_cursor(int key) {
 		e.cx = rowlen;
 }
 
-void editor_open(char *filename) {
+void kilo_editor_open(char *filename) {
 	free(e.filename);
 	e.filename = strdup(filename);
 
@@ -432,13 +432,13 @@ void editor_open(char *filename) {
 	while ((linelen = getline(&line, &linecap, fp)) != -1) {
 		while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
 			linelen--;
-		editor_row_append(line, (size_t) linelen);
+		kilo_editor_row_append(line, (size_t) linelen);
 	}
 	free(line);
 	fclose(fp);
 }
 
-void editor_row_append(char *s, size_t len) {
+void kilo_editor_row_append(char *s, size_t len) {
 	e.row = realloc(e.row, sizeof(erow) * ((u32) e.numrows + 1));
 	int at = e.numrows;
 	e.row[at].size = (int) len;
@@ -448,7 +448,7 @@ void editor_row_append(char *s, size_t len) {
 
 	e.row[at].rsize = 0;
 	e.row[at].render = NULL;
-	editor_update_row(&e.row[at]);
+	kilo_editor_update_row(&e.row[at]);
 
 	e.numrows++;
 }
@@ -456,10 +456,10 @@ void editor_row_append(char *s, size_t len) {
 /** An important thing to note here is that the cy is the location
  * of the cursor in the file & e.rowoff is the line number of the top
  * line visible in the window. so the math checks out that way. */
-void editor_scroll() {
+void kilo_editor_scroll() {
 	e.rx = 0;
 	if (e.cy < e.numrows)
-		e.rx = editor_row_cx_to_rx(&e.row[e.cy], e.cx);
+		e.rx = kilo_editor_row_cx_to_rx(&e.row[e.cy], e.cx);
 
 	if (e.cy < e.rowoff)
 		e.rowoff = e.cy;
@@ -471,7 +471,7 @@ void editor_scroll() {
 		e.coloff = e.rx - e.screencols + 1;
 }
 
-void editor_update_row(erow *row) {
+void kilo_editor_update_row(erow *row) {
 	u32 tabs = 0;
 	for (int j = 0; j < row->size; ++j)
 		if (row->chars[j] == '\t')
@@ -495,7 +495,7 @@ void editor_update_row(erow *row) {
 	row->rsize = idx;
 }
 
-int editor_row_cx_to_rx(erow *row, int cx) {
+int kilo_editor_row_cx_to_rx(erow *row, int cx) {
 	int rx = 0;
 	for (int j = 0; j < cx; ++j) {
 		if (row->chars[j] == '\t')
@@ -505,7 +505,7 @@ int editor_row_cx_to_rx(erow *row, int cx) {
 	return rx;
 }
 
-void editor_draw_status_bar(struct abuf *ab) {
+void kilo_editor_draw_status_bar(struct abuf *ab) {
 	abuf_append(ab, "\x1b[7m", 4);
 	char status[80];
 	char rstatus[80];
@@ -528,7 +528,7 @@ void editor_draw_status_bar(struct abuf *ab) {
 	abuf_append(ab, "\r\n", 2);
 }
 
-void editor_draw_message_bar(struct abuf *ab) {
+void kilo_editor_draw_message_bar(struct abuf *ab) {
 	abuf_append(ab, "\x1b[K", 3);
 	int msglen = (int) strlen((const char *) e.statusmsg);
 	if (msglen > e.screencols)
@@ -537,7 +537,7 @@ void editor_draw_message_bar(struct abuf *ab) {
 		abuf_append(ab, e.statusmsg, msglen);
 }
 
-void editor_set_status_message(const char *fmt, ...) {
+void kilo_editor_set_status_message(const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 	vsnprintf(e.statusmsg, sizeof(e.statusmsg), fmt, ap);

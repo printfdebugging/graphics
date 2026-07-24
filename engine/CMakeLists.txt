@@ -64,8 +64,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 	-Wconversion
 	-Wunreachable-code
 	-Wpedantic
-	# -fsanitize=undefined
-	# -fsanitize=address
+	-fsanitize=undefined
+	-fsanitize=address
 	-DLSAN_OPTIONS=verbosity=1:log_threads=1
 	# -Wcast-qual
 	# -Wfloat-equal
@@ -93,10 +93,10 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	$<$<BOOL:${WIN32}>:vulkan-1>
 )
 
-# target_link_options(${APPLICATION} PRIVATE
-#         -fsanitize=undefined
-#         -fsanitize=address
-# )
+target_link_options(${PROJECT_NAME} PUBLIC
+	-fsanitize=undefined
+	-fsanitize=address
+)
 
 install(
 	TARGETS ${PROJECT_NAME}

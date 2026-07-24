@@ -2,6 +2,7 @@
 #define EDITOR_H
 
 #include "cglm/struct.h"
+#include "unicode/unicode.h"
 
 #include "engine/engine.h"
 #include "engine/window.h"
@@ -15,9 +16,8 @@
  * data structure (ropes), but for now we keep it like this just to get
  * things started. */
 struct editor_row {
-	char *raw_data;
-	u32 raw_data_size;
-
+	rune *runes;
+	u32 runelen;
 	struct font_renderer renderer_data;
 };
 
@@ -39,6 +39,7 @@ struct editor_state {
 
 	struct editor_row *rows;
 	u32 rows_count;
+	u32 row_offset;
 
 	f64 last_frame;
 	f64 delta_time;
