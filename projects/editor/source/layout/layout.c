@@ -31,7 +31,7 @@ void editor_row_append(struct editor_state *editor, char *line, u32 linelen) {
 		return;
 	}
 
-	row->runes = calloc(sizeof(rune) * row->runelen, 0);
+	row->runes = calloc(row->runelen, sizeof(rune));
 	if (!row->runes) {
 		fprintf(stderr, "failed to allocate buffer for runes\n");
 		return;
