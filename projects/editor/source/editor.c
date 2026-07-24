@@ -55,7 +55,7 @@ status editor_initialize(struct editor_state *editor, int argc, char *argv[]) {
 	}
 
 	editor->font_filepath = ENGINE_ASSETS_DIR "fonts/IosevkaNerdFont-Regular.ttf";
-	editor->font_size = 30;
+	editor->font_size = 18;
 
 	if (!(rc = font_init_from_file(editor->font, editor->font_filepath, dpi)) ||
 	    !(rc = font_renderer_init_default_shader(editor->font_shader))) {
