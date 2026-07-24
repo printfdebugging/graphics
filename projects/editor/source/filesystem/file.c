@@ -14,7 +14,7 @@ status editor_open(struct editor_state *editor, const char *filepath) {
 	u64 linecap = 0;
 	i32 linelen = 0;
 	while ((linelen = (i32) getline(&line, &linecap, file)) != -1) {
-		while (linelen > 0 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
+		while (linelen > 1 && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
 			linelen--;
 		editor_row_append(editor, line, (u32) linelen);
 	}

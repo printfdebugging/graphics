@@ -131,7 +131,7 @@ status editor_shutdown(struct editor_state *editor) {
 	/* todo: create a function to do it */
 	for (u32 rowidx = 0; rowidx < editor->rows_count; ++rowidx) {
 		font_renderer_destroy(&editor->rows[rowidx].renderer_data);
-		free(editor->rows[rowidx].raw_data);
+		free(editor->rows[rowidx].runes);
 	}
 
 	free(editor->rows);

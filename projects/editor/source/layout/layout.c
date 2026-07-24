@@ -1,4 +1,4 @@
-#include <string.h>
+#include "unicode/unicode.h"
 
 #include "engine/core/defines.h"
 
@@ -25,11 +25,23 @@ void editor_row_append(struct editor_state *editor, char *line, u32 linelen) {
 	editor->rows = realloc(editor->rows, sizeof(struct editor_row) * ((u32) editor->rows_count + 1));
 	u32 at = editor->rows_count;
 	struct editor_row *row = &editor->rows[at];
+	row->runelen = rune_count((u8 *) line, linelen);
+	if (row->runelen == 0) {
+		editor->rows_count++;
+		return;
+	}
 
-	row->raw_data_size = linelen;
-	row->raw_data = malloc((u32) linelen + 1);
-	memcpy(row->raw_data, line, (u32) linelen);
-	row->raw_data[linelen] = '\0';
+	row->runes = calloc(sizeof(rune) * row->runelen, 0);
+	if (!row->runes) {
+		fprintf(stderr, "failed to allocate buffer for runes\n");
+		return;
+	}
+
+	status rc = status_success;
+	if (!(rc = utf8_decode_stream((u8 *) line, linelen, row->runes, row->runelen))) {
+		editor->rows_count++;
+		return;
+	}
 
 	font_renderer_init(&row->renderer_data);
 	editor_row_layout(editor, row);
@@ -39,7 +51,7 @@ void editor_row_append(struct editor_state *editor, char *line, u32 linelen) {
 
 void editor_row_layout(struct editor_state *editor, struct editor_row *row) {
 	/* todo: handle errors here, or make these void returning functions with proper error messages. */
-	font_renderer_load_text(&row->renderer_data, editor->font, row->raw_data);
+	font_renderer_load_text(&row->renderer_data, editor->font, row->runes, row->runelen);
 	font_renderer_upload_to_gpu(&row->renderer_data);
 	font_renderer_setup_quad_locations(&row->renderer_data, editor->font_shader);
 }

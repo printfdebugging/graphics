@@ -41,12 +41,12 @@ status font_renderer_destroy(struct font_renderer *renderer) {
 	return 0;
 }
 
-status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text) {
+status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const u32 *runes, const u32 runelen) {
 	hb_buffer_t *buffer = hb_buffer_create();
 	status rc = status_success;
 	/* note: todo: the text data structure should have these properties. */
 	/* note: think about parallelising this later when you have an editor and it's data structures up and running and some basic rendering going on */
-	hb_buffer_add_utf8(buffer, text, -1, 0, -1);
+	hb_buffer_add_codepoints(buffer, runes, (i32) runelen, 0, -1);
 	hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
 	hb_buffer_set_language(buffer, hb_language_from_string("en", -1));
 	/* todo: enable ligatures and see how they are rendered */
