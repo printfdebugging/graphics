@@ -43,6 +43,7 @@ status font_renderer_destroy(struct font_renderer *renderer) {
 
 status font_renderer_load_text(struct font_renderer *renderer, struct font *font, const char *text) {
 	hb_buffer_t *buffer = hb_buffer_create();
+	status rc = status_success;
 	/* note: todo: the text data structure should have these properties. */
 	/* note: think about parallelising this later when you have an editor and it's data structures up and running and some basic rendering going on */
 	hb_buffer_add_utf8(buffer, text, -1, 0, -1);
@@ -61,11 +62,11 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 	/* note: we send 6 vertices per glyph i.e. 2 triangles */
 	if (!renderer->vertices) {
 		fprintf(stderr, "failed to allocate renderer->vertices\n");
-		return status_failure;
+		rc = status_failure;
+		goto cleanup;
 	}
 
 	struct point position = { .x = 0, .y = 0 };
-	status rc = status_success;
 	for (u32 glyph_index = 0; glyph_index < glyph_count; ++glyph_index) {
 		hb_codepoint_t glyphid = glyph_info[glyph_index].codepoint;
 		struct glyph_info info;
@@ -124,7 +125,9 @@ status font_renderer_load_text(struct font_renderer *renderer, struct font *font
 		position.y += glyph_positions[glyph_index].y_advance;
 	}
 
-	return status_success;
+cleanup:
+	hb_buffer_destroy(buffer);
+	return rc;
 }
 
 /* this would be used for chunks at a time, so the renderer would have to rebuild renderer options from the layouting layer */
