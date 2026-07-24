@@ -31,7 +31,12 @@ static u32 __editor_row_count_tabs(struct editor_row *row) {
  * @brief
  * 	The runes are printed with a `|` separator at the start
  * 	in order to distinguish between various runes.
+ *
+ * @note
+ * 	This is one of those functions which are good to
+ * 	have but only used for quick and dirty testing.
  */
+[[maybe_unused]]
 static void __editor_row_print_runes(struct editor_row *row) {
 	for (u32 i = 0; i < row->runelen; ++i) {
 		u32 rune = row->runes[i];
