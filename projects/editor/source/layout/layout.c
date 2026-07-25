@@ -40,13 +40,13 @@ static u32 __editor_row_count_tabs(struct editor_row *row) {
 static void __editor_row_print_runes(struct editor_row *row) {
 	for (u32 i = 0; i < row->runelen; ++i) {
 		u32 rune = row->runes[i];
-		u8 bytelen = rune_bytelen(rune);
+		u8 bytelen = uc_rune_bytelen(rune);
 
 		byte utf8[bytelen + 1];
 		utf8[bytelen] = '\0';
 
 		if (bytelen) {
-			utf8_encode(rune, bytelen, utf8);
+			uc_utf8_encode(rune, bytelen, utf8);
 			fprintf(stderr, "|%s", utf8);
 		} else {
 			fprintf(stderr, "|?");
@@ -117,7 +117,7 @@ void editor_row_append(struct editor_state *editor, char *line, u32 linelen) {
 	editor->rows = realloc(editor->rows, sizeof(struct editor_row) * ((u32) editor->rows_count + 1));
 	u32 at = editor->rows_count;
 	struct editor_row *row = &editor->rows[at];
-	row->runelen = rune_count((u8 *) line, linelen);
+	row->runelen = uc_rune_count((u8 *) line, linelen);
 	if (row->runelen == 0) {
 		editor->rows_count++;
 		return;
@@ -130,7 +130,7 @@ void editor_row_append(struct editor_state *editor, char *line, u32 linelen) {
 	}
 
 	status rc = status_success;
-	if (!(rc = utf8_decode_stream((u8 *) line, linelen, row->runes, row->runelen))) {
+	if (!(rc = uc_utf8_decode_stream((u8 *) line, linelen, row->runes, row->runelen))) {
 		editor->rows_count++;
 		return;
 	}
