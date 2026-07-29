@@ -22,7 +22,6 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install") # CMAKE_PREFIX_PATH points to the install directory of the project. it looks for `libfoo.pc` files in ${CMAKE_PREFIX_PATH}/lib/pkgconfig directory.
 
-
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
 	set(CMAKE_C_COMPILER_LAUNCHER "ccache")
@@ -42,8 +41,8 @@ pkg_check_modules(UNICODE REQUIRED IMPORTED_TARGET GLOBAL unicode)
 pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET GLOBAL fontconfig)
 pkg_check_modules(HARFBUZZ REQUIRED IMPORTED_TARGET GLOBAL harfbuzz)
 pkg_check_modules(HARFBUZZ_GPU REQUIRED IMPORTED_TARGET GLOBAL harfbuzz-gpu)
-add_subdirectory(cmake/stb)
-add_subdirectory(cmake/cgltf)
+pkg_check_modules(STB REQUIRED IMPORTED_TARGET GLOBAL stb)
+pkg_check_modules(CGLTF REQUIRED IMPORTED_TARGET GLOBAL cgltf)
 
 add_library(${PROJECT_NAME}
 	source/core/string.c
