@@ -1,6 +1,0 @@
---arch=x86_64
---cc=clang
---cxx=clang++
---enable-gpl
---enable-version3
---enable-shared
