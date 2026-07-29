@@ -20,7 +20,6 @@ set(PROJECT_ASSETS_DIR "${PROJECT_NAME}/assets/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(BUILD_SHARED_LIBS OFF)
-set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/install") # CMAKE_PREFIX_PATH points to the install directory of the project. it looks for `libfoo.pc` files in ${CMAKE_PREFIX_PATH}/lib/pkgconfig directory.
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
