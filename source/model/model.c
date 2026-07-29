@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cgltf.h"
+#include "cgltf/cgltf.h"
 
 #include "engine/model/model.h"
 #include "engine/model/node.h"

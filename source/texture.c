@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 #include "engine/texture.h"
 #include "engine/core/defines.h"

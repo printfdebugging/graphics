@@ -99,11 +99,11 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-	stb
-	cgltf
 	PkgConfig::GLAD
 	PkgConfig::GLFW
 	PkgConfig::CGLM
+	PkgConfig::STB
+	PkgConfig::CGLTF
 	PkgConfig::HARFBUZZ
 	PkgConfig::HARFBUZZ_GPU
 	pthread

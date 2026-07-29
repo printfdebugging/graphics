@@ -4,7 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "cglm/struct.h"
 #include "glad/glad.h"
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 #include "engine/engine.h"
 #include "engine/window.h"
