@@ -57,6 +57,7 @@ add_library(${PROJECT_NAME}
 
 	source/font/font.c
 	source/font/atlas.c
+	source/font/manager.c
 
 	source/shader.c
 	source/texture.c
@@ -104,6 +105,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 	PkgConfig::CGLM
 	PkgConfig::STB
 	PkgConfig::CGLTF
+	PkgConfig::FONTCONFIG
 	PkgConfig::HARFBUZZ
 	PkgConfig::HARFBUZZ_GPU
 	pthread
